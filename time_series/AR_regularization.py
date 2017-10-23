@@ -78,6 +78,20 @@ class AutoRegressiveRegularization:
         df.columns = ['forecast_lb', 'forecast_ub']
         return df
 
+    def insample_predict(self, X, y, dynamic=False):  # todo: kind of dumb that I'm passing in y here...maybe just save it above as an attribute
+        self.y_forecast = y['target'].values[:self.order]
+
+        if dynamic:
+            df = pd.DataFrame(columns=['date', 'cpa_forecast']).set_index(keys='date', drop=True)
+            for i in xrange(self.order, len(X)):
+                df = df.append(self.predict(X.iloc[i: i+1].reset_index(drop=True)))
+                self.y_forecast = self.y_forecast[1:]
+        else:
+            df = pd.DataFrame(columns=['date', 'cpa_forecast']).set_index(keys='date', drop=True)
+            for i in xrange(self.order, len(X)):
+                df = df.append(self.predict(X.iloc[i: i + 1].reset_index(drop=True)))
+                self.y_forecast = y['target'].values[i - 1: self.order + i - 1]
+        return df
 
 def forecast_plot(df, save=False):
     fig = plt.figure(figsize=(12, 8))
