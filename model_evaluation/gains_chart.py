@@ -6,9 +6,6 @@ import joblib
 import datetime
 import numpy as np
 import pandas as pd
-import SVGAnalytics as svg
-from random import randint
-from yhat import Yhat, YhatModel
 
 from bokeh.models import Slider
 from bokeh.plotting import figure
@@ -22,9 +19,7 @@ pd.set_option('display.max_columns', 30000)
 pd.set_option('max_colwidth', 40000)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
-def model_lift_chart(X_test, y_test, best_model, interval_width):
-    y_prob = best_model.predict_proba(X_test)[:, 1]
-
+def model_lift_chart(y_test, y_prob, interval_width):
     df = pd.concat(
         [
             pd.Series(y_test).reset_index(drop=True),
@@ -47,25 +42,29 @@ def model_lift_chart(X_test, y_test, best_model, interval_width):
     df_gc['% of Total Contact Population (cumulative)'] = df_gc['% of Total Contact Population (bin)'].cumsum()
     df_gc['Lift'] = df_gc['% of Total Population (cumulative)'] / df_gc['% of Total Contact Population (cumulative)']
     df_gc = df_gc.fillna(0).replace(np.inf, np.nan).fillna(1).round(2)
-
     print df_gc
 
-def model_lift_plot():
-    df = joblib.load('cadence_data_pull.pkl')
-    df['cadence_score'] = df['output'].apply(cadence_score)
-    df['customer_id'] = df['output'].apply(customer_id)
-    df['consider_again_at'] = pd.to_datetime(df['output'].apply(consider_again_at))
-    df['call_attempt'] = df['input'].apply(call_attempt)
-    df = df.merge(joblib.load('call_data_pull.pkl'), how='left', on='customer_id').dropna()
-    df['minutes_between_lead_and_call'] = (pd.to_datetime(df['start_timestamp']) - pd.to_datetime(
-        df['input'].apply(lead_creation_date))).dt.seconds / 60.
-    df = df.loc[df['consider_again_at'] < df['start_timestamp']].sort_values(
-        ['customer_id', 'consider_again_at', 'start_timestamp']).pipe(pare_non_pairs).pipe(target_create).pipe(
-        feature_keep).sort_values('cadence_score', ascending=False)
+def _perfect_model_curve(y_test, y_prob):
+    frac_of_successes = y_test.mean()
 
-    min_max = joblib.load('{0}_data_files/contact_lift_chart_min_max_{1}.pkl'.format(business.lower(), business))
-    cs_min = min_max[0]
-    cs_max = min_max[1]
+    def perfect_model(x):
+        if x >= frac_of_successes:
+            return 1
+        else:
+            return (1 / frac_of_successes) * x
+
+
+
+
+def model_lift_plot(y_test, y_prob):
+    df = pd.concat([y_test, y_prob], axis=1)
+    df.columns = ['y_test', 'y_prob']
+    df.sort_values(['y_prob'], inplace=True)
+
+
+    print df
+
+    sys.exit()
 
     df['target'] = df['cadence_score'].apply(lambda x: (x - cs_min) / (cs_max - cs_min))
 
@@ -130,6 +129,9 @@ def model_lift_plot():
     show(layout)
 
 if __name__ == '__main__':
-    pass
+    y_test = pd.DataFrame(np.random.randint(0, 2, size=(10, 1)))[0]
+    y_prob = pd.DataFrame(np.random.uniform(0, 1, size=(10, 1)))[0]
+    model_lift_plot(y_test, y_prob)
+
 #     todo: generalize
-# bokeh todo: (1) model dropdown menu, (2) to get synchonized hovers for linked plots see: https://stackoverflow.com/questions/35983029/bokeh-synchronizing-hover-tooltips-in-linked-plots
+# bokeh todo: (1) model dropdown menu, (2) to get synchonized hovers for linked plots see: https://stackoverflow.com/questions/35983029/bokeh-synchronizing-hover-tooltips-in-linked-plotss
