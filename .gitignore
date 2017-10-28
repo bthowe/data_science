@@ -9,6 +9,8 @@ __pycache__/
 *.so
 # Distribution / packaging
 
+*.xml
+.idea/
 *.csv
 *.pkl
 temp.py
