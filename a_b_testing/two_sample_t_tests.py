@@ -30,3 +30,21 @@ def z_test(p1, p2, n1, n2, effect_size=0., two_tailed=True, alpha=.05):
     # print 'z-score: %s, p-value: %s, reject null: %s' % (z_score, p_val, reject_null)
     return z_score, p_val, reject_null
 
+
+
+def weighted_mean(weights, values):
+    return np.sum(weights * values) / np.sum(weights)
+
+def effective_sample_size(weights):
+    return np.sum(weights) ** 2 / np.sum(weights ** 2)
+
+def variance_of_weighted_mean(weights, values):
+    """use the usual unweighted estimate of the variance divided by the effective sample size. See
+    http://www.analyticalgroup.com/download/Alternative%20Approaches.pdf."""
+    return np.var(values) / effective_sample_size(weights)
+
+def t_test_difference_in_weighted_means_unpooled_variances(weights1, values1, weights2, values2):
+    """Calculates the t-statistic for a differences in two-population weighted means test using separate (unpooled)
+    variances."""
+    return (weighted_mean(weights1, values1) - weighted_mean(weights2, values2)) / \
+    np.sqrt(variance_of_weighted_mean(weights1, values1) + variance_of_weighted_mean(weights2, values2))

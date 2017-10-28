@@ -12,6 +12,7 @@ pd.set_option('display.max_rows', 30000)
 pd.set_option('max_colwidth', 4000)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
+# todo: does this do overlapping blocks?
 def block_bootstrap(df):
     bs = CircularBlockBootstrap(20, df)
     for data in bs.bootstrap(100):

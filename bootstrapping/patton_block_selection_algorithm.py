@@ -1,34 +1,13 @@
-'''
-function Bstar = opt_block_length_REV_dec07(data);
-% function Bstar = opt_block_length_REV_dec07(data);
-%
-% This is a function to select the optimal (in the sense
-% of minimising the MSE of the estimator of the long-run
-% variance) block length for the stationary bootstrap or circular bootstrap.
-% Code follows Politis and White, 2001, "Automatic Block-Length
-% Selection for the Dependent Bootstrap".
-%
-%  DECEMBER 2007: CORRECTED TO DEAL WITH ERROR IN LAHIRI'S PAPER, PUBLISHED
-%  BY NORDMAN IN THE ANNALS OF STATISTICS
-%
-%  NOTE:    The optimal average block length for the stationary bootstrap, and it does not need to be an integer.
-%           The optimal block length for the circular bootstrap should be an integer. Politis and White suggest
-%               rounding the output UP to the nearest integer.
-%
-% INPUTS:	data, an nxk matrix
-%
-% OUTPUTS:	Bstar, a 2xk vector of optimal bootstrap block lengths, [BstarSB;BstarCB]
-%
-%  Andrew Patton
-%
-%  4 December, 2002
-% 	Revised (to include CB): 13 January, 2003.
-%
-% Helpful suggestions for this code were received from Dimitris Politis and Kevin Sheppard.
-%
-%Modified 23.8.2003 by Kevin Sheppard for speed issues
+import joblib
+import numpy as np
+import pandas as pd
 
-[n,k] = size(data);
+
+'''
+
+
+
+
 
 % these are optional in opt_block_length_full.m, but fixed at default values here
 KN=max(5,sqrt(log10(n)));
@@ -123,3 +102,27 @@ function lam=lam(kk)
 %Helper function, calculates the flattop kernel weights
 lam = (abs(kk)>=0).*(abs(kk)<0.5)+2*(1-abs(kk)).*(abs(kk)>=0.5).*(abs(kk)<=1);
 '''
+
+
+def opt_block_length(data):
+    """This is a function taken from Andrew Patton (http://public.econ.duke.edu/~ap172/) to select the optimal (in the
+    sense of minimising the MSE of the estimator of the long-run variance) block length for the stationary bootstrap or
+    circular bootstrap. Code follows Politis and White, 2001, 'Automatic Block-Length Selection for the Dependent
+    Bootstrap.'
+
+    INPUTS:	data, an nxk pandas dataframe
+
+    OUTPUTS: Bstar, a 2xk vector of optimal bootstrap block lengths, [BstarSB;BstarCB]
+
+"""
+
+    n, k = data.shape
+    print n, k
+
+
+
+
+
+if __name__ == '__main__':
+    data = joblib.load('../sample_data_files/X_train.pkl')  # this data isn't time series data
+    opt_block_length(data)
