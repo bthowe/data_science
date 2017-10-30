@@ -1,3 +1,4 @@
+import sys
 import joblib
 import numpy as np
 import pandas as pd
@@ -103,6 +104,11 @@ function lam=lam(kk)
 lam = (abs(kk)>=0).*(abs(kk)<0.5)+2*(1-abs(kk)).*(abs(kk)>=0.5).*(abs(kk)<=1);
 '''
 
+def mlags(series, lags):
+    # todo: make the column names indicative of the lag number and the original column name as well
+    return pd.concat([series.shift(i) for i in xrange(0, lags + 1)], axis=1)
+
+
 
 def opt_block_length(data):
     """This is a function taken from Andrew Patton (http://public.econ.duke.edu/~ap172/) to select the optimal (in the
@@ -119,10 +125,35 @@ def opt_block_length(data):
     n, k = data.shape
     print n, k
 
+    KN = np.maximum(5, np.sqrt(np.log10(n)))
+    mmax = int(np.ceil(np.sqrt(n)) + KN)
+    warning_flags = 0  # todo: ?
+    round = 0
+    Bmax = np.ceil(np.minimum(3 * np.sqrt(n), n / 3))
+
+    c= 2
+    origdata = data
+    Bstar_final = []
+
+    for i in xrange(1, k):
+        data = origdata.iloc[:, i]  # todo: take column by index
+
+        temp = mlags(data, mmax)
+        temp = temp.iloc[mmax + 1:]
+
+        temp = temp.corr()
+        temp = temp.iloc[1:, 0]
+        print temp; sys.exit()
+        #
+        # temp2 = [mlag(temp, KN)',temp(end-KN+1:end)];		% looking at vectors of autocorrels, from lag mhat to lag mhat+KN
+        # temp2 = temp2(:, KN + 1:end); % dropping
 
 
+# if __name__ == '__main__':
+    # data = joblib.load('../sample_data_files/X_train.pkl')  # this data isn't time series data
+    # opt_block_length(data)
 
 
 if __name__ == '__main__':
-    data = joblib.load('../sample_data_files/X_train.pkl')  # this data isn't time series data
-    opt_block_length(data)
+    df = pd.DataFrame(np.random.randint(0, 100, size=(20, 5)), columns=list('ABCDE'))
+    opt_block_length(df)
