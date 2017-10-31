@@ -4,6 +4,15 @@ import numpy as np
 import pandas as pd
 
 
+pd.set_option('max_columns', 700)
+pd.set_option('max_info_columns', 100000)
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 30000)
+pd.set_option('max_colwidth', 4000)
+pd.set_option('display.float_format', lambda x: '%.5f' % x)
+
+
+
 '''
 
 
@@ -106,8 +115,9 @@ lam = (abs(kk)>=0).*(abs(kk)<0.5)+2*(1-abs(kk)).*(abs(kk)>=0.5).*(abs(kk)<=1);
 
 def mlags(series, lags):
     # todo: make the column names indicative of the lag number and the original column name as well
-    return pd.concat([series.shift(i) for i in xrange(0, lags + 1)], axis=1)
-
+    df = pd.concat([series.shift(i) for i in xrange(lags + 1)], axis=1)
+    df.columns = ['L{}'.format(i) for i in xrange(lags + 1)]
+    return df
 
 
 def opt_block_length(data):
@@ -125,7 +135,7 @@ def opt_block_length(data):
     n, k = data.shape
     print n, k
 
-    KN = np.maximum(5, np.sqrt(np.log10(n)))
+    KN = int(np.maximum(5, np.sqrt(np.log10(n))))
     mmax = int(np.ceil(np.sqrt(n)) + KN)
     warning_flags = 0  # todo: ?
     round = 0
@@ -138,14 +148,13 @@ def opt_block_length(data):
     for i in xrange(1, k):
         data = origdata.iloc[:, i]  # todo: take column by index
 
-        temp = mlags(data, mmax)
-        temp = temp.iloc[mmax + 1:]
+        temp = mlags(data, mmax).iloc[mmax + 1:].corr().iloc[1:, 0]
 
-        temp = temp.corr()
-        temp = temp.iloc[1:, 0]
-        print temp; sys.exit()
-        #
-        # temp2 = [mlag(temp, KN)',temp(end-KN+1:end)];		% looking at vectors of autocorrels, from lag mhat to lag mhat+KN
+        # todo: I don't think this can be correct. Look at this at home.
+        print pd.concat([mlags(temp, KN).iloc[:, 1:].transpose().reset_index(drop=True), temp.iloc[-KN:].reset_index(drop=True)], axis=1).iloc[:, KN:]
+
+        # temp2 = [mlags(temp, KN),temp(end-KN+1:end)];		% looking at vectors of autocorrels, from lag mhat to lag mhat+KN
+        sys.exit()
         # temp2 = temp2(:, KN + 1:end); % dropping
 
 
