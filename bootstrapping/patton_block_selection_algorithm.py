@@ -2,7 +2,8 @@ import sys
 import joblib
 import numpy as np
 import pandas as pd
-
+from scipy.stats import norm
+from statsmodels.tsa.stattools import acf, acovf
 
 pd.set_option('max_columns', 700)
 pd.set_option('max_info_columns', 100000)
@@ -10,8 +11,6 @@ pd.set_option('expand_frame_repr', False)
 pd.set_option('display.max_rows', 30000)
 pd.set_option('max_colwidth', 4000)
 pd.set_option('display.float_format', lambda x: '%.5f' % x)
-
-
 
 '''
 
@@ -113,6 +112,7 @@ function lam=lam(kk)
 lam = (abs(kk)>=0).*(abs(kk)<0.5)+2*(1-abs(kk)).*(abs(kk)>=0.5).*(abs(kk)<=1);
 '''
 
+
 def mlags(series, lags):
     # todo: make the column names indicative of the lag number and the original column name as well
     df = pd.concat([series.shift(i) for i in xrange(lags + 1)], axis=1)
@@ -131,38 +131,41 @@ def opt_block_length(data):
     OUTPUTS: Bstar, a 2xk vector of optimal bootstrap block lengths, [BstarSB;BstarCB]
 
 """
-
     n, k = data.shape
     print n, k
-
-    KN = int(np.maximum(5, np.sqrt(np.log10(n))))
-    mmax = int(np.ceil(np.sqrt(n)) + KN)
-    warning_flags = 0  # todo: ?
-    round = 0
-    Bmax = np.ceil(np.minimum(3 * np.sqrt(n), n / 3))
-
-    c= 2
+    #
+    # KN = int(np.maximum(5, np.sqrt(np.log10(n))))
+    # mmax = int(np.ceil(np.sqrt(n)) + KN)
+    # warning_flags = 0  # todo: ?
+    # round = 0
+    # Bmax = np.ceil(np.minimum(3 * np.sqrt(n), n / 3))
+    #
+    c = norm.ppf(0.975)
     origdata = data
-    Bstar_final = []
+    # Bstar_final = []
 
-    for i in xrange(1, k):
-        data = origdata.iloc[:, i]  # todo: take column by index
+    for i in xrange(0, k):
 
-        temp = mlags(data, mmax).iloc[mmax + 1:].corr().iloc[1:, 0]
+        mmax = 2  # todo: delete
 
-        # todo: I don't think this can be correct. Look at this at home.
-        print pd.concat([mlags(temp, KN).iloc[:, 1:].transpose().reset_index(drop=True), temp.iloc[-KN:].reset_index(drop=True)], axis=1).iloc[:, KN:]
+        data = origdata.iloc[:, i]
+        rho_k = acf(data, nlags=mmax)[1:]  # see note at this point in the code in http://public.econ.duke.edu/~ap172/ regarding sample correlations versus the acf as used here
+        rho_k_crit = c * np.sqrt(np.log10(n) / n)
 
-        # temp2 = [mlags(temp, KN),temp(end-KN+1:end)];		% looking at vectors of autocorrels, from lag mhat to lag mhat+KN
-        sys.exit()
-        # temp2 = temp2(:, KN + 1:end); % dropping
+        
 
 
-# if __name__ == '__main__':
-    # data = joblib.load('../sample_data_files/X_train.pkl')  # this data isn't time series data
-    # opt_block_length(data)
+
+
 
 
 if __name__ == '__main__':
-    df = pd.DataFrame(np.random.randint(0, 100, size=(20, 5)), columns=list('ABCDE'))
+    df = pd.DataFrame([[0.3004800, 0.4806089, -1.0232758, 0.9733925, 0.2688148, -0.5161701, -0.7270535, -1.7454589,
+                        -0.1558424, -0.6287940],
+                       [0.3814848, 0.3526421, 0.8240130, 0.4161907, -0.6108061, -2.3804401, 1.4487400, 0.7112594,
+                        -0.4536392, 0.8210167]]).transpose()
     opt_block_length(df)
+
+
+
+#
