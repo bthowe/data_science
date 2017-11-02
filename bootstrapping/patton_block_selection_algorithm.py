@@ -3,7 +3,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
-from statsmodels.tsa.stattools import acf, acovf
+from statsmodels.tsa.stattools import acf, acovf, ccf
 
 pd.set_option('max_columns', 700)
 pd.set_option('max_info_columns', 100000)
@@ -134,7 +134,7 @@ def opt_block_length(data):
     n, k = data.shape
     print n, k
     #
-    # KN = int(np.maximum(5, np.sqrt(np.log10(n))))
+    KN = int(np.maximum(5, np.sqrt(np.log10(n))))
     # mmax = int(np.ceil(np.sqrt(n)) + KN)
     # warning_flags = 0  # todo: ?
     # round = 0
@@ -152,7 +152,35 @@ def opt_block_length(data):
         rho_k = acf(data, nlags=mmax)[1:]  # see note at this point in the code in http://public.econ.duke.edu/~ap172/ regarding sample correlations versus the acf as used here
         rho_k_crit = c * np.sqrt(np.log10(n) / n)
 
-        
+        ni_function = lambda x: np.sum((np.abs(rho_k) < rho_k_crit)[x: x + KN])
+        num_insignificant = [ni_function(i) for i in xrange(mmax - KN + 1)]
+
+        if any(num_insignificant == KN):
+            mhat = num_insignificant.remove(KN)
+            # mhat = [i for i in num_insignificant if i == KN][0]  # use
+        else:
+            if any(abs(rho_k) > rho_k_crit):
+                lag_sig = [i for i in abs(rho_k) > rho_k_crit if i]
+                k_sig = len(lag_sig)
+                if k_sig == 1:
+                    mhat = lag_sig
+                else:
+                    mhat = max(lag_sig)
+            else:
+                mhat = 1
+
+        if 2 * mhat > mmax:
+            M = mmax
+        else:
+            M = 2 * mhat
+
+        kk = range(-M, M + 1)
+
+        R_k = ccf(data)  # todo
+
+
+
+
 
 
 
