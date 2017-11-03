@@ -15,11 +15,61 @@ pd.set_option('display.float_format', lambda x: '%.5f' % x)
 def lam(x):
     return np.where((np.abs(x) >= 0), 1, 0) * np.where((np.abs(x) < 0.5), 1, 0) + 2 * (1 - np.abs(x)) * np.where((np.abs(x) >= 0.5), 1, 0) * np.where((np.abs(x) <= 1), 1, 0)
 
-def mlags(series, lags):
-    # todo: make the column names indicative of the lag number and the original column name as well
-    df = pd.concat([series.shift(i) for i in xrange(lags + 1)], axis=1)
-    df.columns = ['L{}'.format(i) for i in xrange(lags + 1)]
-    return df
+def find_M(data, mmax, Kn, rho_k_crit):
+    rho_k = acf(data, nlags=mmax)[1:]
+
+    ni_function = lambda x: np.sum((np.abs(rho_k) < rho_k_crit)[x: x + Kn])
+    num_insignificant = [ni_function(i) for i in xrange(mmax - Kn + 1)]
+
+    if Kn in num_insignificant:
+        mhat = num_insignificant.index(Kn)
+    else:
+        if any(np.abs(rho_k) > rho_k_crit):
+            lag_sig = np.where(rho_k > rho_k_crit)[0]
+            if len(lag_sig) == 1:
+                mhat = lag_sig[0]
+            else:
+                mhat = np.max(lag_sig)
+        else:
+            mhat = 1
+
+    if 2 * (mhat + 1) > mmax:
+        M = mmax
+    else:
+        M = 2 * (mhat + 1)
+
+    return M
+
+def find_G_D(data, bootstrap_type, M):
+    kk = np.arange(-M, M + 1)
+
+    acov = acovf(data)[: M + 1]
+    R_k = np.r_[acov[1:][::-1], acov]
+
+    Ghat = np.sum(lam(kk / float(M)) * np.abs(kk) * R_k)
+
+    if bootstrap_type == 'Circular':
+        Dhat = (4 / 3.) * np.sum(lam(kk / float(M)) * R_k) ** 2
+    else:
+        Dhat = 2 * np.sum(lam(kk / float(M)) * R_k) ** 2
+
+    return Ghat, Dhat
+
+def rounder(x, bootstrap_type):
+    if x < 1:
+        return 1
+    else:
+        if bootstrap_type == 'Circular':
+            return np.round(x)
+        else:
+            return np.ceil(x)
+
+def find_bstar(bootstrap_type, rnd, Ghat, Dhat, Bmax, n):
+    if not rnd:
+        bstar = min(((2 * Ghat ** 2) / Dhat) ** (1 / 3.) * n ** (1 / 3.), Bmax)
+    else:
+        bstar = min(rounder(((2 * Ghat ** 2) / Dhat) ** (1 / 3.) * n ** (1 / 3.), bootstrap_type), Bmax)
+    return bstar
 
 def opt_block_length(df, bootstrap_type='Circular', rnd=False):
     """This is a function taken from Andrew Patton (http://public.econ.duke.edu/~ap172/) to select the optimal (in the
@@ -38,66 +88,24 @@ def opt_block_length(df, bootstrap_type='Circular', rnd=False):
 """
     n, k = df.shape
 
-    KN = int(np.maximum(5, np.sqrt(np.log10(n))))
-    mmax = int(np.ceil(np.sqrt(n)) + KN)
-    Bmax = np.ceil(np.minimum(3 * np.sqrt(n), n / 3))
     c = norm.ppf(0.975)
+    Kn = int(np.maximum(5, np.sqrt(np.log10(n))))
+
+    mmax = int(np.ceil(np.sqrt(n)) + Kn)
+    Bmax = np.ceil(np.minimum(3 * np.sqrt(n), n / 3))
+
+    rho_k_crit = c * np.sqrt(np.log10(n) / n)
 
     Bstar = []
 
     for i in xrange(0, k):
         data = df.iloc[:, i]
-        rho_k = acf(data, nlags=mmax)[1:]  # see note at this point in the code in http://public.econ.duke.edu/~ap172/ regarding sample correlations versus the acf as used here
-        rho_k_crit = c * np.sqrt(np.log10(n) / n)
 
-        ni_function = lambda x: np.sum((np.abs(rho_k) < rho_k_crit)[x: x + KN])
-        num_insignificant = [ni_function(i) for i in xrange(mmax - KN + 1)]
-
-        if KN in num_insignificant:
-            mhat = num_insignificant.index(KN)
-        else:
-            if any(np.abs(rho_k) > rho_k_crit):
-                lag_sig = np.where(rho_k > rho_k_crit)[0]
-                if len(lag_sig) == 1:
-                    mhat = lag_sig[0]
-                else:
-                    mhat = np.max(lag_sig)
-            else:
-                mhat = 1
-
-        if 2 * (mhat + 1) > mmax:
-            M = mmax
-        else:
-            M = 2 * (mhat + 1)
-
-        kk = np.arange(-M, M + 1)
-
-        acov = acovf(data)[: M + 1]
-        R_k = np.r_[acov[1:][::-1], acov]
-
-        Ghat = np.sum(lam(kk / float(M)) * np.abs(kk) * R_k)
-
-        if bootstrap_type == 'Circular':
-            Bhat = (4 / 3.) * np.sum(lam(kk / float(M)) * R_k) ** 2
-        else:
-            Bhat = 2 * np.sum(lam(kk / float(M)) * R_k) ** 2
-
-        def rounder(x):
-            if x < 1:
-                return 1
-            else:
-                if bootstrap_type == 'Circular':
-                    return np.round(x)
-                else:
-                    return np.ceil(x)
-
-        if not rnd:
-            bstar = min(((2 * Ghat ** 2) / Bhat) ** (1 / 3.) * n ** (1 / 3.), Bmax)
-        else:
-            bstar = min(rounder(((2 * Ghat ** 2) / Bhat) ** (1 / 3.) * n ** (1 / 3.)), Bmax)
+        M = find_M(data, mmax, Kn, rho_k_crit)
+        Ghat,  Dhat = find_G_D(data, bootstrap_type, M)
+        bstar = find_bstar(bootstrap_type, rnd, Ghat, Dhat, Bmax, n)
 
         Bstar.append(bstar)
-
     return Bstar
 
 
@@ -115,4 +123,4 @@ if __name__ == '__main__':
     #                     -0.4536392, 0.8210167]]).transpose()
 
     df = pd.read_csv('/Users/travis.howe/Downloads/patton_x.csv', index_col=False).drop('Unnamed: 0', 1)
-    print opt_block_length(df, rnd=False)
+    print opt_block_length(df, bootstrap_type='Stationary', rnd=False)
