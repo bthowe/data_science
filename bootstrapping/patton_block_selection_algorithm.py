@@ -66,10 +66,9 @@ def rounder(x, bootstrap_type):
 
 def find_bstar(bootstrap_type, rnd, Ghat, Dhat, Bmax, n):
     if not rnd:
-        bstar = min(((2 * Ghat ** 2) / Dhat) ** (1 / 3.) * n ** (1 / 3.), Bmax)
+        return min(((2 * Ghat ** 2) / Dhat) ** (1 / 3.) * n ** (1 / 3.), Bmax)
     else:
-        bstar = min(rounder(((2 * Ghat ** 2) / Dhat) ** (1 / 3.) * n ** (1 / 3.), bootstrap_type), Bmax)
-    return bstar
+        return int(min(rounder(((2 * Ghat ** 2) / Dhat) ** (1 / 3.) * n ** (1 / 3.), bootstrap_type), Bmax))
 
 def opt_block_length(df, bootstrap_type='Circular', rnd=False):
     """This is a function taken from Andrew Patton (http://public.econ.duke.edu/~ap172/) to select the optimal (in the
@@ -96,16 +95,12 @@ def opt_block_length(df, bootstrap_type='Circular', rnd=False):
 
     rho_k_crit = c * np.sqrt(np.log10(n) / n)
 
-    Bstar = []
-
     for i in xrange(0, k):
         data = df.iloc[:, i]
 
         M = find_M(data, mmax, Kn, rho_k_crit)
         Ghat,  Dhat = find_G_D(data, bootstrap_type, M)
-        bstar = find_bstar(bootstrap_type, rnd, Ghat, Dhat, Bmax, n)
-
-        Bstar.append(bstar)
+        Bstar = find_bstar(bootstrap_type, rnd, Ghat, Dhat, Bmax, n)
     return Bstar
 
 
