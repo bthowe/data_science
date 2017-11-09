@@ -21,16 +21,28 @@ import numpy as np
 
 import pyspark as ps
 
+dlds = '/Users/travis.howe/Downloads/'
+
 # to run this in the command line, simply python galvanize_individual.py
 # in the spark shell, i don't need to initialize SparkContext (done automatically)
 conf = ps.SparkConf().setMaster('local[4]').setAppName('My App')
 sc = ps.SparkContext(conf=conf)
 
 
-file_rdd = sc.textFile('data/cookie_data.txt')
+file_rdd = sc.textFile('../sample_data_files/cookie_data.txt')
 
-# print file_rdd.first()
-print file_rdd.take(20)
+print file_rdd.map(lambda x: x + " the hammer!").collect()  # see work below...on page 62 in book
+sys.exit()
+
+print file_rdd.first()
+# print file_rdd.take(20)
+
+
+file_rdd2 = sc.parallelize(np.random.uniform(0, 1, size=(20, 5)).tolist())
+print file_rdd2.collect()
+
+
+sys.exit()
 
 
 ## be careful with collect with large datasets
