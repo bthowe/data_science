@@ -16,6 +16,7 @@ __pycache__/
 temp.py
 
 .Python
+metastore_db/
 env/
 build/
 develop-eggs/

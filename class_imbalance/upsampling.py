@@ -18,7 +18,8 @@ def resample(y):
 
 
 def upsample(X, y):
-    """Balances classes by resampling with replacement."""
+    """Balances classes by resampling with replacement. See imblearn.over_sampling.RandomOverSampler for class that does
+    the same: http://contrib.scikit-learn.org/imbalanced-learn/stable/generated/imblearn.over_sampling.RandomOverSampler.html. """
 
     for k, v in resample(y).iteritems():
         X = X.append(X.iloc[v])
