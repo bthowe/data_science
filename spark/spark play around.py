@@ -1,4 +1,3 @@
-import os
 import sys
 import json
 import joblib
@@ -29,31 +28,16 @@ conf = ps.SparkConf().setMaster('local[4]').setAppName('My App')
 sc = ps.SparkContext(conf=conf)
 
 
-file_rdd = sc.textFile('../sample_data_files/cookie_data.txt')
-
-print file_rdd.map(lambda x: x + " the hammer!").collect()  # see work below...on page 62 in book
-sys.exit()
-
-print file_rdd.first()
-# print file_rdd.take(20)
+# file_rdd = sc.textFile('../sample_data_files/cookie_data.txt')
+rdd1 = sc.parallelize(range(10))
+print rdd1.reduce(lambda x, y: x + y)
 
 
-file_rdd2 = sc.parallelize(np.random.uniform(0, 1, size=(20, 5)).tolist())
-print file_rdd2.collect()
+
+# start with page 67, aggregate
 
 
 sys.exit()
-
-
-## be careful with collect with large datasets
-# print file_rdd.collect()
-# print lst_rdd.collect()
-
-
-# print file_rdd.map(lambda x: (str(x.split('"')[1]), int(x.split('"')[3]))).take(10)
-#
-# import ast
-# print file_rdd.map(ast.literal_eval).map(lambda x: (x.keys()[0], int(x.values()[0]))).collect()
 
 import json
 data = file_rdd.map(json.loads).map(lambda x: (str(x.keys()[0]), int(x.values()[0])))
