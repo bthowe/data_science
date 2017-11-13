@@ -29,7 +29,13 @@ sc = ps.SparkContext(conf=conf)
 
 
 # file_rdd = sc.textFile('../sample_data_files/cookie_data.txt')
-rdd1 = sc.parallelize(range(10))
+rdd1 = sc.parallelize(range(5))
+rdd1.saveAsTextFile(dlds + 'thing.txt')
+
+
+
+sys.exit()
+
 print rdd1.reduce(lambda x, y: x + y)
 
 
@@ -37,7 +43,6 @@ print rdd1.reduce(lambda x, y: x + y)
 # start with page 67, aggregate
 
 
-sys.exit()
 
 import json
 data = file_rdd.map(json.loads).map(lambda x: (str(x.keys()[0]), int(x.values()[0])))
