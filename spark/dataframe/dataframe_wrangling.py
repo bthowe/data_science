@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import sys
 import json
 import joblib
@@ -33,21 +32,22 @@ df = sqlContext.createDataFrame(rdd_lines)
 # print df.show()
 ################ end of preliminaries
 
-### groupBy
-gb = df.groupBy(df['one'])
+# reference a specific column
+df.one
+df['one']
 
-# count()
-results = gb.count()  #.sort("count",ascending=False)
-# print results.show()
+# create a new column
+df.withColumn('four', F.lit(np.random.rand()))
 
-# agg()
-results = gb.agg({'*': 'count'})
-gb.agg(F.avg('one'), F.min('two'), F.max('three')).show()  # use .alias to rename, e.g. F.avg('one').alias('yo')
+# manipulate column
+df.withColumn('four', df['three'] * 2)
+df.withColumn('four', df['three'] > 0)
 
-# also, mean(), max(), min(), sum()
+# subset columns, create new columns
+df.select('one', 'two')
+df.select('one', (df['three'] > 0).alias('positive'))
 
-# pivot...leaves indeces unchanged and makes the columns equal to the values in the specified column name
-results = gb.pivot('one').count()
-print results.show()
+# subset observations...i.e., masking
+df.filter(df['three'] > 0).show()
 
-
+# see also https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_SQL_Cheat_Sheet_Python.pdf
