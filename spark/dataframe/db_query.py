@@ -29,7 +29,7 @@ df = sqlContext.read.format('jdbc').options(
     url=os.getenv('REDSHIFT_URL'),
     user=os.getenv('REDSHIFT_USER'),
     password=os.getenv('REDSHIFT_PASSWORD'),
-    dbtable=''
+    dbtable=os.getenv('REDSHIFT_DB')
 ).load()
 df.show()
 
