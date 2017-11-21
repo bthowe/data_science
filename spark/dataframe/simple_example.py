@@ -9,10 +9,11 @@ import pandas as pd
 from time import time
 
 from pyspark.sql import functions as F
+from pyspark.ml.linalg import DenseVector
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext, Row, types
+from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.regression import LinearRegression
-
 
 conf = (SparkConf()
         .setAppName("data_frame_random_lookup")
@@ -56,51 +57,46 @@ df = df.withColumn('start_month', F.month(df['agent_start_date']))
 # #drop nulls
 # #these do the same thing
 # df = df.filter(df['start_month'].isNotNull())
-df = df.where(F.col('start_month').isNotNull())
-
 df = df.select('tenure', 'gross_policy_budget', 'start_month')
-dummylist = ['start_month']
+df = df.\
+    where(F.col('start_month').isNotNull()).\
+    where(F.col('tenure').isNotNull()).\
+    where(F.col('gross_policy_budget').isNotNull())
 
 # #create dummy variables
-def create_dummies(df, dummylist):
+# OneHotEncoder: https://spark.apache.org/docs/latest/ml-features.html#onehotencoder
+def create_dummies(df, dummylist, drop=True):
     for inputcol in dummylist:
         categories = df.select(inputcol).rdd.distinct().flatMap(lambda x: x).collect()
 
-        exprs = [F.when(F.col(inputcol) == category, 1).otherwise(0).alias(category) for category in categories]
+        exprs = [F.when(F.col(inputcol) == category, 1).otherwise(0).alias(str(category)) for category in categories]
 
         for index, column in enumerate(exprs):
             df = df.withColumn(inputcol + str(index), column)
 
+        if drop:
+            df = df.drop(inputcol)
+
     return df
 
+dummylist = ['start_month']
 df = create_dummies(df, dummylist)
 
 
+df.describe().show()
 
-df.show()
+input_data = df.rdd.map(lambda x: (x[0], DenseVector(x[1:])))
+df = sqlContext.createDataFrame(input_data, ['label', 'features'])
 
-
-
-# todo: create dummies
-# todo: drop nulls
-# todo: is there like a pipe in pyspark?
-
-
-
-sys.exit()
 train_data, test_data = df.randomSplit([.8, .2], seed=22)
-train_data.show()
-
 
 lr = LinearRegression(labelCol='label', maxIter=10, regParam=0.3, elasticNetParam=0.8)
-
 linearModel = lr.fit(train_data)
 predicted = linearModel.transform(test_data)
-labels = predicted.select('label').df.map(lambda x: x[0])
 
+predictions = predicted.select("prediction").rdd.map(lambda x: x[0])
+labels = predicted.select('label').rdd.map(lambda x: x[0])
+predictionAndLabel = predictions.zip(labels)
+print predictionAndLabel.collect()
 
 sc.stop()
-
-
-
-# https://www.datacamp.com/community/tutorials/apache-spark-tutorial-machine-learning
