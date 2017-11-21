@@ -1,0 +1,20 @@
+-- create table
+CREATE TABLE schema_name.table
+(
+    prediction_index BIGINT identity(0, 1),
+    name VARCHAR(100),
+    prediction DECIMAL(18, 18),
+    date DATE,
+    column_1 DECIMAL(18, 18) DEFAULT NULL,
+    column_2 DECIMAL(18, 18) DEFAULT NULL,
+    column_3 INT DEFAULT NULL,
+    column_4 INT DEFAULT NULL,
+    created_at datetime default sysdate
+);
+
+
+-- copy from s3 file to redshift
+copy schema_name.table (name, prediction, date, column_1, column_2, column_3, column_4)
+from 's3 bucket uri'
+CREDENTIALS 'aws_access_key_id=<id here>;aws_secret_access_key=<key here>' CSV IGNOREHEADER 1;
+
