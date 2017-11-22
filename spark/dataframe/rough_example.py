@@ -31,24 +31,24 @@ sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
 query = '''
-(select
-    databunker.applications.*,
-    databunker.agents.agent_name, databunker.agents.start_date as agent_start_date, databunker.agents.term_date as agent_term_date, databunker.agents.business, databunker.agents.resident_state_id,
-    databunker.agent_annotations.start_date, databunker.agent_annotations.gross_policy_budget
-from databunker.applications
-left join databunker.agents on databunker.agents.id = databunker.applications.agent_id
-left join databunker.agent_annotations on databunker.agent_annotations.agent_id = databunker.agents.id
-where date_part('month', databunker.applications.submission_date) = date_part('month', databunker.agent_annotations.start_date) AND
-      date_part('year', databunker.applications.submission_date) = date_part('year', databunker.agent_annotations.start_date)) ali
+    (select
+        databunker.applications.*,
+        databunker.agents.agent_name, databunker.agents.start_date as agent_start_date, databunker.agents.term_date as agent_term_date, databunker.agents.business, databunker.agents.resident_state_id,
+        databunker.agent_annotations.start_date, databunker.agent_annotations.gross_policy_budget
+    from databunker.applications
+    left join databunker.agents on databunker.agents.id = databunker.applications.agent_id
+    left join databunker.agent_annotations on databunker.agent_annotations.agent_id = databunker.agents.id
+    where date_part('month', databunker.applications.submission_date) = date_part('month', databunker.agent_annotations.start_date) AND
+          date_part('year', databunker.applications.submission_date) = date_part('year', databunker.agent_annotations.start_date)) ali
 '''
 
 df = sqlContext.read.format('jdbc').options(
-    url=os.getenv('REDSHIFT_URL'),
-    user=os.getenv('REDSHIFT_USER'),
-    password=os.getenv('REDSHIFT_PASSWORD'),
-    # dbtable=os.getenv('REDSHIFT_DB')
-    dbtable=query
-).load()
+        url=os.getenv('REDSHIFT_URL'),
+        user=os.getenv('REDSHIFT_USER'),
+        password=os.getenv('REDSHIFT_PASSWORD'),
+        # dbtable=os.getenv('REDSHIFT_DB')
+        dbtable=query
+    ).load()
 
 df = df.withColumn('tenure', F.datediff(df['agent_term_date'], df['agent_start_date']))
 df = df.withColumn('tenure', F.when(df['tenure'] < 0, None).otherwise(df['tenure']))
