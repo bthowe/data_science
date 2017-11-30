@@ -41,3 +41,18 @@ redirect command (i.e., >)
     -redirects the output to a file called top.csv
 
 pipe command (i.e., |)
+
+to create a virtual environment named "test_ve":
+$ virtualenv test_ve
+
+to create a virtual environment named "test_ve" which inherits globally installed packages:
+$ virtualenv test_ve --system-site-packages
+
+to create a virtual environment named "test_ve" which uses something other than the default interpretor:
+$ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 test_ve
+
+to activate a virtual environment named "test_ve":
+$ source test_ve/bin/activate
+
+to install python packages to test_ve from a requirements.txt file:
+$ pip install -r /path/to/requirements.txt
