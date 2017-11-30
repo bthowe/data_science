@@ -1,0 +1,43 @@
+rmdir some_empty_directory
+    -removes an empty directory called "some_empty_directory"
+
+cat some_file.txt
+    -prints the file to screen
+
+less some_file some_other_file
+    -space bar to page down, q to quit, :n to get to next document, :p to get the previous
+
+head -n 3 file.txt
+    -display the first 3 lines of file.txt
+
+tail --last=10 file.txt
+    -display the last 10 lines of file.txt
+
+ls -RF
+    -list everything underneath a directory
+    -R means recursive
+    -F means printing a / after the name of every directoy and * after the name of runnable programs
+
+man <command>
+    -prints the manual for <command>, e.g. man head
+
+cut -f 2-5, 8 -d , values.csv
+    -select columns 2 through 5 and column 8, using comma as the separator
+
+history
+    -gives a numbered command history
+    -re-run a command by typing ! followed (without a space) by the number
+    -can also run the most recent use of a certain command by typing ! followed (without a space) by the command
+
+grep word file.txt
+    -return lines that have the word "word" in them
+    -see the many options for this
+
+paste -d , file1.csv file2.csv
+    -puts the data from file1 and file2 together separated by a comma
+
+redirect command (i.e., >)
+    -e.g. head -n 5 seasonal/summer.csv > top.csv
+    -redirects the output to a file called top.csv
+
+pipe command (i.e., |)
