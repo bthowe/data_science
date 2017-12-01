@@ -1,3 +1,22 @@
+sudo
+    -when you want to be boss
+
+cd some/path
+    -change directory
+
+cp file new_file
+    -copy files
+
+mv file new/file/location
+    -move files
+    -also used to rename files
+
+mkdir directory_name
+    -creates a directory
+
+rm file_name
+    -removes a file
+
 rmdir some_empty_directory
     -removes an empty directory called "some_empty_directory"
 
@@ -41,6 +60,59 @@ redirect command (i.e., >)
     -redirects the output to a file called top.csv
 
 pipe command (i.e., |)
+    -e.g., cut -d , -f 2 seasonal/summer.csv | grep -v Tooth
+    -e.g., cut -d , -f 2 seasonal/autumn.csv | grep -v Tooth | head -n 1
+
+wc -l
+    -counts how many lines (-l option)
+    -counts how many words (-w option)
+    -counts how many characters (-c option)
+
+WILDCARDS
+    -*
+        -e.g., cut -d , -f 1 seasonal/*
+        -would take the first column (delimited by a comma) of all files in the seasonal directory
+        -e.g., head -n 3 seasonal/s*
+    -?
+        -matches a single character
+    -[...]
+        -matches any one of the characters inside the square brackets
+        -e.g., 201[78].txt
+    -{...}
+        -matches any of the command-separated patterns inside the brackets
+        -e.g., {*.txt, *.csv}
+
+sort
+    -e.g., cut -f 2 -d ,  seasonal/winter.csv | grep -v Tooth | sort
+    -there are a number of options available here
+
+uniq
+    -e.g., cut -f 2 -d , seasonal/* | grep -v Tooth | sort | uniq
+    -often used in connection with sort...for obvious reasons
+
+echo something
+    -print whatever follows to screen
+    -e.g., in the above case, it prints "something"
+    -e.g., echo $USER
+        -print the value of the environment variable USER
+
+create a shell variable
+    -e.g., training=seasonal/summer.csv
+    -print value
+        -echo $training
+
+loops
+    -e.g., for suffix in gif jpg png; do echo $suffix; done
+    -e.g., for filename in people/*; do echo $filename; done
+    -e.g.,  files=seasonal/*.csv
+            for f in $files; do echo $f; done
+    -e.g., for file in seasonal/*.csv; do head -n 2 $file | tail -n 1; done
+    -e.g., for f in seasonal/*.csv; do echo $f; head -n 2 $f | tail -n 1; done
+
+if there are spaces in file names
+    -use single quotes around names, e.g., 'July 2017.csv'
+    -use backslash, e.g., July\ 2017.csv
+
 
 to create a virtual environment named "test_ve":
 $ virtualenv test_ve
