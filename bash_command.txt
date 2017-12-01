@@ -1,6 +1,9 @@
 sudo
     -when you want to be boss
 
+Ctrl-c
+    -kills script
+
 cd some/path
     -change directory
 
@@ -47,6 +50,7 @@ history
     -gives a numbered command history
     -re-run a command by typing ! followed (without a space) by the number
     -can also run the most recent use of a certain command by typing ! followed (without a space) by the command
+    -a useful command is: $ history | grep -h -v Tooth spring.csv > temp.csv, which takes all lines but the header (which has the word Tooth) and sends the output to temp.csv
 
 grep word file.txt
     -return lines that have the word "word" in them
@@ -89,6 +93,7 @@ sort
 uniq
     -e.g., cut -f 2 -d , seasonal/* | grep -v Tooth | sort | uniq
     -often used in connection with sort...for obvious reasons
+    -the option -c causes the count to appear next to the line
 
 echo something
     -print whatever follows to screen
@@ -112,6 +117,31 @@ loops
 if there are spaces in file names
     -use single quotes around names, e.g., 'July 2017.csv'
     -use backslash, e.g., July\ 2017.csv
+
+
+
+
+
+to create a menu of commands to run in a shell script (you don't have to save with .sh suffix, but it's a nice convention):
+-in a file called headers.sh: head -n 1 seasonal/*.csv
+    -this can be done by typing: nano headers.sh
+    -then inputing head -n 1 seasonal/*.csv
+-run it by typing bash headers.sh
+-the command $@ allows you to pass command-line parameters into the script
+    -e.g., sort $@ | uniq, in a file called unique-lines.sh
+    -e.g. continued, in the command line: $ bash unique-lines.sh seasonal/* > output_file.csv
+-$1, $2, etc. allow you to pass specific command-line parameters
+    -e.g., cut -d , -f $2 $1, in script called column.sh
+    -e.g. continued, bash column.sh seasonal/autumn.csv 1
+-can include loops and multiple lines
+-can be used like normal shell commands (e.g., the results can be piped):
+    -e.g., bash date-range.sh seasonal/* | sort
+
+
+
+
+
+
 
 
 to create a virtual environment named "test_ve":
