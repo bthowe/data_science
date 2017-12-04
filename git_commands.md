@@ -53,4 +53,27 @@ git annote filename
 ```
 * shows who made the last change to each line of a file and when
 
+```git
+git diff HEAD..HEAD~2
+```
+* shows the difference between the current and ultapenultimate commit
+
+```git
+git clean -n
+```
+* will show you a list of files that are in the repository, but whose history Git is not currently tracking
+```git
+git clean -f
+```
+* will remove these files
+* be very careful with this...these are untracked files and so have not been saved
+
+```git
+git config --list 
+```
+* options include --system, --global, --local
+* should change name and email address on every computer I use (i.e., use the global option): these keys are given by user.name and user.email, respectively
+    * e.g., ```git config --global user.email my_email@gmail.com```
+    
+
 
