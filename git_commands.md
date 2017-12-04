@@ -75,5 +75,42 @@ git config --list
 * should change name and email address on every computer I use (i.e., use the global option): these keys are given by user.name and user.email, respectively
     * e.g., ```git config --global user.email my_email@gmail.com```
     
+```git
+git checkout -- filename
+```
+* will discard the changes that have not yet been staged in filename
 
+```git
+git reset HEAD filename
+```
+* will undo changes that have been staged in filename
+* resets the file to the state last staged
+* if you want to go all the way back to where you were before you started making changes, you must also do git checkout -- filename
 
+```git
+git checkout <hash> <name of file>
+git checkout 2242bd report.txt
+```
+* restores old version of a file
+* doesn't erase any of repo's history...restoring is another commit
+* can use folder names instead of filenames (e.g., . to mean current directory)
+
+```git
+git diff branch1..branch2
+```
+* see differences between branches
+
+```git
+git checkout branch-name
+```
+* switch to another branch
+
+```git
+git checkout -b branch-name
+```
+* creates a new branch
+
+```git
+git merge source destination
+```
+* incorporate the changes made in source into destination
