@@ -114,3 +114,34 @@ git checkout -b branch-name
 git merge source destination
 ```
 * incorporate the changes made in source into destination
+
+```git
+git init project-name
+```
+* create a new repository
+
+```git
+git init file:///Users/travis.howe/repo new_name
+```
+* can also run git init on an existing repo
+
+```git
+git remote -v
+```
+* lists the origins
+
+```git
+git remote add remote-name URL
+git remote rm remote-name
+```
+* add and remove existing remotes
+
+```git
+git pull origin branch_name
+```
+* pull changes
+
+```git
+git push origin branch_name
+```
+* push changes to remote
