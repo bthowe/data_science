@@ -1,0 +1,160 @@
+sudo
+    -when you want to be boss
+
+Ctrl-c
+    -kills script
+
+cd some/path
+    -change directory
+
+cp file new_file
+    -copy files
+
+mv file new/file/location
+    -move files
+    -also used to rename files
+
+mkdir directory_name
+    -creates a directory
+
+rm file_name
+    -removes a file
+
+rmdir some_empty_directory
+    -removes an empty directory called "some_empty_directory"
+
+cat some_file.txt
+    -prints the file to screen
+
+less some_file some_other_file
+    -space bar to page down, q to quit, :n to get to next document, :p to get the previous
+
+head -n 3 file.txt
+    -display the first 3 lines of file.txt
+
+tail --last=10 file.txt
+    -display the last 10 lines of file.txt
+
+ls -RF
+    -list everything underneath a directory
+    -R means recursive
+    -F means printing a / after the name of every directoy and * after the name of runnable programs
+
+man <command>
+    -prints the manual for <command>, e.g. man head
+
+cut -f 2-5, 8 -d , values.csv
+    -select columns 2 through 5 and column 8, using comma as the separator
+
+history
+    -gives a numbered command history
+    -re-run a command by typing ! followed (without a space) by the number
+    -can also run the most recent use of a certain command by typing ! followed (without a space) by the command
+    -a useful command is: $ history | grep -h -v Tooth spring.csv > temp.csv, which takes all lines but the header (which has the word Tooth) and sends the output to temp.csv
+
+grep word file.txt
+    -return lines that have the word "word" in them
+    -see the many options for this
+
+paste -d , file1.csv file2.csv
+    -puts the data from file1 and file2 together separated by a comma
+
+redirect command (i.e., >)
+    -e.g. head -n 5 seasonal/summer.csv > top.csv
+    -redirects the output to a file called top.csv
+
+pipe command (i.e., |)
+    -e.g., cut -d , -f 2 seasonal/summer.csv | grep -v Tooth
+    -e.g., cut -d , -f 2 seasonal/autumn.csv | grep -v Tooth | head -n 1
+
+wc -l
+    -counts how many lines (-l option)
+    -counts how many words (-w option)
+    -counts how many characters (-c option)
+
+WILDCARDS
+    -*
+        -e.g., cut -d , -f 1 seasonal/*
+        -would take the first column (delimited by a comma) of all files in the seasonal directory
+        -e.g., head -n 3 seasonal/s*
+    -?
+        -matches a single character
+    -[...]
+        -matches any one of the characters inside the square brackets
+        -e.g., 201[78].txt
+    -{...}
+        -matches any of the command-separated patterns inside the brackets
+        -e.g., {*.txt, *.csv}
+
+sort
+    -e.g., cut -f 2 -d ,  seasonal/winter.csv | grep -v Tooth | sort
+    -there are a number of options available here
+
+uniq
+    -e.g., cut -f 2 -d , seasonal/* | grep -v Tooth | sort | uniq
+    -often used in connection with sort...for obvious reasons
+    -the option -c causes the count to appear next to the line
+
+echo something
+    -print whatever follows to screen
+    -e.g., in the above case, it prints "something"
+    -e.g., echo $USER
+        -print the value of the environment variable USER
+
+create a shell variable
+    -e.g., training=seasonal/summer.csv
+    -print value
+        -echo $training
+
+loops
+    -e.g., for suffix in gif jpg png; do echo $suffix; done
+    -e.g., for filename in people/*; do echo $filename; done
+    -e.g.,  files=seasonal/*.csv
+            for f in $files; do echo $f; done
+    -e.g., for file in seasonal/*.csv; do head -n 2 $file | tail -n 1; done
+    -e.g., for f in seasonal/*.csv; do echo $f; head -n 2 $f | tail -n 1; done
+
+if there are spaces in file names
+    -use single quotes around names, e.g., 'July 2017.csv'
+    -use backslash, e.g., July\ 2017.csv
+
+
+
+
+
+to create a menu of commands to run in a shell script (you don't have to save with .sh suffix, but it's a nice convention):
+-in a file called headers.sh: head -n 1 seasonal/*.csv
+    -this can be done by typing: nano headers.sh
+    -then inputing head -n 1 seasonal/*.csv
+-run it by typing bash headers.sh
+-the command $@ allows you to pass command-line parameters into the script
+    -e.g., sort $@ | uniq, in a file called unique-lines.sh
+    -e.g. continued, in the command line: $ bash unique-lines.sh seasonal/* > output_file.csv
+-$1, $2, etc. allow you to pass specific command-line parameters
+    -e.g., cut -d , -f $2 $1, in script called column.sh
+    -e.g. continued, bash column.sh seasonal/autumn.csv 1
+-can include loops and multiple lines
+-can be used like normal shell commands (e.g., the results can be piped):
+    -e.g., bash date-range.sh seasonal/* | sort
+
+
+
+
+
+
+
+
+to create a virtual environment named "test_ve":
+$ virtualenv test_ve
+
+to create a virtual environment named "test_ve" which inherits globally installed packages:
+$ virtualenv test_ve --system-site-packages
+
+to create a virtual environment named "test_ve" which uses something other than the default interpretor:
+$ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 test_ve
+
+to activate a virtual environment named "test_ve":
+$ source test_ve/bin/activate
+
+to install python packages to test_ve from a requirements.txt file:
+$ pip install -r /path/to/requirements.txt
