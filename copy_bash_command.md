@@ -145,16 +145,32 @@ to create a menu of commands to run in a shell script (you don't have to save wi
 
 
 to create a virtual environment named "test_ve":
+```bash
 $ virtualenv test_ve
+```
 
 to create a virtual environment named "test_ve" which inherits globally installed packages:
+```bash
 $ virtualenv test_ve --system-site-packages
+```
 
 to create a virtual environment named "test_ve" which uses something other than the default interpretor:
+```bash
 $ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 test_ve
+$ virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve
+```
 
 to activate a virtual environment named "test_ve":
+```bash
 $ source test_ve/bin/activate
+```
 
 to install python packages to test_ve from a requirements.txt file:
+```bash
 $ pip install -r /path/to/requirements.txt
+```
+
+to deactivate
+```bash
+$ deactivate
+```
