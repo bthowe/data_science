@@ -6,44 +6,58 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
 
-
-
-
-# todo: stash in mongodb
-
-
-
-
-
-
-
-
 end_of_book_list = ['Moroni 10', 'Doctrine and Covenants 138', 'Articles of Faith 1', 'Malachi 4', 'Revelation 22']
 go = True
 
+client = MongoClient()
+# client.drop_database('scrip_footnotes')
+db = client['scrip_footnotes']
+# print(db.collection_names())
+
 url = 'https://www.lds.org/scriptures/bofm/1-ne/1?lang=eng'
 while go:
-    r = requests.get(url)
+    try:
+        r = requests.get(url)
+    except:
+        print('\nError\n')
+        continue
     soup = BeautifulSoup(r.text)
     current_chapter = soup.find('span', attrs={'class': 'active'}).text
     print(current_chapter)
 
+    source = url.split('/')[-3]
+    book = url.split('/')[-2]
+    chapter = url.split('/')[-1].split('?')[0]
+
+    tab = db[source]
 
     for verse in soup.find_all('p', attrs={'class': 'verse'}):
         current_verse = verse.span.text
-        print('\n\n\n')
-        print(current_verse)
 
         for footnote in verse.find_all('a', attrs={'class': 'footnote study-note-ref'}):
-            current_letter = footnote.sup.text
-            print(current_letter)
+            letter = footnote.sup.text
+            # print(letter)
             url_new = footnote['rel'][0]
-            r_new = requests.get(url_new)
+
+            try:
+                r_new = requests.get(url_new)
+            except:
+                print('\nError\n')
+                continue
             soup_new = BeautifulSoup(r_new.text)
             footnote_list = '; '.join([a.text for a in soup_new.find_all('a')])
-            print(footnote_list)
 
-        sys.exit()
+            tab.insert_one(
+                {
+                    'source': source,
+                    'book': book,
+                    'chapter': chapter,
+                    'verse': current_verse,
+                    'letter': letter,
+                    'footnote': footnote_list
+                }
+            )
+
     if current_chapter in end_of_book_list:
         if current_chapter == end_of_book_list[0]:
             url = 'https://www.lds.org/scriptures/dc-testament/dc/1?lang=eng'
@@ -62,30 +76,10 @@ while go:
         else:
             url = url_next
 
-
-
-sys.exit()
-client = MongoClient()
-db = client['GC_talks']
-for conference in itertools.product(range(2010, 2017), ['04', '10']):
-    # db['year_{0}_month_{1}'.format(conference[0], conference[1])].drop()
-    tab = db['year_{0}_month_{1}'.format(conference[0], conference[1])]
-
-    r = requests.get('https://www.lds.org/general-conference/{0}/{1}?lang=eng'.format(conference[0], conference[1]))
-    soup = BeautifulSoup(r.text)
-
-    for section in soup.find_all('div', attrs={'class': 'section tile-wrapper layout--3 lumen-layout__item'})[:6]:
-        session = section.find_all('span', attrs={'class': 'section__header__title'})[0].get_text()
-        for tag in section.find_all('a', attrs={'class': 'lumen-tile__link'}):
-            url = tag['href']
-            r = requests.get('https://www.lds.org/' + url)
-            soup = BeautifulSoup(r.text)
-
-            talk_text = soup.find_all('div', attrs={'class': 'article-content'})[0].get_text().replace('\n', ' ')
-            speaker = tag.find_all('div', attrs={'class': 'lumen-tile__content'})[0].get_text()
-            title = tag.find_all('div', attrs={'class': 'lumen-tile__title'})[0].get_text().strip()
-
-            print('{2}, {0}: {1}'.format(speaker, title, session))
-            tab.insert_one({'speaker': speaker, 'year': conference[0], 'month': conference[1], 'session': session,
-                            'talk_text': talk_text, 'title': title})
-
+# show dbs
+# show collections
+# use <database name>
+# use <collection name>
+# db.collection_name.find()   shows all documents in this collections
+# db.bofm.find({'book': '2-ne', 'chapter': '20'})
+# db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
