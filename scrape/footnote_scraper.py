@@ -10,7 +10,7 @@ end_of_book_list = ['Moroni 10', 'Doctrine and Covenants 138', 'Articles of Fait
 go = True
 
 client = MongoClient()
-# client.drop_database('scrip_footnotes')
+client.drop_database('scrip_footnotes')
 db = client['scrip_footnotes']
 # print(db.collection_names())
 
@@ -19,8 +19,8 @@ while go:
     try:
         r = requests.get(url)
     except:
-        print('\nError\n')
-        continue
+        print('\nError, chapter\n')
+        continue  # if the connection times out it will go to the beginning of the loop without updating...essentially, a second try
     soup = BeautifulSoup(r.text)
     current_chapter = soup.find('span', attrs={'class': 'active'}).text
     print(current_chapter)
@@ -32,20 +32,26 @@ while go:
     tab = db[source]
 
     for verse in soup.find_all('p', attrs={'class': 'verse'}):
-        current_verse = verse.span.text
+        current_verse = verse.span.text.strip()
 
         for footnote in verse.find_all('a', attrs={'class': 'footnote study-note-ref'}):
             letter = footnote.sup.text
-            # print(letter)
             url_new = footnote['rel'][0]
 
-            try:
-                r_new = requests.get(url_new)
-            except:
-                print('\nError\n')
-                continue
+            while True:
+                try:
+                    r_new = requests.get(url_new)
+                except:
+                    print('\nError, footnote')
+                    print(current_verse)
+                    print(letter)
+                    print('\n')
+                    continue
+                break
+
             soup_new = BeautifulSoup(r_new.text)
-            footnote_list = '; '.join([a.text for a in soup_new.find_all('a')])
+            # footnote_list = '; '.join([a.text for a in soup_new.find_all('a')])  # old way
+            footnote_list = soup_new.p.text.strip()  # new way
 
             tab.insert_one(
                 {
@@ -83,3 +89,5 @@ while go:
 # db.collection_name.find()   shows all documents in this collections
 # db.bofm.find({'book': '2-ne', 'chapter': '20'})
 # db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
+# db.bofm.stats().count
+# db['dc-testament'].stats().count
