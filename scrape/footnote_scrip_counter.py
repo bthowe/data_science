@@ -32,41 +32,40 @@ class FootnoteParser(object):
     def _abs_in_footnote(self, txt, seps):
         return [sep for sep in seps if sep in txt]
 
-    def _flatten(self, lst):
+    def _flatten(self, ref):
         ref_lst = []
-        for ref in lst.split('; '):
-            if '(' in lst:
+        if '(' in ref:
+            verses = ref[ref.find('(') + 1: ref.find(')')]
 
-                verses = ref[ref.find('(') + 1: ref.find(')')]
+            verses_lst = []
+            for segs in verses.split(','):
+                if '-' in segs:
+                    nums = segs.strip().split('-')
+                    print(nums)
+                    seg_lst = map(str, list(range(int(nums[0]), int(nums[1]) + 1)))
+                else:
+                    seg_lst = [segs]
+                verses_lst += seg_lst
+            print(verses_lst)
 
-                verses_lst = []
-                for segs in verses.split(','):
-                    if '-' in segs:
-                        nums = segs.strip().split('-')
-                        seg_lst = map(str, list(range(int(nums[0]), int(nums[1]) + 1)))
-                    else:
-                        seg_lst = [segs]
-                    verses_lst += seg_lst
-                print(verses_lst)
-
-                pass  #todo: (1) take the numbers between the parentheses, (2) split by comma, (3) generate list
-            else:
-                ref_lst.append(ref)
+            pass  #todo: (1) take the numbers between the parentheses, (2) split by comma, (3) generate list
+        else:
+            ref_lst.append(ref)
 
 
     def references_add_prefix(self):
         prefixes = self._abs_in_footnote(self.footnote_str, ab_lst)
         suffixes = self._split_footnote(self.footnote_str, ab_lst)
 
-        # self._flatten(suffixes)
-        # print(suffixes);  sys.exit()
-
-
         ref_lst = []
         for combos in itertools.product(prefixes, suffixes):
             prefix = combos[0]
             suffix = combos[1]
 
+
+            print(self._flatten(suffix.split('; ')[0]))
+
+            sys.exit()
             ref = ' '.join(combos)
             if ref in self.footnote_str:
                 ref_lst += ['{0} {1}'.format(prefix, s) for s in suffix.split('; ')]  # todo: can I just flatten each s if necessary:                 self._flatten(suffix)
