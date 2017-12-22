@@ -158,6 +158,9 @@ to create a virtual environment named "test_ve" which uses something other than 
 ```bash
 $ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 test_ve
 $ virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve
+
+virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 retention --system-site-packages
+virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 retention --system-site-packages
 ```
 
 to activate a virtual environment named "test_ve":
@@ -173,4 +176,26 @@ $ pip install -r /path/to/requirements.txt
 to deactivate
 ```bash
 $ deactivate
+```
+
+
+list python libraries
+```bash
+pip freeze
+pip freeze > requirements.txt
+```
+
+install library to certain installation of python
+```bash
+pip2.7 install <package name>
+pip3.6 install <package name>
+```
+
+alias pip and python installations in bash
+...in .bash_profile
+```bash
+alias pip='pip2.7'
+alias pip3='pip3.6'
+alias python=python2.7
+alias python3=python3.6
 ```
