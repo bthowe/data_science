@@ -145,3 +145,11 @@ git pull origin branch_name
 git push origin branch_name
 ```
 * push changes to remote
+
+```git
+git checkout branch1
+git rebase master
+```
+Similar to merge, but fundamentally different. 
+This moves the entire branch1 branch to begin on the tip of the master branch, effectively incorporating all of the new commits in master. 
+But, instead of using a merge commit, rebasing re-writes the project history by creating brand new commits for each commit in the original branch.
