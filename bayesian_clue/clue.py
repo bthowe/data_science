@@ -55,9 +55,7 @@ class Clue(object):
             print(self._deal(self._shuffle(remaining_cards)))
 
     def _shuffle(self, deck):
-        # todo: take all combinations of true/false instead...what if there are more than two other players?
-        # todo: instead of using True and False, use integers for each player
-
+        # todo: brute force would be 12! permutations. This is too many rows. Find a different approach
         player_cards = []
         for player in self.other_players:
             player_cards += [player] * self.other_players_dict[player]
@@ -76,6 +74,17 @@ class Clue(object):
         while deck_lst:
             player_hand_dic[next(pool)].append(deck_lst.pop())
         return player_hand_dic
+
+    def _deal2(self, deck):
+        for hand in itertools.combinations(deck, self.other_players_dict[self.other_players[0]]):
+            deck_new = [card for card in deck if card not in hand]
+            if len(deck_new) > self.other_players_dict[self.other_players[1]]: # todo: this is not dynamic since I use a 1
+                self._deal2(deck_new)
+            else:
+                return deck_new
+    # todo: should I do this recursively?
+
+
 
     def hands_update(self, player, cards, answer='no'):
         pass
