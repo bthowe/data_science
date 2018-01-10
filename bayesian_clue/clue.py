@@ -95,31 +95,30 @@ class Clue(object):
 players = 2
 cards_num = 2
 def hand1(h):
+    player_hand = []
     for envelope in itertools.combinations(h, 3):
         h_minus_envelope = [card for card in h if card not in envelope]
-        print(hand2(envelope, h_minus_envelope))
-        sys.exit()
+        for hand in hand2(envelope, h_minus_envelope):
+            player_hand.append([str(envelope)] + hand)
 
-        # todo: how do I add to the envelope row?
+    return player_hand
 
 def hand2(e, h):
     player_hand_lst = []
     while len(h) > cards_num:
         for player_hand in itertools.combinations(h, 2):
-            hand_lst = [e, player_hand]
             h_minus_envelope = [card for card in h if card not in player_hand]
+            h2 = hand2(e, h_minus_envelope)
+            if type(h2) == tuple:
+                player_hand_lst.append([str(player_hand), str(h2)])
+            else:
+                for hand in h2:
+                    player_hand_lst.append([str(player_hand)] + hand)
+        return player_hand_lst
+    return tuple(h)
 
-            # print(player_hand)
-            a = hand2(player_hand, h_minus_envelope)
-
-            # h_minus_envelope = [card for card in h if card not in player_hand]
-            # player_hand_lst.append([e, player_hand, hand2(e, h_minus_envelope)])
-        return a + [e]
-    print(h)
-    return [tuple(h), tuple(e)]
-
-
-
+# todo: convert to pandas dataframe
+# todo: clean up this nasty code
 
 
 if __name__ == '__main__':
@@ -128,10 +127,6 @@ if __name__ == '__main__':
     #
     # c = Clue(players, my_hand)
 
-    h = range(11)
-    hand1(h)
-
-
-
-
-
+    h = range(9)
+    hand = hand1(h)
+    print(pd.DataFrame(hand, columns=['envelope', 'player1', 'player2', 'player3']).head(50))
