@@ -90,15 +90,48 @@ class Clue(object):
         pass
 
     def card_reveal(self, player, card):
+        pass
+
+players = 2
+cards_num = 2
+def hand1(h):
+    for envelope in itertools.combinations(h, 3):
+        h_minus_envelope = [card for card in h if card not in envelope]
+        print(hand2(envelope, h_minus_envelope))
+        sys.exit()
+
+        # todo: how do I add to the envelope row?
+
+def hand2(e, h):
+    player_hand_lst = []
+    while len(h) > cards_num:
+        for player_hand in itertools.combinations(h, 2):
+            hand_lst = [e, player_hand]
+            h_minus_envelope = [card for card in h if card not in player_hand]
+
+            # print(player_hand)
+            a = hand2(player_hand, h_minus_envelope)
+
+            # h_minus_envelope = [card for card in h if card not in player_hand]
+            # player_hand_lst.append([e, player_hand, hand2(e, h_minus_envelope)])
+        return a + [e]
+    print(h)
+    return [tuple(h), tuple(e)]
 
 
 
 
 
 if __name__ == '__main__':
-    players = {'Calvin': 6, 'Kay': 6}
-    my_hand = ['Study', 'Kitchen', 'Hall', 'Plum', 'White', 'rope', 'dagger']
+    # players = {'Calvin': 6, 'Kay': 6}
+    # my_hand = ['Study', 'Kitchen', 'Hall', 'Plum', 'White', 'rope', 'dagger']
+    #
+    # c = Clue(players, my_hand)
 
-    c = Clue(players, my_hand)
+    h = range(11)
+    hand1(h)
 
-    # todo: permutations will lead to duplicate hands
+
+
+
+
