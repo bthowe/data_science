@@ -3,88 +3,67 @@ import itertools
 import pandas as pd
 from collections import defaultdict
 
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 30000)
+pd.set_option('display.max_columns', 30000)
+pd.set_option('max_colwidth', 40000)
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+
 
 class Clue(object):
-    def __init__(self, other_players_dict, my_hand):
-        self.other_players_dict = other_players_dict
-        self.other_players = other_players_dict.keys()  # making a list of player names since ordered
+    def __init__(self, other_players_list, my_hand):
+        self.other_players_list = other_players_list
         self.my_hand = my_hand
-        self.rooms = [
-            'Study',
-            'Kitchen',
-            'Hall',
-            'Conservatory',
-            'Lounge',
-            'Ballroom',
-            'Dining Room',
-            'Library',
-            'Billiard Room'
-        ]
-        self.suspects = [
-            'Plum',
-            'White',
-            'Scarlet',
-            'Green',
-            'Mustard',
-            'Peacock'
-        ]
-        self.weapons = [
-            'rope',
-            'dagger',
-            'wrench',
-            'pistol',
-            'candlestick',
-            'lead pipe'
-        ]
-        self._possible_hands()
+
+        rooms = ['Study', 'Kitchen', 'Hall', 'Conservatory', 'Lounge', 'Ballroom', 'Dining Room', 'Library', 'Billiard Room']
+        self.remaining_rooms = [room for room in rooms if room not in self.my_hand]
+
+        suspects = ['Plum', 'White', 'Scarlet', 'Green', 'Mustard', 'Peacock']
+        self.remaining_suspects = [suspect for suspect in suspects if suspect not in self.my_hand]
+
+        weapons = ['rope', 'dagger', 'wrench', 'pistol', 'candlestick', 'lead pipe']
+        self.remaining_weapons = [weapon for weapon in weapons if weapon not in self.my_hand]
+
+        self.player_generator = self._player_generator()
+        self.possible_hands = self._possible_hands()
+
+    def _player_generator(self):
+        while True:
+            for player in self.other_players_list:
+                yield player
 
     def _possible_hands(self):
-        remaining_rooms = [room for room in self.rooms if room not in self.my_hand]
-        remaining_suspects = [suspect for suspect in self.suspects if suspect not in self.my_hand]
-        remaining_weapons = [weapon for weapon in self.weapons if weapon not in self.my_hand]
+        player_hand = []
+        for envelope in itertools.product(self.remaining_rooms, self.remaining_suspects, self.remaining_weapons):
+            remaining_cards = [card for card in self.remaining_rooms + self.remaining_suspects + self.remaining_weapons if card not in envelope]
 
-        for i in itertools.product(remaining_rooms, remaining_suspects, remaining_weapons):
-            envelope = i
-            print(envelope)
-            remaining_cards = [room for room in remaining_rooms if room not in envelope] + \
-                              [suspect for suspect in remaining_suspects if suspect not in envelope] + \
-                              [weapon for weapon in remaining_weapons if weapon not in envelope]
-            print(remaining_cards)
-            print(self._shuffle(remaining_cards))
+            for hand in self._hands_create(remaining_cards):
+                player_hand.append([str(envelope)] + hand)
+
+            # columns = ['envelope'] + [players[0] for players in self.other_players_list]
+            # print(pd.DataFrame(player_hand, columns=columns).head(50))
+            # sys.exit()
+            print(len(player_hand))
             sys.exit()
-            print(self._deal(self._shuffle(remaining_cards)))
+        columns = ['envelope'] + [players[0] for players in self.other_players_list]
+        return pd.DataFrame(player_hand, columns=columns)
 
-    def _shuffle(self, deck):
-        # todo: brute force would be 12! permutations. This is too many rows. Find a different approach
-        player_cards = []
-        for player in self.other_players:
-            player_cards += [player] * self.other_players_dict[player]
+    def _hands_create(self, cards):
+        hands_lst = []
 
-        df_hands = pd.DataFrame(list(itertools.permutations(player_cards)), columns=deck)
-        print(df_hands.head())
-        print(df_hands.shape)
-        sys.exit()
-
-        # return itertools.permutations(deck)
-
-    def _deal(self, deck):
-        deck_lst = list(deck)
-        player_hand_dic = {player:[] for player in self.other_players}
-        pool = itertools.cycle(self.other_players)
-        while deck_lst:
-            player_hand_dic[next(pool)].append(deck_lst.pop())
-        return player_hand_dic
-
-    def _deal2(self, deck):
-        for hand in itertools.combinations(deck, self.other_players_dict[self.other_players[0]]):
-            deck_new = [card for card in deck if card not in hand]
-            if len(deck_new) > self.other_players_dict[self.other_players[1]]: # todo: this is not dynamic since I use a 1
-                self._deal2(deck_new)
-            else:
-                return deck_new
-    # todo: should I do this recursively?
-
-
+        last_player_card_count = self.other_players_list[-1][1]
+        while len(cards) > last_player_card_count:
+            next_player = next(self.player_generator)[1]
+            for player_hand in itertools.combinations(cards, next_player):
+                remaining_cards = [card for card in cards if card not in player_hand]
+                hand_combination = self._hands_create(remaining_cards)
+                if type(hand_combination) == tuple:
+                    hands_lst.append([str(player_hand), str(hand_combination)])
+                else:
+                    for hand in hand_combination:
+                        hands_lst.append([str(player_hand)] + hand)
+            return hands_lst
+        return tuple(cards)
 
     def hands_update(self, player, cards, answer='no'):
         pass
@@ -92,41 +71,47 @@ class Clue(object):
     def card_reveal(self, player, card):
         pass
 
-players = 2
-cards_num = 2
-def hand1(h):
-    player_hand = []
-    for envelope in itertools.combinations(h, 3):
-        h_minus_envelope = [card for card in h if card not in envelope]
-        for hand in hand2(envelope, h_minus_envelope):
-            player_hand.append([str(envelope)] + hand)
-
-    return player_hand
-
-def hand2(e, h):
-    player_hand_lst = []
-    while len(h) > cards_num:
-        for player_hand in itertools.combinations(h, 2):
-            h_minus_envelope = [card for card in h if card not in player_hand]
-            h2 = hand2(e, h_minus_envelope)
-            if type(h2) == tuple:
-                player_hand_lst.append([str(player_hand), str(h2)])
-            else:
-                for hand in h2:
-                    player_hand_lst.append([str(player_hand)] + hand)
-        return player_hand_lst
-    return tuple(h)
+# players = 2
+# cards_num = 2
+# def hand1(h):
+#     player_hand = []
+#     for envelope in itertools.combinations(h, 3):
+#         h_minus_envelope = [card for card in h if card not in envelope]
+#         for hand in hand2(envelope, h_minus_envelope):
+#             player_hand.append([str(envelope)] + hand)
+#
+#     return player_hand
+#
+# def hand2(e, h):
+#     player_hand_lst = []
+#     while len(h) > cards_num:
+#         for player_hand in itertools.combinations(h, 2):
+#             h_minus_envelope = [card for card in h if card not in player_hand]
+#             h2 = hand2(e, h_minus_envelope)
+#             if type(h2) == tuple:
+#                 player_hand_lst.append([str(player_hand), str(h2)])
+#             else:
+#                 for hand in h2:
+#                     player_hand_lst.append([str(player_hand)] + hand)
+#         return player_hand_lst
+#     return tuple(h)
 
 # todo: convert to pandas dataframe
 # todo: clean up this nasty code
 
 
 if __name__ == '__main__':
-    # players = {'Calvin': 6, 'Kay': 6}
-    # my_hand = ['Study', 'Kitchen', 'Hall', 'Plum', 'White', 'rope', 'dagger']
-    #
-    # c = Clue(players, my_hand)
+    # players = [('Calvin', 5), ('Kay', 4), ('Martin', 4)]
+    # my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope']
+    players = [('Calvin', 6), ('Kay', 6)]
+    my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope', 'dagger']
 
-    h = range(9)
-    hand = hand1(h)
-    print(pd.DataFrame(hand, columns=['envelope', 'player1', 'player2', 'player3']).head(50))
+    c = Clue(players, my_hand)
+    # print(c.possible_hands.head(50))
+    print(c.possible_hands.shape)
+    print(c.possible_hands.drop_duplicates(keep='last').shape)
+    # maybe I'll have to wait a couple of rounds to restrict the size
+
+    # h = range(9)
+    # hand = hand1(h)
+    # print(pd.DataFrame(hand, columns=['envelope', 'player1', 'player2', 'player3']).head(50))
