@@ -73,6 +73,18 @@ class Clue(object):
     def card_reveal(self, player, card):
         pass
 
+    def turn(self, inquiry, player, answer='no'):
+        self.history.append([inquiry, player, answer])
+
+    def card_reveal(self, player, card):
+
+        pass
+
+# what if I had a hand of potential cards for each of the players and as they say no I widdle each down. Then I somehow use this to construct the possibilities
+# I should calculate the number of possibly hands as well and when it gets down to something reasonable, create the dataframe
+# It should be pretty straightforward to calculate the possible number of hands
+# Then I'd update the dataframe using the historical and future data
+
 # players = 2
 # cards_num = 2
 # def hand1(h):
