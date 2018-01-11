@@ -34,6 +34,8 @@ class Clue(object):
 
     def _possible_hands(self):
         player_hand = []
+        # 112
+        # 924 for 3 players, ~84k for 4, ~something huge for 6 (just think, 18 players would be 17!)
         for envelope in itertools.product(self.remaining_rooms, self.remaining_suspects, self.remaining_weapons):
             remaining_cards = [card for card in self.remaining_rooms + self.remaining_suspects + self.remaining_weapons if card not in envelope]
 
@@ -101,10 +103,12 @@ class Clue(object):
 
 
 if __name__ == '__main__':
+    players = [('Calvin', 3), ('Kay', 3), ('Martin', 3), ('Seth', 3), ('Maggie', 3)]
+    my_hand = ['Study', 'Kitchen', 'Plum']
     # players = [('Calvin', 5), ('Kay', 4), ('Martin', 4)]
     # my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope']
-    players = [('Calvin', 6), ('Kay', 6)]
-    my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope', 'dagger']
+    # players = [('Calvin', 6), ('Kay', 6)]
+    # my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope', 'dagger']
 
     c = Clue(players, my_hand)
     # print(c.possible_hands.head(50))
