@@ -70,15 +70,26 @@ class Clue(object):
     def hands_update(self, player, cards, answer='no'):
         pass
 
+
+    self.yes_dict = {player[0]: [] for player in self.other_players_list}
+    self.yes_uncertain_dict = {player[0]: [] for player in self.other_players_list}
+    self.no_dict = {player[0]: [] for player in self.other_players_list}
     def card_reveal(self, player, card):
-        pass
+        """player shows me card"""
+        self.yes_dict[player] += card
 
     def turn(self, inquiry, player, answer='no'):
-        self.history.append([inquiry, player, answer])
+        """'player' responds to the 'inquiry' with a 'no' or 'yes' by showing one of his cards. Cards are added to a
+        list in either yes_dict or no_dict. If a 'no' response is given, the card values are added directly to the list.
+        Otherwise, the list of cards is added to the list."""
+        if answer == 'no':
+            self.no_dict[player] += inquiry
+        else:
+            self.yes_uncertain_dict[player].append(inquiry)
 
-    def card_reveal(self, player, card):
 
-        pass
+# why don't I simply, for each player, (18 choose whatever).
+
 
 # what if I had a hand of potential cards for each of the players and as they say no I widdle each down. Then I somehow use this to construct the possibilities
 # I should calculate the number of possibly hands as well and when it gets down to something reasonable, create the dataframe
