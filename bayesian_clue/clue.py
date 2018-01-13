@@ -24,105 +24,62 @@ class Clue(object):
         weapons = ['rope', 'dagger', 'wrench', 'pistol', 'candlestick', 'lead pipe']
         self.remaining_weapons = [weapon for weapon in weapons if weapon not in self.my_hand]
 
-        self.player_generator = self._player_generator()
-        self.possible_hands = self._possible_hands()
+        self.turn_generator = self._turn_generator()
+        self.players_hands = self._player_hands_create()
 
-    def _player_generator(self):
+    def _turn_generator(self):
         while True:
             for player in self.other_players_list:
                 yield player
 
-    def _possible_hands(self):
-        player_hand = []
-        # 112
-        # 924 for 3 players, ~84k for 4, ~something huge for 6 (just think, 18 players would be 17!)
-        for envelope in itertools.product(self.remaining_rooms, self.remaining_suspects, self.remaining_weapons):
-            remaining_cards = [card for card in self.remaining_rooms + self.remaining_suspects + self.remaining_weapons if card not in envelope]
+    def _player_hands_create(self):
+        cards_left_in_deck = self.remaining_rooms + self.remaining_suspects + self.remaining_weapons
+        return {player[0]: PlayerHand(cards_left_in_deck, player[1]) for player in self.other_players_list}
 
-            for hand in self._hands_create(remaining_cards):
-                player_hand.append([str(envelope)] + hand)
-
-            # columns = ['envelope'] + [players[0] for players in self.other_players_list]
-            # print(pd.DataFrame(player_hand, columns=columns).head(50))
-            # sys.exit()
-            print(len(player_hand))
-            sys.exit()
-        columns = ['envelope'] + [players[0] for players in self.other_players_list]
-        return pd.DataFrame(player_hand, columns=columns)
-
-    def _hands_create(self, cards):
-        hands_lst = []
-
-        last_player_card_count = self.other_players_list[-1][1]
-        while len(cards) > last_player_card_count:
-            next_player = next(self.player_generator)[1]
-            for player_hand in itertools.combinations(cards, next_player):
-                remaining_cards = [card for card in cards if card not in player_hand]
-                hand_combination = self._hands_create(remaining_cards)
-                if type(hand_combination) == tuple:
-                    hands_lst.append([str(player_hand), str(hand_combination)])
-                else:
-                    for hand in hand_combination:
-                        hands_lst.append([str(player_hand)] + hand)
-            return hands_lst
-        return tuple(cards)
-
-    def hands_update(self, player, cards, answer='no'):
-        pass
-
-
-    self.yes_dict = {player[0]: [] for player in self.other_players_list}
-    self.yes_uncertain_dict = {player[0]: [] for player in self.other_players_list}
-    self.no_dict = {player[0]: [] for player in self.other_players_list}
-    def card_reveal(self, player, card):
+    def card_reveal(self, card, player='envelope'):
         """player shows me card"""
-        self.yes_dict[player] += card
+        if player == 'envelope':
+            for key, value in self.players_hands.items():
+                value.posterior_update('no', card)  # todo: does this update the objects stored as the values in the dictionary?
+        else:
+            self.players_hands[player].posterior_update('yes', card)
 
-    def turn(self, inquiry, player, answer='no'):
+
+    def uncertain_card_reveal(self, inquiry, player, answer='no'):
         """'player' responds to the 'inquiry' with a 'no' or 'yes' by showing one of his cards. Cards are added to a
         list in either yes_dict or no_dict. If a 'no' response is given, the card values are added directly to the list.
         Otherwise, the list of cards is added to the list."""
         if answer == 'no':
-            self.no_dict[player] += inquiry
+            self.players_hands[player].posterior_update('no', inquiry)
         else:
-            self.yes_uncertain_dict[player].append(inquiry)
+            self.players_hands[player].posterior_update('yes', inquiry)  # todo: start here: if uncertain and yes, then update likelihood
 
 
-# why don't I simply, for each player, (18 choose whatever).
 
 
-# what if I had a hand of potential cards for each of the players and as they say no I widdle each down. Then I somehow use this to construct the possibilities
-# I should calculate the number of possibly hands as well and when it gets down to something reasonable, create the dataframe
-# It should be pretty straightforward to calculate the possible number of hands
-# Then I'd update the dataframe using the historical and future data
+class PlayerHand(object):
+    def __init__(self, deck, size_of_hand):
+        self.deck = deck
+        self.size_of_hand = size_of_hand
+        self.possible_hands = self._possible_hands_create()
 
-# players = 2
-# cards_num = 2
-# def hand1(h):
-#     player_hand = []
-#     for envelope in itertools.combinations(h, 3):
-#         h_minus_envelope = [card for card in h if card not in envelope]
-#         for hand in hand2(envelope, h_minus_envelope):
-#             player_hand.append([str(envelope)] + hand)
-#
-#     return player_hand
-#
-# def hand2(e, h):
-#     player_hand_lst = []
-#     while len(h) > cards_num:
-#         for player_hand in itertools.combinations(h, 2):
-#             h_minus_envelope = [card for card in h if card not in player_hand]
-#             h2 = hand2(e, h_minus_envelope)
-#             if type(h2) == tuple:
-#                 player_hand_lst.append([str(player_hand), str(h2)])
-#             else:
-#                 for hand in h2:
-#                     player_hand_lst.append([str(player_hand)] + hand)
-#         return player_hand_lst
-#     return tuple(h)
+    def _possible_hands_create(self):
+        all_combinations = [tuple(cards) for cards in itertools.combinations(self.deck, self.size_of_hand)]
+        df = pd.DataFrame(all_combinations, columns=['hand'])
+        df['posterior_prob'] = 1 / len(df)
+        return df
 
-# todo: convert to pandas dataframe
-# todo: clean up this nasty code
+    def posterior_update(self, yes_no, card):
+        if yes_no == 'yes':
+            self.possible_hands.loc[~self.possible_hands['hand'].str.contains(card), 'posterior_prob'] = 0
+            self._normalize(self.possible_hands)  # todo: does this update the dataframe?
+        else:
+            for c in card:
+                self.possible_hands.loc[self.possible_hands['hand'].str.contains(c), 'posterior_prob'] = 0
+                self._normalize(self.possible_hands)
+
+    def _normalize(self, df):
+        df['posterior_prob'] = df['posterior_prob'] / df['posterior_prob'].sum()
 
 
 if __name__ == '__main__':
