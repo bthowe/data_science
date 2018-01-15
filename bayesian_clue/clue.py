@@ -52,6 +52,8 @@ class Clue(object):
 
 
 #     todo: need something that combines together the information in each of the individual hands
+#       take all of the rows with non-zero probability and do some sort of cross product join
+#       then iteratively remove rows with duplicate cards.
 
 if __name__ == '__main__':
     players = [('Calvin', 3), ('Kay', 3), ('Martin', 3), ('Seth', 3), ('Maggie', 3)]
