@@ -2,6 +2,7 @@ import sys
 import itertools
 import pandas as pd
 from collections import defaultdict
+from player_hand import PlayerHand
 
 pd.set_option('expand_frame_repr', False)
 pd.set_option('display.max_rows', 30000)
@@ -36,14 +37,9 @@ class Clue(object):
         cards_left_in_deck = self.remaining_rooms + self.remaining_suspects + self.remaining_weapons
         return {player[0]: PlayerHand(cards_left_in_deck, player[1]) for player in self.other_players_list}
 
-    def card_reveal(self, card, player='envelope'):
+    def card_reveal(self, card, player):
         """player shows me card"""
-        if player == 'envelope':
-            for key, value in self.players_hands.items():
-                value.posterior_update('no', card)  # todo: does this update the objects stored as the values in the dictionary?
-        else:
-            self.players_hands[player].posterior_update('yes', card)
-
+        self.players_hands[player].posterior_update('yes', card)
 
     def uncertain_card_reveal(self, inquiry, player, answer='no'):
         """'player' responds to the 'inquiry' with a 'no' or 'yes' by showing one of his cards. Cards are added to a
@@ -52,35 +48,10 @@ class Clue(object):
         if answer == 'no':
             self.players_hands[player].posterior_update('no', inquiry)
         else:
-            self.players_hands[player].posterior_update('yes', inquiry)  # todo: start here: if uncertain and yes, then update likelihood
+            self.players_hands[player].posterior_update('yes', inquiry)
 
 
-
-
-class PlayerHand(object):
-    def __init__(self, deck, size_of_hand):
-        self.deck = deck
-        self.size_of_hand = size_of_hand
-        self.possible_hands = self._possible_hands_create()
-
-    def _possible_hands_create(self):
-        all_combinations = [tuple(cards) for cards in itertools.combinations(self.deck, self.size_of_hand)]
-        df = pd.DataFrame(all_combinations, columns=['hand'])
-        df['posterior_prob'] = 1 / len(df)
-        return df
-
-    def posterior_update(self, yes_no, card):
-        if yes_no == 'yes':
-            self.possible_hands.loc[~self.possible_hands['hand'].str.contains(card), 'posterior_prob'] = 0
-            self._normalize(self.possible_hands)  # todo: does this update the dataframe?
-        else:
-            for c in card:
-                self.possible_hands.loc[self.possible_hands['hand'].str.contains(c), 'posterior_prob'] = 0
-                self._normalize(self.possible_hands)
-
-    def _normalize(self, df):
-        df['posterior_prob'] = df['posterior_prob'] / df['posterior_prob'].sum()
-
+#     todo: need something that combines together the information in each of the individual hands
 
 if __name__ == '__main__':
     players = [('Calvin', 3), ('Kay', 3), ('Martin', 3), ('Seth', 3), ('Maggie', 3)]
@@ -91,11 +62,10 @@ if __name__ == '__main__':
     # my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope', 'dagger']
 
     c = Clue(players, my_hand)
-    # print(c.possible_hands.head(50))
-    print(c.possible_hands.shape)
-    print(c.possible_hands.drop_duplicates(keep='last').shape)
-    # maybe I'll have to wait a couple of rounds to restrict the size
+    # c.card_reveal('White', 'Calvin')
+    # print(c.players_hands['Calvin'].possible_hands)
 
-    # h = range(9)
-    # hand = hand1(h)
-    # print(pd.DataFrame(hand, columns=['envelope', 'player1', 'player2', 'player3']).head(50))
+    # inquiry = ('White', 'rope', 'rope')
+    # c.uncertain_card_reveal(inquiry, 'Calvin', 'no')
+
+    # print(c.players_hands['Calvin'].possible_hands)
