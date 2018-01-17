@@ -25,7 +25,7 @@ class PlayerHand(object):
     def posterior_update(self, yes_no, card):
         if yes_no == 'yes':
             self.possible_hands.loc[~self.possible_hands['hand'].str.contains(card), 'posterior_prob'] = 0
-            self._normalize(self.possible_hands)  # todo: does this update the dataframe?
+            self._normalize(self.possible_hands)
         else:
             for c in card:
                 self.possible_hands.loc[self.possible_hands['hand'].str.contains(c), 'posterior_prob'] = 0

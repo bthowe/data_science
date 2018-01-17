@@ -1,5 +1,6 @@
 import sys
 import itertools
+import functools
 import pandas as pd
 from collections import defaultdict
 from player_hand import PlayerHand
@@ -50,10 +51,33 @@ class Clue(object):
         else:
             self.players_hands[player].posterior_update('yes', inquiry)
 
+    def _cross_join(self):
+        df = self.players_hands[self.other_players_list[0][0]].assign(key=1).query('posterier_prob > 0')
+        for player in self.other_players_list[1:]:
+            df_next = self.players_hands[player[0]].assign(key=1).query('posterier_prob > 0')
+            df = df.merge(df_next, how='left', on='key')
+        df.drop('key', 1, inplace=True)
+        return df
 
-#     todo: need something that combines together the information in each of the individual hands
-#       take all of the rows with non-zero probability and do some sort of cross product join
-#       then iteratively remove rows with duplicate cards.
+    def _find_plausible_combos(self, df):
+        print(df.head())
+
+    def envelope_distribution(self):
+        # todo: 1. toy hands, 2. check output, 3. plausible combos
+
+        hand_dist_lengths = [len(self.players_hands[player[0]].possible_hands.query('posterior_prob > 0')) for player in self.other_players_list]
+
+
+        print(hand_dist_lengths)
+        print(functools.reduce(lambda x, y: x * y, hand_dist_lengths))
+        sys.exit()
+        if functools.reduce(lambda x, y: x * y, hand_dist_lengths) < 1000:
+            df = self._cross_join().pipe(self._find_plausible_combos)
+
+
+
+
+
 
 if __name__ == '__main__':
     players = [('Calvin', 3), ('Kay', 3), ('Martin', 3), ('Seth', 3), ('Maggie', 3)]
@@ -63,9 +87,38 @@ if __name__ == '__main__':
     # players = [('Calvin', 6), ('Kay', 6)]
     # my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope', 'dagger']
 
+
+
+
+    # todo: I'm still stuck on the best way to do this. What I have does an effective job for the players hand but doesn't
+    # allow for the aggregation well.
+
+
+
     c = Clue(players, my_hand)
-    # c.card_reveal('White', 'Calvin')
+    c.card_reveal('White', 'Calvin')
+    c.card_reveal('Scarlet', 'Calvin')
+    c.card_reveal('Hall', 'Kay')
+    c.card_reveal('Conservatory', 'Kay')
+    c.card_reveal('Lounge', 'Martin')
+    c.card_reveal('Ballroom', 'Martin')
+    c.card_reveal('Dining Room', 'Seth')
+    c.card_reveal('Green', 'Seth')
+    c.card_reveal('rope', 'Maggie')
+    c.card_reveal('dagger', 'Maggie')
+
+    c.envelope_distribution()
     # print(c.players_hands['Calvin'].possible_hands)
+
+    # rooms = ['Study', 'Kitchen', 'Hall', 'Conservatory', 'Lounge', 'Ballroom', 'Dining Room', 'Library',
+    #          'Billiard Room']
+    # self.remaining_rooms = [room for room in rooms if room not in self.my_hand]
+    #
+    # suspects = ['Plum', 'White', 'Scarlet', 'Green', 'Mustard', 'Peacock']
+    # self.remaining_suspects = [suspect for suspect in suspects if suspect not in self.my_hand]
+    #
+    # weapons = ['rope', 'dagger', 'wrench', 'pistol', 'candlestick', 'lead pipe']
+
 
     # inquiry = ('White', 'rope', 'rope')
     # c.uncertain_card_reveal(inquiry, 'Calvin', 'no')
