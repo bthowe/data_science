@@ -51,12 +51,15 @@ class Clue(object):
         else:
             self.players_hands[player].posterior_update('yes', inquiry)
 
+    def _lister(self, x):
+        return x[1:-1].replace("'", "").split(", ")
+
     def _find_plausible_combos(self, x):
         hand_vars = [var for var in x.index.tolist() if 'hand' in var]
 
         all_hand = []
         for hand in hand_vars:
-            all_hand += x[hand][1:-1].replace("'", "").split(", ")
+            all_hand += self._lister(x[hand])
 
         condition1 = len(all_hand) == len(set(all_hand))  # i.e., no repeat cards in hands
         condition2 = (len([card for card in self.rooms if (card not in all_hand) and (card not in self.my_hand)]) > 0) and \
@@ -70,55 +73,33 @@ class Clue(object):
             x['infeasible'] = 1
             return x
 
-
     def _cross_join(self):
-        df = self.players_hands[self.other_players_list[0][0]].possible_hands.\
-            assign(key=1).\
-            query('posterior_prob > 0')
+        df = pd.DataFrame([[str(tuple(self.my_hand))]], columns=['hand_I']).\
+            assign(key=1)
 
-        for player in self.other_players_list[1:]:
+        for player in self.other_players_list:
             df_next = self.players_hands[player[0]].possible_hands.assign(key=1).query('posterior_prob > 0')
             df = df.\
-                merge(df_next, how='left', on='key').\
+                merge(df_next.drop('posterior_prob', 1), how='left', on='key').\
                 apply(self._find_plausible_combos, axis=1). \
                 query('infeasible == 0'). \
                 drop('infeasible', 1)
         df.drop('key', 1, inplace=True)
         return df
 
-    def envelope_distribution(self):
-        print(self._cross_join())
+    def _envelope_create(self, x):
+        hands_all = []
+        for val in x.iteritems():
+            hands_all += self._lister(val[1])
+        x['envelop'] = [card for card in self.rooms + self.weapons + self.suspects if card not in hands_all]
+        return x
 
-
-# todo: finish the enevelope df creation
-#     -should display possible envelope as well
-# todo: make displaying a players possible hand easy
-# todo: add the calculate cardinality of possible hands to the end of the card_reveal and uncertain_card_reveal methods
-# todo: the posterior probability has to be .5 not .062
-#     -the problem is I cannot (it's too big) calculate this every time and so getting a true conditional posterior is not possible.
-
-
-# 1. is there anything that can be inferred from combining all hands into 1 dataset? No, other than probabilities for hands.
-# 2. just wait until there is only one possible envelope
-# 3. how do you reduce the number of rows in a posible_hand df? I have to ask good questions.
-
-
+    def possible_envelope(self):
+        print(self._cross_join().apply(self._envelope_create, axis=1))
 
 if __name__ == '__main__':
     players = [('Calvin', 3), ('Kay', 3), ('Martin', 3), ('Seth', 3), ('Maggie', 3)]
     my_hand = ['Study', 'Kitchen', 'Plum']
-    # players = [('Calvin', 5), ('Kay', 4), ('Martin', 4)]
-    # my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope']
-    # players = [('Calvin', 6), ('Kay', 6)]
-    # my_hand = ['Study', 'Kitchen', 'Plum', 'White', 'rope', 'dagger']
-
-
-
-
-    # todo: I'm still stuck on the best way to do this. What I have does an effective job for the players hand but doesn't
-    # allow for the aggregation well.
-
-
 
     c = Clue(players, my_hand)
     c.card_reveal('White', 'Calvin')
@@ -135,15 +116,5 @@ if __name__ == '__main__':
     c.card_reveal('pistol', 'Seth')
     c.card_reveal('rope', 'Maggie')
     c.card_reveal('dagger', 'Maggie')
-    # c.card_reveal('candlestick', 'Maggie')
 
-    c.envelope_distribution()
-    # print(c.players_hands['Calvin'].possible_hands)
-
-    #          'Billiard Room', 'Mustard, 'lead pipe'
-
-
-    # inquiry = ('White', 'rope', 'rope')
-    # c.uncertain_card_reveal(inquiry, 'Calvin', 'no')
-
-    # print(c.players_hands['Calvin'].possible_hands)
+    c.possible_envelope()

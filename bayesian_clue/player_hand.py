@@ -19,6 +19,7 @@ class PlayerHand(object):
 
     def _possible_hands_create(self):
         all_combinations = [str(tuple(cards)) for cards in itertools.combinations(self.deck, self.size_of_hand)]
+
         df = pd.DataFrame(all_combinations, columns=['hand_{}'.format(self.name)])
         df['posterior_prob'] = 1 / len(df)
         return df
