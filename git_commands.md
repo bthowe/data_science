@@ -153,3 +153,19 @@ git rebase master
 Similar to merge, but fundamentally different. 
 This moves the entire branch1 branch to begin on the tip of the master branch, effectively incorporating all of the new commits in master. 
 But, instead of using a merge commit, rebasing re-writes the project history by creating brand new commits for each commit in the original branch.
+
+```git
+git cherry -v
+```
+* list the commits waiting to be pushed
+
+```git
+git checkout -b <new_branch_name>
+git pull origin <new_branch_name>
+```
+* create branch new_branch_name locally and then pull from remote
+
+```git
+git fetch
+```
+git pull does a git fetch followed by a git merge
