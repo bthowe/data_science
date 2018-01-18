@@ -17,14 +17,14 @@ class Clue(object):
         self.other_players_list = other_players_list
         self.my_hand = my_hand
 
-        rooms = ['Study', 'Kitchen', 'Hall', 'Conservatory', 'Lounge', 'Ballroom', 'Dining Room', 'Library', 'Billiard Room']
-        self.remaining_rooms = [room for room in rooms if room not in self.my_hand]
+        self.rooms = ['Study', 'Kitchen', 'Hall', 'Conservatory', 'Lounge', 'Ballroom', 'Dining Room', 'Library', 'Billiard Room']
+        self.remaining_rooms = [room for room in self.rooms if room not in self.my_hand]
 
-        suspects = ['Plum', 'White', 'Scarlet', 'Green', 'Mustard', 'Peacock']
-        self.remaining_suspects = [suspect for suspect in suspects if suspect not in self.my_hand]
+        self.suspects = ['Plum', 'White', 'Scarlet', 'Green', 'Mustard', 'Peacock']
+        self.remaining_suspects = [suspect for suspect in self.suspects if suspect not in self.my_hand]
 
-        weapons = ['rope', 'dagger', 'wrench', 'pistol', 'candlestick', 'lead pipe']
-        self.remaining_weapons = [weapon for weapon in weapons if weapon not in self.my_hand]
+        self.weapons = ['rope', 'dagger', 'wrench', 'pistol', 'candlestick', 'lead pipe']
+        self.remaining_weapons = [weapon for weapon in self.weapons if weapon not in self.my_hand]
 
         self.turn_generator = self._turn_generator()
         self.players_hands = self._player_hands_create()
@@ -36,7 +36,7 @@ class Clue(object):
 
     def _player_hands_create(self):
         cards_left_in_deck = self.remaining_rooms + self.remaining_suspects + self.remaining_weapons
-        return {player[0]: PlayerHand(cards_left_in_deck, player[1]) for player in self.other_players_list}
+        return {player[0]: PlayerHand(cards_left_in_deck, player[0], player[1]) for player in self.other_players_list}
 
     def card_reveal(self, card, player):
         """player shows me card"""
@@ -51,31 +51,56 @@ class Clue(object):
         else:
             self.players_hands[player].posterior_update('yes', inquiry)
 
+    def _find_plausible_combos(self, x):
+        hand_vars = [var for var in x.index.tolist() if 'hand' in var]
+
+        all_hand = []
+        for hand in hand_vars:
+            all_hand += x[hand][1:-1].replace("'", "").split(", ")
+
+        condition1 = len(all_hand) == len(set(all_hand))  # i.e., no repeat cards in hands
+        condition2 = (len([card for card in self.rooms if (card not in all_hand) and (card not in self.my_hand)]) > 0) and \
+            (len([card for card in self.suspects if (card not in all_hand) and (card not in self.my_hand)]) > 0) and \
+            (len([card for card in self.suspects if (card not in all_hand) and (card not in self.my_hand)]) > 0)
+
+        if condition1 and condition2:
+            x['infeasible'] = 0
+            return x
+        else:
+            x['infeasible'] = 1
+            return x
+
+
     def _cross_join(self):
-        df = self.players_hands[self.other_players_list[0][0]].assign(key=1).query('posterier_prob > 0')
+        df = self.players_hands[self.other_players_list[0][0]].possible_hands.\
+            assign(key=1).\
+            query('posterior_prob > 0')
+
         for player in self.other_players_list[1:]:
-            df_next = self.players_hands[player[0]].assign(key=1).query('posterier_prob > 0')
-            df = df.merge(df_next, how='left', on='key')
+            df_next = self.players_hands[player[0]].possible_hands.assign(key=1).query('posterior_prob > 0')
+            df = df.\
+                merge(df_next, how='left', on='key').\
+                apply(self._find_plausible_combos, axis=1). \
+                query('infeasible == 0'). \
+                drop('infeasible', 1)
         df.drop('key', 1, inplace=True)
         return df
 
-    def _find_plausible_combos(self, df):
-        print(df.head())
-
     def envelope_distribution(self):
-        # todo: 1. toy hands, 2. check output, 3. plausible combos
-
-        hand_dist_lengths = [len(self.players_hands[player[0]].possible_hands.query('posterior_prob > 0')) for player in self.other_players_list]
+        print(self._cross_join())
 
 
-        print(hand_dist_lengths)
-        print(functools.reduce(lambda x, y: x * y, hand_dist_lengths))
-        sys.exit()
-        if functools.reduce(lambda x, y: x * y, hand_dist_lengths) < 1000:
-            df = self._cross_join().pipe(self._find_plausible_combos)
+# todo: finish the enevelope df creation
+#     -should display possible envelope as well
+# todo: make displaying a players possible hand easy
+# todo: add the calculate cardinality of possible hands to the end of the card_reveal and uncertain_card_reveal methods
+# todo: the posterior probability has to be .5 not .062
+#     -the problem is I cannot (it's too big) calculate this every time and so getting a true conditional posterior is not possible.
 
 
-
+# 1. is there anything that can be inferred from combining all hands into 1 dataset? No, other than probabilities for hands.
+# 2. just wait until there is only one possible envelope
+# 3. how do you reduce the number of rows in a posible_hand df? I have to ask good questions.
 
 
 
@@ -98,26 +123,24 @@ if __name__ == '__main__':
     c = Clue(players, my_hand)
     c.card_reveal('White', 'Calvin')
     c.card_reveal('Scarlet', 'Calvin')
+    c.card_reveal('wrench', 'Calvin')
     c.card_reveal('Hall', 'Kay')
     c.card_reveal('Conservatory', 'Kay')
+    c.card_reveal('Peacock', 'Kay')
     c.card_reveal('Lounge', 'Martin')
     c.card_reveal('Ballroom', 'Martin')
+    c.card_reveal('Library', 'Martin')
     c.card_reveal('Dining Room', 'Seth')
     c.card_reveal('Green', 'Seth')
+    c.card_reveal('pistol', 'Seth')
     c.card_reveal('rope', 'Maggie')
     c.card_reveal('dagger', 'Maggie')
+    # c.card_reveal('candlestick', 'Maggie')
 
     c.envelope_distribution()
     # print(c.players_hands['Calvin'].possible_hands)
 
-    # rooms = ['Study', 'Kitchen', 'Hall', 'Conservatory', 'Lounge', 'Ballroom', 'Dining Room', 'Library',
-    #          'Billiard Room']
-    # self.remaining_rooms = [room for room in rooms if room not in self.my_hand]
-    #
-    # suspects = ['Plum', 'White', 'Scarlet', 'Green', 'Mustard', 'Peacock']
-    # self.remaining_suspects = [suspect for suspect in suspects if suspect not in self.my_hand]
-    #
-    # weapons = ['rope', 'dagger', 'wrench', 'pistol', 'candlestick', 'lead pipe']
+    #          'Billiard Room', 'Mustard, 'lead pipe'
 
 
     # inquiry = ('White', 'rope', 'rope')
