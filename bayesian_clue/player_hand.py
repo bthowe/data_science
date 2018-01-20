@@ -15,6 +15,11 @@ class PlayerHand(object):
         self.deck = deck
         self.name = name
         self.size_of_hand = size_of_hand
+
+        self.rooms = ['Study', 'Kitchen', 'Hall', 'Conservatory', 'Lounge', 'Ballroom', 'Dining Room', 'Library', 'Billiard Room']
+        self.suspects = ['Plum', 'White', 'Scarlet', 'Green', 'Mustard', 'Peacock']
+        self.weapons = ['rope', 'dagger', 'wrench', 'pistol', 'candlestick', 'lead pipe']
+
         self.possible_hands = self._possible_hands_create()
 
     def _possible_hands_create(self):
@@ -22,6 +27,9 @@ class PlayerHand(object):
 
         df = pd.DataFrame(all_combinations, columns=['hand_{}'.format(self.name)])
         df['posterior_prob'] = 1 / len(df)
+        for card in self.rooms + self.suspects + self.weapons:
+            df[card] = 0
+            df.loc[df['hand_{}'.format(self.name)].str.contains(card), card] = 1
         return df
 
     def posterior_update(self, yes_no, card):

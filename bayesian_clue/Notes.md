@@ -10,7 +10,8 @@ In some ways it is similar to the dice problem in that the value of the card is 
 2. add the calculate cardinality of possible hands to the end of the card_reveal and uncertain_card_reveal methods
 
 1. intelligent guessing: which guess will lead to the grestest uncertainty reduction? Can I calculate this?
-
+    1. which card shows up the most in the remaining possible hands
+    2. on my turn, how do I best rule it out?
 2. should I make the tuple-strings just into lists?
 3. the should I calculate actual posterior probabilities? This would necessitate combining information across hands.
 4. using flask, create a UI that makes this easier to implement during an actual game

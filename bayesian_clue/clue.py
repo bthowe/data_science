@@ -42,6 +42,10 @@ class Clue(object):
         """player shows me card"""
         self.players_hands[player].posterior_update('yes', card)
 
+        for other_player in self.other_players_list:
+            if other_player[0] != player:
+                self.players_hands[other_player[0]].posterior_update('no', [card])
+
     def uncertain_card_reveal(self, inquiry, player, answer='no'):
         """'player' responds to the 'inquiry' with a 'no' or 'yes' by showing one of his cards. Cards are added to a
         list in either yes_dict or no_dict. If a 'no' response is given, the card values are added directly to the list.
@@ -50,6 +54,8 @@ class Clue(object):
             self.players_hands[player].posterior_update('no', inquiry)
         else:
             self.players_hands[player].posterior_update('yes', inquiry)
+            # todo: if someone says yes, then all other players are no for hands including all of those three cards.
+
 
     def _lister(self, x):
         return x[1:-1].replace("'", "").split(", ")
@@ -78,7 +84,7 @@ class Clue(object):
             assign(key=1)
 
         for player in self.other_players_list:
-            df_next = self.players_hands[player[0]].possible_hands.assign(key=1).query('posterior_prob > 0')
+            df_next = self.players_hands[player[0]].possible_hands[['hand_{}'.format(player[0]), 'posterior_prob']].assign(key=1).query('posterior_prob > 0')
             df = df.\
                 merge(df_next.drop('posterior_prob', 1), how='left', on='key').\
                 apply(self._find_plausible_combos, axis=1). \
@@ -96,6 +102,14 @@ class Clue(object):
 
     def possible_envelope(self):
         print(self._cross_join().apply(self._envelope_create, axis=1))
+
+    def dist_of_possible_cards(self):
+        for player in self.other_players_list:
+            print(self.players_hands[player[0]].possible_hands.query('posterior_prob > 0'))
+
+
+# todo: how am I getting a probability of 1 for Calvin but White shows up as a possibility in Maggie's hand?
+
 
 if __name__ == '__main__':
     players = [('Calvin', 3), ('Kay', 3), ('Martin', 3), ('Seth', 3), ('Maggie', 3)]
@@ -117,4 +131,5 @@ if __name__ == '__main__':
     c.card_reveal('rope', 'Maggie')
     c.card_reveal('dagger', 'Maggie')
 
-    c.possible_envelope()
+    c.dist_of_possible_cards()
+    # c.possible_envelope()
