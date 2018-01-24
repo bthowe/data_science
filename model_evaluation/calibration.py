@@ -6,7 +6,7 @@ def calibrate_probas(model, X, y, bin_width=.1):
     proba_table_columns = ['bins', 'bin_lower_bound', 'bin_upper_bound', 'count', 'probability']
 
     df = X.assign(predicted_probas=model.predict_proba(X)[:, 1], target=y)[['predicted_probas', 'target']]  # do I want to include any other feature in this dataset?
-    df = df.assign(bins=pd.cut(df['predicted_probas'], bins=bins))
+    df = df.assign(bins=pd.cut(df['predicted_probas'], bins=bins, include_lowest=True))
     df = df. \
         groupby(df['bins']). \
         agg({'predicted_probas': 'count', 'target': 'mean'}).\
