@@ -199,3 +199,17 @@ alias pip3='pip3.6'
 alias python=python2.7
 alias python3=python3.6
 ```
+
+I had to follow the following in order to install xgboost: https://stackoverflow.com/questions/39315156/how-to-install-xgboost-in-python-on-macos
+* I clone the github repo into .../venv/my_repo/lib/python3.6/site-packages
+* gcc-7, and g++-7
+
+
+```bash
+curl -i http://localhost:5000/todo/api/v1.0/tasks/2
+```
+For testing endpoints in the command line
+
+```bash
+curl -i -H "Content-Type: application/json" -X POST -d '{"title":"Read a book"}' http://localhost:5000/todo/api/v1.0/tasks
+```
