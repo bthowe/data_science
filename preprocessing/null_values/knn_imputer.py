@@ -2,48 +2,10 @@ import sys
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-
-def knn_func(df, feature_to_impute, k):
-    # todo: odd number of neighbors
-    # todo: weighted votes
-    # todo: try different distance metrics
-
-    """feature_to_impute: name of feature to fill the missing values"""
-
-    ss = StandardScaler()
-    ss.fit_transform(X, y)
-    # inverse_transform
-
-
-    df_to_impute = df.query('{0} != {0}'.format(feature_to_impute))
-
-    estimate_cols = [col for col in df.columns.tolist() if col not in [feature_to_impute, 'target']]
-
-    X = df.dropna()[estimate_cols + ['target']]
-    y = X.pop('target')
-
-    knn = KNeighborsClassifier(k)
-    knn.fit(X, y)
-
-    kneighbors = knn.kneighbors(df_to_impute[estimate_cols])[1]
-
-    # todo: which of these is correct?
-    knn_means = [df.loc[neighbors][feature_to_impute].values.mean() for neighbors in kneighbors]
-    # knn_means = [df.loc[neighbors][estimate_cols].values.mean() for neighbors in kneighbors]
-
-    # todo: something is not right here
-    print(knn_means)
-
-    df_to_impute[feature_to_impute] = knn_means
-
-    df.loc[df_to_impute.index] = df_to_impute
-
-    return df
-
-
 
 class KnnImpute(object):
     """
@@ -62,42 +24,28 @@ class KnnImpute(object):
         self.impute_feature = impute_feature
         self.model_features = model_features
 
+        self.standardize = StandardScaler()
+
     def impute(self, X, y):
         df_to_impute = X.query('{0} != {0}'.format(self.impute_feature))
-        X_analysis = X.query('{0} == {0}'.format(self.impute_feature))
-        y_analysis = y.loc[X.index]
+        X_analysis = X.query('{0} == {0}'.format(self.impute_feature))[model_features].dropna()
+        y_analysis = y.loc[X_analysis.index]
 
-        # todo: do I want to do a train test split?
-        X_train, X_test, y_train, y_test = train_test_split(self._standardize(X_analysis), y_analysis, test_size=0.33, random_state=42)
+        self._fit(X_analysis, y_analysis)
 
-        self._fit(X_train, y_train)
-
-        X.loc[df_to_impute.index, self.impute_feature] = self._mean_calc(df_to_impute, X_test)
-
-        # todo: unstandardize the data
-
-        return X
-
-    def _standardize(self, X):
-        ss = StandardScaler()
-        return ss.fit_transform(X)
+        return self._fill(df_to_impute, X)
 
     def _fit(self, X, y):
-        X = X[self.model_features].dropna()
-        y = y.loc[X.index]
-        self.estimator.fit(X, y)
+        self.estimator.fit(self.standardize.fit_transform(X), y)
 
-    def _mean_calc(self, df_to_impute, X_test):
-        knn_means = [df.loc[neighbors][feature_to_impute].values.mean() for neighbors in kneighbors]
-        # knn_means = [df.loc[neighbors][estimate_cols].values.mean() for neighbors in kneighbors]
+    def _mean_calc(self, df_to_impute, X):
+        df_to_impute_standardized = self.standardize.transform(df_to_impute[self.model_features])
+        kneighbors = self.estimator.kneighbors(df_to_impute_standardized)[1]
+        return [X.loc[neighbors][self.impute_feature].values.mean() for neighbors in kneighbors]
 
-        # todo: something is not right here
-        print(knn_means)
-
-        df_to_impute[feature_to_impute] = knn_means
-
-        df.loc[df_to_impute.index] = df_to_impute
-
+    def _fill(self, df_to_impute, X):
+        X.loc[df_to_impute.index, self.impute_feature] = self._mean_calc(df_to_impute, X)
+        return X
 
 if __name__ == '__main__':
     np.random.seed(4)
@@ -114,13 +62,7 @@ if __name__ == '__main__':
     y = df.pop('target')
     impute_feature = 'one'
     model_features = ['two', 'three']
+    estimator = KNeighborsClassifier(3)  # remember with all Knn problems, (1) standardize, (2) use an odd number of neighbors, (3) try weighted votes, and (4) try different distance metrics
 
-
-
-    print(X)
-    ki = KnnImpute(KNeighborsClassifier(k), impute_feature, model_features)
+    ki = KnnImpute(estimator, impute_feature, model_features)
     print(ki.impute(X, y))
-    sys.exit()
-
-    print(rf_func(df, 'one', 2))
-    knn_func(df, 'one', 2)

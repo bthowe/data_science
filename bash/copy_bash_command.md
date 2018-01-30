@@ -171,6 +171,7 @@ $ source test_ve/bin/activate
 to install python packages to test_ve from a requirements.txt file:
 ```bash
 $ pip install -r /path/to/requirements.txt
+$ pip3 install -r /path/to/requirements.txt
 ```
 
 to deactivate
