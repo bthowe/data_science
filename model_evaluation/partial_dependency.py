@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from xgboost import XGBRegressor
+from scipy.signal import savgol_filter
 
 class PartialDependency(object):
     """Generates and plots the partial dependency (PD) or idinvidual conditional expectation (ICE) function between the
@@ -83,7 +84,40 @@ class PartialDependency(object):
         ax.set_xlabel('{0}'.format(self.feature))
         plt.show()
 
-# todo: derivate ICE (d-ICE) plots
+    def d_ice_plot(self, sample=1):
+        """
+        This method creates plots of the partial derivative of the estimated response functions \hat{f}. When
+        interactions between the feature of relevance and other covariates exist, the derivative lines will be
+        heterogeneous. The standard deviation across these curves by feature value is also plotted, and serves as a
+        measure of heterogeneity.
+
+        :param sample: The fraction of the total number of curves (i.e., the number of observations, N) to plot
+        """
+        all_indeces = self.X_predictions.index.unique()
+        frac = round(len(all_indeces) * sample)
+        indeces = np.random.choice(all_indeces, size=frac, replace=False)
+
+        Doutcome = []
+        fig = plt.figure(figsize=(12, 8))
+        ax = fig.add_subplot(2, 1, 1)
+        for index in indeces:
+            feature = self.X_predictions.loc[index][self.feature]
+            outcome = savgol_filter(
+                x=self.X_predictions.loc[index]['predicted_target'] - self.X_predictions.loc[index].iloc[0]['predicted_target'],
+                window_length=5,
+                polyorder=2
+            )
+            doutcome = np.gradient(outcome, feature)
+            Doutcome.append(doutcome)
+            ax.plot(feature, doutcome)
+        ax.set_ylabel('Partial Derivative')
+        ax.set_xlabel('{0}'.format(self.feature))
+
+        ax = fig.add_subplot(2, 1, 2)
+        ax.plot(self.X_vals, np.std(Doutcome, axis=0))
+        ax.set_ylabel('Standard Deviation of Partials')
+        ax.set_xlabel('{0}'.format(self.feature))
+        plt.show()
 
 if __name__ == '__main__':
     N = 1000
@@ -102,4 +136,5 @@ if __name__ == '__main__':
     pd = PartialDependency(Y, X, 'X2')
     # print(pd.partial_dependency_function())
     # pd.partial_dependency_plot()
-    pd.ice_plot(sample=.1, centered=True, include_PDP=True)
+    # pd.ice_plot(sample=.1, centered=True, include_PDP=True)
+    pd.d_ice_plot(sample=.1)
