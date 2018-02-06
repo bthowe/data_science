@@ -13,7 +13,7 @@ def abs_ave_by_treatment(df, Y, W):
     """
     return np.abs(df[Y].loc[df[W] == 1].mean() - df[Y].loc[df[W] == 0].mean())
 
-def abs_ave_by_treatment(df, f, Y, W):
+def abs_ave_by_treatment_transform(df, f, Y, W):
     """Calculates the absolute value of the difference in average transformed outcomes by treatment status. This test
     statistic is relatively attractive if a plausible alternative hypothesis corresponds to an additive treatment effect
     after such a transformation (e.g., the natural logorithm associated with a constant multiplicative effect of the
@@ -77,7 +77,12 @@ def model_based_stat(theta_t, theta_c, stat_func):
     pass
 
 def kol_smir_stat(df, Y, W):
-    # todo: description here
-    ks_2samp(df[Y].loc[df[W] == 1], df[Y].loc[df[W] == 0])
+    """
+    Computes the Kolmogorov–Smirnov statistic which is used to test equality of distributions.
+    :param df: the dataset
+    :param Y: the outcome variable
+    :param W: the treatment assignment
+    """
+    return ks_2samp(df[Y].loc[df[W] == 1], df[Y].loc[df[W] == 0])
 
 
