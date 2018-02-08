@@ -4,16 +4,17 @@ import statistics
 import numpy as np
 import pandas as pd
 
-def fishers_exact_test(df, statistic):
+def fishers_exact_test(df, statistic, alpha=0.05):
     """
     Performs Fishers exact test ...
 
     :param df: original dataframe
     :param statistic: statistic used to evaluate treatment effect
-    :return: true probability of ...
+    :param alpha: determines the 1-alpha% "Fisher" interval, i.e., the p-values larger than alpha
+
+    :return: the value of the test-statistic, the exact p-value of the test statistic, and the 1-alpha% "Fisher" interval for the treatment effect.
     """
     # todo: could always just take M sample permutations, make as option
-    # todo: what do I return?
 
     test_stat = statistic(df, 'outcome', 'W')
 
@@ -25,7 +26,10 @@ def fishers_exact_test(df, statistic):
         df.loc[i, 'W'] = 1
         stat_distribution.append(statistic(df, 'outcome', 'W'))
 
-    return np.sum(np.where(stat_distribution > test_stat, 1, 0)) / len(stat_distribution)
+    return test_stat, \
+           np.sum(np.where(stat_distribution >= test_stat, 1, 0)) / len(stat_distribution), \
+           (np.percentile(stat_distribution, alpha*100), np.percentile(stat_distribution, (1-alpha) * 100))
+
 
 if __name__ == '__main__':
     N = 10
@@ -36,4 +40,4 @@ if __name__ == '__main__':
 
     stat = statistics.abs_ave_by_treatment
 
-    fishers_exact_test(df, stat)
+    print(fishers_exact_test(df, stat, alpha=.05))
