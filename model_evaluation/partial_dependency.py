@@ -6,8 +6,8 @@ from xgboost import XGBRegressor
 from scipy.signal import savgol_filter
 
 class PartialDependency(object):
-    """Generates and plots the partial dependency (PD) or idinvidual conditional expectation (ICE) function between the
-    specified feature and the predicted outcome.
+    """Generates and plots the partial dependency (PD) or individual conditional expectation (ICE) function between the
+    specified feature and the predicted outcome. De-pipeline everything (the model and X) before passing them in.
 
     Inputs:
         model: A function that takes a dataframe as input and outputs corresponding predictions
@@ -31,16 +31,19 @@ class PartialDependency(object):
 
     def _predictions_data(self):
         X_ginormous = self.X.copy()
+
         X_ginormous[self.feature] = self.X_vals[0]
         for val in self.X_vals[1:]:
             X_temp = self.X.copy()
             X_temp[self.feature] = val
             X_ginormous = X_ginormous.append(X_temp)
-        X_ginormous['predicted_target'] = self.model(X_ginormous)
+        X_ginormous['predicted_target'] = self.model(X_ginormous.values)  # getting a weird feature names cannot have "[, ], or < in them" error
         return X_ginormous
 
     def partial_dependency_function(self):
-        return self.X_predictions.groupby(self.feature)['predicted_target'].mean().reset_index()
+        function = self.X_predictions.groupby(self.feature)['predicted_target'].mean().reset_index()
+        function['predicted_target'] = function['predicted_target'] - function['predicted_target'].iloc[0]
+        return function
 
     def partial_dependency_plot(self):
         function = self.X_predictions.groupby(self.feature)['predicted_target'].mean().reset_index()
@@ -86,10 +89,10 @@ class PartialDependency(object):
 
     def d_ice_plot(self, sample=1):
         """
-        This method creates plots of the partial derivative of the estimated response functions \hat{f}. When
-        interactions between the feature of relevance and other covariates exist, the derivative lines will be
-        heterogeneous. The standard deviation across these curves by feature value is also plotted, and serves as a
-        measure of heterogeneity.
+        This method creates plots of the partial derivative of the smoothed (using scipy.signal.savgol_filter)
+        estimated response functions \hat{f}. When interactions between the feature of relevance and other covariates
+        exist, the derivative lines will be heterogeneous. The standard deviation across these curves by feature
+        value is also plotted, and serves as a measure of heterogeneity.
 
         :param sample: The fraction of the total number of curves (i.e., the number of observations, N) to plot
         """
@@ -118,6 +121,7 @@ class PartialDependency(object):
         ax.set_ylabel('Standard Deviation of Partials')
         ax.set_xlabel('{0}'.format(self.feature))
         plt.show()
+
 
 if __name__ == '__main__':
     N = 1000
