@@ -64,7 +64,7 @@ class PartialDependency(object):
         :param include_PDP: A boolean indicating whether to include a plot of the PD curve
         """
         all_indeces = self.X_predictions.index.unique()
-        frac = round(len(all_indeces) * sample)
+        frac = int(round(len(all_indeces) * sample))
         indeces = np.random.choice(all_indeces, size=frac, replace=False)
 
         fig = plt.figure(figsize=(12, 8))
