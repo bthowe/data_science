@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-
+from scipy.stats import t
+from scipy.stats import norm
 
 def neyman_estimator(df, W, Y):
     """
@@ -60,6 +61,14 @@ def V_const(df, W, Y):
 
     s2 = (((df_c - df_c.mean()) ** 2).sum() + ((df_t - df_t.mean()) ** 2).sum()) / (n - 2)
     return s2 * (1 / n_c + 1 / n_t)
+
+def confidence_interval(t_diff, V2, alpha=.1, randomization_distr='normal'):
+    if randomization_distr == 'normal':
+        return (t_diff - np.sqrt(V2) * norm.ppf(1 - alpha / 2), t_diff + np.sqrt(V2) * norm.ppf(1 - alpha / 2))
+    # elif randomization_distr == 't':
+    #     return (t_diff - np.sqrt(V2) * t.ppf(1 - alpha / 2, df=n), t_diff + np.sqrt(V2) * t.ppf(1 - alpha / 2, df=n))
+
+
 
 
 if __name__ == '__main__':
