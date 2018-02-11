@@ -1,3 +1,5 @@
+import sys
+import itertools
 import numpy as np
 import pandas as pd
 from scipy.stats import t
@@ -13,6 +15,31 @@ def neyman_estimator(df, W, Y):
     Y: the outcome
     """
     return df.loc[df[W] == 1][Y].mean() - df.loc[df[W] == 0][Y].mean()
+
+def neyman_weighted_estimator(df, W, Y):
+    """
+    Returns the weighted Neyman estimator for the average treatment effect, which is the sum of the Neyman estimators
+    for each subsample defined by the values of the discrete covariates weighted by subsample size. When there are
+    subsamples with only treated or only control units, this method breaks.
+
+    df: the n x m + 2 dataset, with columns Y, W, and m discrete covariates
+    W: the treatment assignment variable
+    Y: the outcome
+    """
+    N = len(df)
+    covariates = [cols for cols in df.columns.tolist() if cols not in [W, Y]]
+    unique_covariates = [df[cols].unique().tolist() for cols in covariates]
+
+    weighted_neyman = []
+    for vals in itertools.product(*unique_covariates):
+        df_temp = df.copy()
+        for col in zip(covariates, vals):
+            df_temp = df_temp.query('{0} == {1}'.format(col[0], col[1]))
+        n = len(df_temp)
+        weighted_neyman.append(neyman_estimator(df_temp, W, Y) * (n / N))
+
+    return np.sum(weighted_neyman)
+
 
 def V_neyman(df, W, Y):
     """
@@ -65,20 +92,23 @@ def V_const(df, W, Y):
 def confidence_interval(t_diff, V2, alpha=.1, randomization_distr='normal'):
     if randomization_distr == 'normal':
         return (t_diff - np.sqrt(V2) * norm.ppf(1 - alpha / 2), t_diff + np.sqrt(V2) * norm.ppf(1 - alpha / 2))
-    # elif randomization_distr == 't':
+    # elif randomization_distr == 't':  # todo: need the N for degrees of freedom
     #     return (t_diff - np.sqrt(V2) * t.ppf(1 - alpha / 2, df=n), t_diff + np.sqrt(V2) * t.ppf(1 - alpha / 2, df=n))
 
 
-
-
 if __name__ == '__main__':
-    N = 10
+    N = 100
     # np.random.seed(2)
     columns = ['outcome']
     df = pd.DataFrame(np.random.uniform(-1, 1, size=(N, len(columns))), columns=columns)
     df['W'] = np.random.randint(0, 2, size=(N, 1))
+    df['one'] = np.random.randint(0, 2, size=(N, 1))
+    df['two'] = np.random.randint(0, 4, size=(N, 1))
 
     print(neyman_estimator(df, 'W', 'outcome'))
+
+    print(neyman_weighted_estimator(df, 'W', 'outcome'))
+
     print(V_neyman(df, 'W', 'outcome'))
     print(V_rho(df, 'W', 'outcome'))
     print(V_const(df, 'W', 'outcome'))
