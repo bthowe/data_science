@@ -6,10 +6,11 @@ import joblib
 import datetime
 import numpy as np
 import pandas as pd
+from scipy.signal import savgol_filter
 
 from bokeh.models import Slider
 from bokeh.plotting import figure
-from bokeh.io import output_file, show, curdoc
+from bokeh.io import output_file, show, save, curdoc
 from bokeh.layouts import widgetbox, row, column
 from bokeh.models import HoverTool, ColumnDataSource, Select, Range1d, CategoricalColorMapper
 
@@ -56,17 +57,15 @@ def _perfect_model_curve(y_test, y_prob):
 
 
 
-def model_lift_plot(y_test, y_prob):
-    df = pd.concat([y_test, y_prob], axis=1)
-    df.columns = ['y_test', 'y_prob']
+def model_lift_plot(y_test, y_prob, name='Churned'):
+    df = pd.concat(
+        [
+            y_test.reset_index(drop=True),
+            pd.DataFrame(y_prob).reset_index(drop=True)
+        ], axis=1
+    )
+    df.columns = ['target', 'y_prob']
     df.sort_values(['y_prob'], inplace=True)
-
-
-    print df
-
-    sys.exit()
-
-    df['target'] = df['cadence_score'].apply(lambda x: (x - cs_min) / (cs_max - cs_min))
 
     df['frac_of_total'] = 1
     df['frac_of_total'] = (df['frac_of_total'].cumsum() / len(df))
@@ -83,7 +82,14 @@ def model_lift_plot(y_test, y_prob):
     df['perfect_model'] = df['frac_of_total'].apply(perfect_model)
     df.reset_index(drop=True, inplace=True)
 
-    p = np.polyfit(df['frac_of_total'], df['frac_of_contacts'], 15)
+
+    outcome = savgol_filter(
+        x=df['frac_of_contacts'],
+        window_length=5,
+        polyorder=3
+    )
+    p = np.polyfit(df['frac_of_total'], outcome, 15)  # use the smoother first
+    # p = np.polyfit(df['frac_of_total'], df['frac_of_contacts'], 15)
     poly = np.poly1d(p)
     d_poly = poly.deriv()
     d2_poly = d_poly.deriv()
@@ -110,7 +116,7 @@ def model_lift_plot(y_test, y_prob):
                       tooltips=[('Perfect Model', '@y_perf'), ('Estimate', '@y'), ('Random', '@x'),
                                 ('Second Derivative', '@y_2der')], mode='vline')
 
-    p = figure(title='Lift Curve', x_axis_label='Fraction of Leads', y_axis_label='Fraction Contacted',
+    p = figure(title='Lift Curve', x_axis_label='Fraction of Leads', y_axis_label='Fraction {0}'.format(name),
                plot_height=400, plot_width=1000, tools=[hover, ])
     p.y_range = Range1d(0, 1)
     p.line(x='x', y='y', source=source, color='blue', legend='Model Prediction', name='true_model')
@@ -127,6 +133,8 @@ def model_lift_plot(y_test, y_prob):
 
     layout = column(p, dp)
     show(layout)
+    save(layout, filename='/Users/travis.howe/Downloads/lift_plot.html', title='Pretention Lift Plot')
+
 
 if __name__ == '__main__':
     y_test = pd.DataFrame(np.random.randint(0, 2, size=(10, 1)))[0]
