@@ -1,8 +1,20 @@
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 
+def ls_coefficients(X, y):
+    lr = LinearRegression(fit_intercept=True)
+    lr.fit(X, y)
 
+    coefficients = list(lr.coef_)
+    coefficients.append(lr.intercept_)
+
+    return dict(zip(X.columns.tolist(), coefficients))
+
+def ls_treatment_effect_estimator(X, y, W):
+    coeff_dic = ls_coefficients(X, y)
+    return coeff_dic[W]
 
 def V(df, W, Y, coeffs, type='hetero'):
     Y = df.pop(Y)
