@@ -1,5 +1,4 @@
 import pandas as pd
-
 import statsmodels.api as sm
 
 data = pd.read_table('/home/liuwensui/Documents/data/csdata.txt')
