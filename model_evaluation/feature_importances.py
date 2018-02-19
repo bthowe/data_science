@@ -17,23 +17,20 @@ class FeatureImportances(object):
         self.y = y
         self.metric = metric
 
-
-        mask = self.model.best_estimator_.named_steps['select'].get_support()
-        self.feature_list = np.array(self.model.best_estimator_.named_steps['feature_create'].transform(X).columns.tolist())[mask].tolist()
         self.reduction = {}
 
-    def fi_distribution_generate(self):
+    def fi_distribution_generate(self, draws_num):
         start = time.time()
-        for col in self.feature_list:
-            print col, time.time() - start
+        for col in self.X.columns.tolist():
+            print(col, time.time() - start)
             col_list = []
-            for i in xrange(100):
-                X_rand = self.model.best_estimator_.named_steps['feature_create'].transform(self.X.copy())
+            for i in range(draws_num):
+                X_rand = self.X.copy()
                 X_rand[col] = X_rand[col].sample(frac=1, replace=True).values  # resample with replacement
-                y_rand = self.model.best_estimator_.steps[-1][1].predict_proba(self.model.best_estimator_.named_steps['select'].transform(X_rand))[:, 1]
+                y_rand = self.model(X_rand)
 
-                col_list.append(self.metric(self.y, self.model.predict_proba(self.X)[:, 1]) - self.metric(self.y, y_rand))
-                self.reduction[col] = col_list
+                col_list.append(self.metric(self.y, self.model(self.X)) - self.metric(self.y, y_rand))
+            self.reduction[col] = col_list
         return pd.DataFrame(self.reduction)
 
     def positive_fi_list(self):
