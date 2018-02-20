@@ -1,6 +1,14 @@
+import sys
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+
+
+# def
+
+# seems best to interact the treatment assignment variable with everything.
+# then regress, and evaluate the following hypotheses using the test below:
+
 
 
 def ls_coefficients(X, y):
@@ -33,3 +41,53 @@ def V(df, W, Y, coeffs, type='hetero'):
     else:
         return (1 / (N * (N - 1 - M))) * np.sum((Y - alpha - tau - betas * X) ** 2) * (1 / (W.mean() * (1 - W.mean())))
 
+
+
+
+if __name__ == '__main__':
+    N = 1000
+    np.random.seed(2)
+    df = pd.DataFrame(np.random.uniform(-1, 1, size=(N, 3)), columns=['X1', 'X2', 'X3'])
+    df['W'] = np.random.randint(0, 2, size=(N, 1))
+    df['constant'] = 1
+    df['varepsilon'] = np.random.normal(size=(N, 1))
+    df['Y'] = 0.25 + 0.4 * df['W'] + 0.2 * df['X1'] - 5 * df['X2'] + 10 * df['X3'] + df['varepsilon']
+
+    X = df.drop('varepsilon', 1)
+    y = X.pop('Y')
+
+    import statsmodels.api as sm
+    model = sm.OLS(y, X)
+    results = model.fit()
+
+
+    V = results.cov_params()
+    print(V)
+    covars = ['X1', 'X2', 'X3', 'W']
+    V_t_g = V[covars].loc[covars]
+
+    params = results.params.loc[covars]
+
+
+    print(params * V_t_g)
+
+    # print(results.params.loc[covars].T)
+
+
+
+    sys.exit()
+
+
+    print(results.summary())
+    print(np.sqrt((1 / (N * (N - 4))) * np.sum((y - results.predict()) ** 2) / (df['W'].mean() * (1- df['W'].mean()))))
+
+    results = model.fit(cov_type='HC3')
+    print(results.summary())
+    print(np.sqrt((1 / (N * (N - 4))) * np.sum(((df['W'] - df['W'].mean()) ** 2) * ((y - results.predict()) ** 2)) / ((df['W'].mean() * (1- df['W'].mean())) ** 2)))
+
+    # np.sum(((W - W.mean()) ** 2) * (Y - alpha - tau - betas * X) ** 2) * (
+    # 1 / (W.mean() * (1 - W.mean())) ** 2)
+    # it's the same!
+
+    # what is the hessian here
+    # what is the fisher information matrix of the model?
