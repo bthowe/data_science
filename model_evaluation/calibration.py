@@ -27,7 +27,14 @@ def calibrate_probas(model, X, y, bin_width=.1):
     func = lambda x: p[0] * x ** 2 + p[1] * x + p[2]
     def row_name(x):
         if x['probability'] != x['probability']:
-            return func(x.name)
+            # return func(x.name)
+            val = func(x.name)
+            if val > 1:
+                return 1
+            elif val < 0:
+                return 0
+            else:
+                return val
         else:
             return x['probability']
     df['probability'] = df.apply(row_name, axis=1)
