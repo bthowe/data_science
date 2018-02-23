@@ -86,3 +86,4 @@ def kol_smir_stat(df, Y, W):
     return ks_2samp(df[Y].loc[df[W] == 1], df[Y].loc[df[W] == 0])
 
 
+# todo: stats based on covariates
