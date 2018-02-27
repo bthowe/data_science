@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import pandas as pd
+from scipy.stats import chi2
 from sklearn.linear_model import LinearRegression
 
 
@@ -42,6 +43,13 @@ def V(df, W, Y, coeffs, type='hetero'):
         return (1 / (N * (N - 1 - M))) * np.sum((Y - alpha - tau - betas * X) ** 2) * (1 / (W.mean() * (1 - W.mean())))
 
 
+def chi2_test(covars, results):
+    V = results.cov_params()
+    V_t_g = V[covars].loc[covars].values
+
+    params = results.params.loc[covars].values
+    return 1 - chi2.cdf(params.T.dot(V_t_g).dot(params), len(params))
+
 
 
 if __name__ == '__main__':
@@ -60,20 +68,10 @@ if __name__ == '__main__':
     model = sm.OLS(y, X)
     results = model.fit()
 
+    covar_lst = ['X1', 'X2', 'X3', 'W']
+    print(chi2_test(covar_lst, results))
 
-    V = results.cov_params()
-    print(V)
-    covars = ['X1', 'X2', 'X3', 'W']
-    V_t_g = V[covars].loc[covars]
-
-    params = results.params.loc[covars]
-
-
-    print(params * V_t_g)
-
-    # print(results.params.loc[covars].T)
-
-
+    # todo: doc string, finesse main block a bit.
 
     sys.exit()
 
