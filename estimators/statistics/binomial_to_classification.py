@@ -43,6 +43,10 @@ def artificial_data2():
     pass
 
 
+# todo: how do the models' results compare if the number of N across each row is the same?
+
+
+
 def log_reg(df, covars, target):
     # logit = sm.Logit(df[target], df[covars])
     # print(logit.fit().params)
