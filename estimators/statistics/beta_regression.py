@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 from scipy.stats import beta
-from scipy.stats import binom
+import matplotlib.pyplot as plt
 
 import os
 os.environ['R_HOME'] = '/Library/Frameworks/R.framework/Resources'
@@ -22,107 +22,87 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 def artificial_data1():
     N = 1000
-    N_groups = int(N / 10)
 
     beta0 = -1.6
     beta1 = -0.03
     beta2 = 0.6
     beta3 = 1.6
 
-    gamma0 = -3.2
-    gamma1 = -0.45
+    gamma0 = 3.2
+    gamma1 = 0.45
     gamma2 = 0.2
     gamma3 = 3.1
 
-    df = pd.DataFrame(np.random.uniform(-1, 1, size=(N, 3)), columns=['X1', 'X2', 'X3'])
-    df['pi_alpha'] = np.exp(beta0 + beta1 * df['X1'] + beta2 * df['X2'] + beta3 * df['X3']) / (1 + np.exp(beta0 + beta1 * df['X1'] + beta2 * df['X2'] + beta3 * df['X3']))
-    df['pi_beta'] = np.exp(gamma0 + gamma1 * df['X1'] + gamma2 * df['X2'] + gamma3 * df['X3']) / (1 + np.exp(gamma0 + gamma1 * df['X1'] + gamma2 * df['X2'] + gamma3 * df['X3']))
-    print(df['pi_alpha'].describe())
-    print(df['pi_beta'].describe())
-    df['y'] = beta.rvs(df['pi_alpha'], df['pi_beta'])
-    print(df.head())
-    sys.exit()
-    df.drop(['pi_alpha', 'pi_beta'], 1, inplace=True)
-    df['constant'] = 1
+    df = pd.DataFrame(np.random.uniform(0, 2, size=(N, 3)), columns=['X1', 'X2', 'X3'])
+    df['pi_mu'] = np.exp(beta0 + beta1 * df['X1'] + beta2 * df['X2'] + beta3 * df['X3']) / (1 + np.exp(beta0 + beta1 * df['X1'] + beta2 * df['X2'] + beta3 * df['X3']))  # logit link
+    df['pi_phi'] = np.log(gamma0 + gamma1 * df['X1'] + gamma2 * df['X2'] + gamma3 * df['X3'])  # log link
+    # todo: this doesn't seem to be correct for some reason, given the output. It looks like the regression estimates the betas well but not the gammas.
+
+    df['a'] = df['pi_mu'] * df['pi_phi']
+    df['b'] = df['pi_phi'] * (1 - df['pi_mu'])
+
+    df['y'] = beta.rvs(df['a'], df['b'])
+    df.drop(['pi_mu', 'pi_phi', 'a', 'b'], 1, inplace=True)
     return df
 
-def beta_reg(df, covars, target):
-    # http://www.win-vector.com/blog/2014/01/generalized-linear-models-for-predicting-rates/#more-2527
 
+def _prediction_uncertainty_range_plot(y_pred, y_true, y_precision):
+    mn = min(np.min(y_pred), np.min(y_true))
+    mx = max(np.max(y_pred), np.max(y_true))
+    std = np.std(y_pred) / 2
+
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(np.linspace(mn, mx, 100), np.linspace(mn, mx, 100), color='black')
+    ax.scatter(y_pred, y_true)
+    ax.errorbar(y_pred, y_true, fmt='o', xerr=y_precision)
+    ax.set_ylim(mn - std, mx + std)
+    ax.set_xlim(mn - std, mx + std)
+    plt.show()
+
+def beta_reg(df, target, plot=True):
+    """Use beta regression when estimating non-frequency rates and not when estimating probabilities or frequencies.
+    Remember that the outcome value needs to be between zero and one."""
     pandas2ri.activate()
     r = robjects.r
-    forecast = importr('betareg')
+    importr('betareg')
 
-    rdf = pandas2ri.py2ri(df[[target] + covars])
-
-    print(rdf.head())
+    covars = [covar for covar in df.columns.tolist() if covar != target]
+    print(covars)
 
     covar_linear_combo = ' + '.join(covars)
     formula = '{0} ~ {1} | {1}'.format(target, covar_linear_combo)
-    M = r.betareg(formula, data=df)
+    M = r.betareg(formula, data=df, link='logit', link_phi='log')  # link_phi can be 'indentity', 'log', or 'sqrt'; adds a constant by default
+
     print(r.summary(M))
     print(r.summary(M).rx2('coefficients'))
 
+    _prediction_uncertainty_range_plot(r.predict(M, newdata=df), df[target], np.sqrt(r.predict(M, newdata=df, type='variance')))
 
-    # pandas2ri.activate()
-    # r = robjects.r
-    # forecast = importr('betareg')
-    # r.data('GasolineYield', package='betareg')
-    # # print(r.sapply(r['GasolineYield'], r.typeof))
-    #
+
+def test_beta_reg():
+    """Related to http://www.win-vector.com/blog/2014/01/generalized-linear-models-for-predicting-rates/#more-2527"""
+    pandas2ri.activate()
+    r = robjects.r
+    forecast = importr('betareg')
+    r.data('GasolineYield', package='betareg')
     # print(r['GasolineYield'].head())
-    # # r.set_seed(52352)  # this doens't work
-    #
-    # M = r.betareg('yield ~ gravity + pressure + temp | gravity + pressure + temp', data=r['GasolineYield'])
-    # print(r.summary(M))
-    # print(r.summary(M).rx2('coefficients'))
-    #
-    #
+    # print(r.sapply(r['GasolineYield'], r.typeof))
 
+    print(r['GasolineYield'].head())
+    # r.set_seed(52352)  # this doens't work
 
+    M = r.betareg('yield ~ gravity + pressure + temp | gravity + pressure + temp', data=r['GasolineYield'])
+    print(r.summary(M))
+    print(r.summary(M).rx2('coefficients'))
 
+    _prediction_uncertainty_range_plot(r.predict(M, newdata=r['GasolineYield']), r['GasolineYield']['yield'], np.sqrt(r.predict(M, newdata=r['GasolineYield'], type='variance')))
 
-
-    # df_train, df_holdout = make_train_holdout('cpa_forecast_data_files/train_data_SC v4.csv')
-    # y_train, X_train = make_train_data(df_train)
-    # X_score = make_forecast_data(df_holdout)
-    #
-    # # print X_train.info()
-    # # print y_train.info()
-    # # sys.exit()
-    #
-    # covar_lst = X_train.drop(['date'], 1).columns.tolist()
-    #
-    # # read in df
-    # rX_train = pandas2ri.py2ri(X_train[covar_lst])
-    # ry_train = r.ts(pandas2ri.py2ri(y_train['target']), start=r.c(2014, 1), frequency=12)
-    # rX_score = pandas2ri.py2ri(X_score[covar_lst])
-    #
-    # # print r.head(ry_train)
-    # # print r.sapply(rX_train, r.typeof)
-    #
-    #
-    #
-    # print
-    # forecast.auto_arima(ry_train, xreg=rX_train)
-    # sys.exit()
-    # arima_fit = forecast.auto_arima(ry_train, xreg=rX_train)
-    # print
-    # r.summary(arima_fit)
-    #
-    # sys.exit()
-    # forecast.forecast_checkresiduals(arima_fit)
-    #
-    # print
-    # forecast.forecast(arima_fit, h=36, xreg=rX_score)
-    # # print forecast.forecast_fracdiff(arima_fit, xreg=rX_train)
+    # rdf = pandas2ri.py2ri(df[[target] + covars])
 
 if __name__ == '__main__':
     np.random.seed(2)
     df = artificial_data1()
 
-    print(df['y'].describe()); sys.exit()
-
-    beta_reg(df, ['X1', 'X2', 'X3'], 'y')
-    # beta_reg(df, ['constant', 'covarX1', 'covarX2', 'covarX3'], 'y_beta')
-    # todo: will it add a constant by default...yes
+    beta_reg(df, 'y')
+    test_beta_reg()
