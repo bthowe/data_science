@@ -11,10 +11,16 @@ class FeatureImportances(object):
     0.05 quantiles (according to the distribution found in fi_distribution_generate) are positive. This method return a
     pandas series sorted by the mean difference in 'lift.'"""
 
-    def __init__(self, model, X, y, metric):
+    def __init__(self, model, X, y, metric, sample_size=1):
         self.model = model
-        self.X = X
-        self.y = y
+
+        if 0 <= sample_size <= 1:
+            frac = int(round(len(X) * sample_size))
+            self.X = X.sample(frac=frac)
+        else:
+            self.X = X.sample(n=sample_size)
+        self.y = y.loc[self.X.index]
+
         self.metric = metric
 
         self.reduction = {}
@@ -27,9 +33,9 @@ class FeatureImportances(object):
             for i in range(draws_num):
                 X_rand = self.X.copy()
                 X_rand[col] = X_rand[col].sample(frac=1, replace=True).values  # resample with replacement
-                y_rand = self.model(X_rand)
+                y_rand = self.model(X_rand.values)  # feature_names may not contain [, ] or <
 
-                col_list.append(self.metric(self.y, self.model(self.X)) - self.metric(self.y, y_rand))
+                col_list.append(self.metric(self.y, self.model(self.X.values)) - self.metric(self.y, y_rand))  # feature_names may not contain [, ] or <
             self.reduction[col] = col_list
         return pd.DataFrame(self.reduction)
 
