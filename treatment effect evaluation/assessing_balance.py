@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import pandas as pd
 from scipy import stats
+import matplotlib.pyplot as plt
 
 pd.set_option('max_columns', 1000)
 pd.set_option('max_info_columns', 1000)
@@ -60,8 +61,28 @@ def overlap(df, X_c, X_t, alpha):
 
     return df
 
-def assess_covariate_distributions(X_c, X_t, alpha=0.05):
-    print(mean_std(X_c, X_t).pipe(overlap, X_c, X_t, alpha))
+def hist_plotter(X1, X2, feature):
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(1, 1, 1)
+    if feature != 'target':
+        ax.hist(X1[feature], label='Control', alpha=.5, normed=True)
+        ax.hist(X2[feature], label='Treatment', alpha=.5, normed=True)
+    else:
+        ax.hist(X1, label='Control', alpha=.5, normed=True)
+        ax.hist(X2, label='Treatment', alpha=.5, normed=True)
+    plt.legend()
+    plt.title('Histogram of {}'.format(feature))
+    plt.savefig('/Users/travis.howe/Downloads/covariate_histograms_temp/{}.png'.format(feature))
+
+def covariate_histograms(df, X_c, y_c, X_t, y_t):
+    os.makedirs('/Users/travis.howe/Downloads/covariate_histograms_temp')
+    for feature in df.index.tolist():
+        hist_plotter(X_c, X_t, feature)
+    hist_plotter(y_c, y_t, 'target')
+    print(df)
+
+def assess_covariate_distributions(X_c, y_c, X_t, y_t, alpha=0.05):
+    print(mean_std(X_c, X_t).pipe(overlap, X_c, X_t, alpha)).pipe(covariate_histograms, X_c, y_c, X_t, y_t)
     print(multivariate_measure(X_c, X_t))
 
 if __name__ == '__main__':
