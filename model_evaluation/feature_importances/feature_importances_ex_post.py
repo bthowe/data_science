@@ -4,12 +4,15 @@ import pandas as pd
 
 
 class FeatureImportances(object):
-    """For each feature used in a model, the method 'fi_distribution_generate' bootstraps a distribution for the
-    difference between the metric value using the test data and the metric value using the test data where the values
-    corresponding to a given feature for each observation are drawn with replacement from the distribution of values for
-    this feature. The method 'positive_fi_list' returns the list of features and their corresponding means such that the
-    0.05 quantiles (according to the distribution found in fi_distribution_generate) are positive. This method return a
-    pandas series sorted by the mean difference in 'lift.'"""
+    """Calculates an ex post feature importance. For each feature used in a model, the method 'fi_distribution_generate'
+    bootstraps a distribution for the difference between the metric value using the test data and the metric value using
+    the test data where the values corresponding to a given feature for each observation are drawn with replacement from
+    the distribution of values for this feature. The method 'positive_fi_list' returns the list of features and their
+    corresponding means such that the 0.05 quantiles (according to the distribution found in fi_distribution_generate)
+    are positive. This method return a pandas series sorted by the mean difference in 'lift.'
+
+    This methodology for calculating feature importances is convenient when a model is already baked.
+    """
 
     def __init__(self, model, X, y, metric, sample_size=1):
         self.model = model
