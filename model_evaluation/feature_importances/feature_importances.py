@@ -1,11 +1,7 @@
 import sys
-import joblib
-import pymc3 as pm
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
-from scipy.stats import binom
-import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
 from sklearn.linear_model import LinearRegression
 
@@ -31,13 +27,22 @@ def data_create():
     beta4 = 891.263
     eps = norm.rvs(0, 1000, size=(len(data), ))
     data['income'] = beta0 + data['age'] * beta1 + data['age2'] * beta2 + data['educ'] * beta3 + data['hours'] * beta4 + eps
-    # joblib.dump(data, 'data.pkl')
     return data
 
 
-def fi(X, y):
+def fi(X, y, n):
+    """
+    Calculates the average increase in R squared for each feature. This function does the following: (1) An ordering of
+    the features is chosen; (2) features are successively added in order to the set of features used to fit a model; (3)
+    and the increase in R squared is found after each iteration; (4) the average increase in R squared is calculated
+    for each variable.
+
+    :param X: Covariates...pandas dataframe
+    :param y: Outcomes...pandas series
+    :param n: number of times each feature is scored
+    :return: Dictionary of features and their average increase on the outcome in terms of the R squared
+    """
     cols = X.columns.tolist()
-    n = 10
 
     feature_dict = {col: 0 for col in cols}
 
@@ -59,8 +64,8 @@ def fi(X, y):
 
 if __name__ == '__main__':
     df = data_create()
-    # data = joblib.load('data.pkl')
 
     X = df
     y = df.pop('income')
-    fi(X, y)
+    n = 10
+    fi(X, y, n)
