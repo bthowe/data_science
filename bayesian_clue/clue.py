@@ -108,9 +108,6 @@ class Clue(object):
             print(self.players_hands[player[0]].possible_hands.query('posterior_prob > 0'))
 
 
-# todo: how am I getting a probability of 1 for Calvin but White shows up as a possibility in Maggie's hand?
-
-
 if __name__ == '__main__':
     players = [('Calvin', 3), ('Kay', 3), ('Martin', 3), ('Seth', 3), ('Maggie', 3)]
     my_hand = ['Study', 'Kitchen', 'Plum']
