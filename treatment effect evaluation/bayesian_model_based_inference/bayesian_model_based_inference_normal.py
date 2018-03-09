@@ -94,8 +94,6 @@ def treatment_effect_calc(df):
     return (df['y_treatment'] - df['y_control']).mean(), (df['y_treatment'] - df['y_control']).std()
 
 
-
-
 if __name__ == '__main__':
     # data_create()
 
