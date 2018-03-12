@@ -82,7 +82,7 @@ def missing_draws(df):
     """
     Draws from the distribution of the missing data conditional on the observed data and the parameters.
     """
-    df['target_missing'] = norm.rvs(df['mu'], df['sigma'])
+    df['target_missing'] = df['mu']  # only difference between super-population and finite-sample!
     return df
 
 def outcomes_create(df):
@@ -92,7 +92,6 @@ def outcomes_create(df):
 
 def treatment_effect_calc(df):
     return (df['y_treatment'] - df['y_control']).mean(), (df['y_treatment'] - df['y_control']).std()
-
 
 if __name__ == '__main__':
     # data_create()
