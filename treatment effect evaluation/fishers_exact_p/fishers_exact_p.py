@@ -1,8 +1,10 @@
-import sys
 import itertools
-import stats
+
 import numpy as np
 import pandas as pd
+
+from fishers_exact_p import fep_stats
+
 
 def fishers_exact_test(df, statistic, alpha=0.05):
     """
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(np.random.uniform(-1, 1, size=(N, len(columns))), columns=columns)
     df['W'] = np.random.randint(0, 2, size=(N, 1))
 
-    stat = stats.abs_ave_by_treatment
+    stat = fep_stats.abs_ave_by_treatment
 
     print(fishers_exact_test(df, stat, alpha=.05))
     print(fishers_exact_test_approx(df, stat, alpha=.05))

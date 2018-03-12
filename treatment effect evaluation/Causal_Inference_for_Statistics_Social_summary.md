@@ -22,7 +22,18 @@ Grouping these six points into broadly correlated classes, points 1 and 2 relate
     * assignment mechanism is known and controlled in the former 
 
 
-### Fisher's exact p-value
+### Paradigms
+* Finite sample
+    * What is the finite-sample average treatment effect?
+* Super population
+    * What is the population average treatment effects?
+* The analysis does differ. Intuitively, in the finite-sample case, we must impute values for the missing observations.
+ On the other hand, when inferring about the super-population, we can use the unbiasedness of the sample means (due to 
+ random treatment assignment and random subsampling) to implicitly impute values for the missing observations 
+ using a difference in means. 
+
+
+## Fisher's exact p-value
 Key insights: 
 1. objective?
 1. under the sharp null hypothesis, all the missing values can be inferred from the observed ones.
@@ -30,7 +41,7 @@ Key insights:
 3. repeat the calculations suggested in 1 and 2 for all possible assignment vectors (or for a randomly selected subset of them)
 4. find the fraction of test statistics from 3 more extreme than that from 2.
 
-### Neyman's 
+## Neyman's 
 Key insights:
 1. ultimately interested in the population average treatment effect.
 2. estimate this using the sample average treatment effect
@@ -38,7 +49,7 @@ Key insights:
 ### Difference between Fisher's and Neyman's
 
 
-### Regression methods for completely randomized experiments (Chapter 7) 
+## Regression methods for completely randomized experiments (Chapter 7) 
 The results from the least square estimator are, for the most part, only approximate, relying on large samples (i.e., large sample (consistent) but not small sample unbiased).
 The conditions required for consistency follow from randomization. Advantages of regression methods include...
 * incorporate covariates into estimands
@@ -49,3 +60,5 @@ The main disadvantages is the linearity which, while not a concern in randomized
 ### Differences between the above three
 (that do not have the exact (finite sample) statistical properties that make the Neyman and Fisher approaches so elegant in their simplicity but that do address more complicated questions.
 assume that the randomness is not just the assignment randomness but also the sampling. 
+
+## Stratified Randomized Experiments
