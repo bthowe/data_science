@@ -25,11 +25,22 @@ def T_diff_lambda(y_t, y_c, lam='RSS'):
 
 def T_rank_stratum(y):
     y['rank'] = y['y'].groupby(y['stratum']).rank()
-    y['norm'] = y['y'].groupby(y['stratum']).transform('count')
-    y['norm'] = (y['norm'] + 1) / 2  # todo: how do I do this in one line?
+    y['norm'] = (y['y'].groupby(y['stratum']).transform('count') + 1) / 2
     y['normalized_rank'] = y['rank'] - y['norm']
     return np.abs(y.query('treatment == 1')['normalized_rank'].mean() - y.query('treatment == 0')['normalized_rank'].mean())
 
+def T_range(y):
+    y_t = y.query('treatment == 1')
+    y_c = y.query('treatment == 0')
+
+    Y_t = y_t['y'].groupby(y_t['stratum']).max() - y_t['y'].groupby(y_t['stratum']).min()
+    Y_c = y_c['y'].groupby(y_c['stratum']).max() - y_c['y'].groupby(y_c['stratum']).min()
+
+    N_t = y_t['y'].groupby(y_t['stratum']).count()
+    N_c = y_c['y'].groupby(y_c['stratum']).count()
+    l = (N_t + N_c) / (N_t.sum() + N_c.sum())
+
+    return (l * (Y_t - Y_c)).sum()
 
 if __name__ == '__main__':
     np.random.seed(seed=2)
@@ -51,6 +62,12 @@ if __name__ == '__main__':
 
     print(
         T_rank_stratum(
-            df[['y', 'stratum', 'treatment']],
+            df[['y', 'stratum', 'treatment']]
+        )
+    )
+
+    print(
+        T_range(
+            df[['y', 'stratum', 'treatment']]
         )
     )
