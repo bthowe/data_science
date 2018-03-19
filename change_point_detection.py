@@ -81,11 +81,6 @@ def uniform_model(df):
     pm.traceplot(trace[1000:], varnames=['switchpoint', 'mu_1', 'mu_2', 'sd_1', 'sd_2'])
     plt.show()
 
-def time_encode(df):
-    df['t_encoded'] = LabelEncoder().fit_transform(df['t'])
-    df.drop('t', 1, inplace=True)
-    return df
-
 def data_generate():
     mu1 = .55
     sd1 = .1
@@ -98,14 +93,8 @@ def data_generate():
     return df.append(df2).sort_values('t_encoded')
 
 if __name__ == '__main__':
-    # todo: get new candidate berke scores, merge them to the ci, and then score them all.
-    # todo: perform a switch point analysis on the scores.
 
     df = data_generate()
-
-    # df = pd.read_csv('/Users/travis.howe/Downloads/berke_scores.csv')[['score', 'Completed On']].\
-    #     rename(columns={'Completed On': 't'}). \
-    #     pipe(time_encode)
 
     # binom_model(df)
     uniform_model(df)
