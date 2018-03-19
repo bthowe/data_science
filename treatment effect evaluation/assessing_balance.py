@@ -52,12 +52,12 @@ def mean_std(X_c, X_t):
 
 def overlap(df, X_c, X_t, alpha):
     df['pi_{}_test'.format(alpha)] = 0
-    df['pi_{}_february'.format(alpha)] = 0
+    df['pi_{}_control'.format(alpha)] = 0
 
     for feature in df.index.tolist():
         pi_c, pi_t = pi(X_c, X_t, feature, alpha)
-        df.loc[feature, 'pi_c_{}_test'.format(alpha)] = pi_c
-        df.loc[feature, 'pi_t_{}_february'.format(alpha)] = pi_t
+        df.loc[feature, 'pi_{}_test'.format(alpha)] = pi_c
+        df.loc[feature, 'pi_{}_control'.format(alpha)] = pi_t
 
     return df
 

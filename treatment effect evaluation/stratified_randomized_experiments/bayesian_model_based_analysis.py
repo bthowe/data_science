@@ -51,117 +51,8 @@ def model_parameter_distribution_estimate(data):
     strata = data_t['stratum'].values
     n_strata = len(data_t['stratum'].unique())
 
-    # county_names = data.county.unique()
-    # county_idx = data.county_code.values
-    #
-    # n_counties = len(data.county.unique())
-    #
-    # with pm.Model() as model_t:
-    #     mu_b0 = pm.Normal('mu_b0', mu=0., sd=100 ** 2)
-    #     sigma_b0 = pm.HalfCauchy('sigma_b0', 5)
-    #     mu_b1 = pm.Normal('mu_b1', mu=0., sd=100 ** 2)
-    #     sigma_b1 = pm.HalfCauchy('sigma_b1', 5)
-    #
-    #     b0 = pm.Normal('b0', mu=mu_b0, sd=sigma_b0, shape=n_counties)
-    #     b1 = pm.Normal('b1', mu=mu_b1, sd=sigma_b1, shape=n_counties)
-    #
-    #     eps = pm.HalfCauchy('eps', 5)
-    #
-    #     radon_est = b0[county_idx] + b1[county_idx] * data.floor.values
-    #
-    #     # Data likelihood
-    #     radon_like = pm.Normal('radon_like', mu=radon_est, sd=eps, observed=data.log_radon)
-    #
-    #     trace = pm.sample(draws=2000, n_init=1000, cores=1, chains=1)
-    #
-    #     print(trace)
-    #     # sys.exit()
-    #     pm.traceplot(trace)
-    #     plt.show()
-    # sys.exit()
-
     features = ['intercept', 'one', 'two', 'three', 'treatment']
     with pm.Model() as model_t:
-        # mu_b0 = pm.Normal('mu_b0', mu=0., sd=100 ** 2)
-        # sigma_b0 = pm.HalfCauchy('sigma_b0', 5)
-        # mu_b1 = pm.Normal('mu_b1', mu=0., sd=100 ** 2)
-        # sigma_b1 = pm.HalfCauchy('sigma_b1', 5)
-        # mu_b2 = pm.Normal('mu_b2', mu=0., sd=100 ** 2)
-        # sigma_b2 = pm.HalfCauchy('sigma_b2', 5)
-        # mu_b3 = pm.Normal('mu_b3', mu=0., sd=100 ** 2)
-        # sigma_b3 = pm.HalfCauchy('sigma_b3', 5)
-        # mu_btreatment = pm.Normal('mu_btreatment', mu=0., sd=100 ** 2)
-        # sigma_btreatment= pm.HalfCauchy('sigma_btreatment', 5)
-        #
-        # b0 = pm.Normal('b0', mu=mu_b0, sd=sigma_b0, shape=n_strata)
-        # b1 = pm.Normal('b1', mu=mu_b1, sd=sigma_b1, shape=n_strata)
-        # b2 = pm.Normal('b2', mu=mu_b2, sd=sigma_b2, shape=n_strata)
-        # b3 = pm.Normal('b3', mu=mu_b3, sd=sigma_b3, shape=n_strata)
-        # btreatment = pm.Normal('btreatment', mu=mu_btreatment, sd=sigma_btreatment, shape=n_strata)
-
-        # mu = {
-        #     'mu_intercept': mu_b0,
-        #     'mu_one': mu_b1,
-        #     'mu_two': mu_b2,
-        #     'mu_three': mu_b3,
-        #     'mu_treatment': mu_btreatment
-        # }
-        # sigma = {
-        #     'sigma_intercept': sigma_b0,
-        #     'sigma_one': sigma_b1,
-        #     'sigma_two': sigma_b2,
-        #     'sigma_three': sigma_b3,
-        #     'sigma_treatment': sigma_btreatment
-        # }
-
-        # b = {
-        #     'b_intercept': pm.Normal('b0', mu=mu['mu_intercept'], sd=sigma['sigma_intercept'], shape=n_strata),
-        #     'b_one': pm.Normal('b1', mu=mu['mu_one'], sd=sigma['sigma_one'], shape=n_strata),
-        #     'b_two': pm.Normal('b2', mu=mu['mu_two'], sd=sigma['sigma_two'], shape=n_strata),
-        #     'b_three': pm.Normal('b3', mu=mu['mu_three'], sd=sigma['sigma_three'], shape=n_strata),
-        #     'b_treatment': pm.Normal('btreatment', mu=mu['mu_treatment'], sd=sigma['sigma_treatment'], shape=n_strata)
-        # }
-        # b = {
-        #     'b_intercept': pm.Normal('b0', mu=mu_b0, sd=sigma_b0, shape=n_strata),
-        #     'b_one': pm.Normal('b1', mu=mu_b1, sd=sigma_b1, shape=n_strata),
-        #     'b_two': pm.Normal('b2', mu=mu_b2, sd=sigma_b2, shape=n_strata),
-        #     'b_three': pm.Normal('b3', mu=mu_b3, sd=sigma_b3, shape=n_strata),
-        #     'b_treatment': pm.Normal('btreatment', mu=mu_btreatment, sd=sigma_btreatment, shape=n_strata)
-        # }
-        # b = {
-        #     'b0': b0,
-        #     'b1': b1,
-        #     'b2': b2,
-        #     'b3': b3,
-        #     'btreatment': btreatment
-        # }
-
-        # sys.exit()
-
-        # mu = {'mu_{}'.format(col): pm.Normal('mu_{}'.format(col), mu=0., sd=100 ** 2) for col in features}
-        # sigma = {'sigma_{}'.format(col): pm.Normal('sigma_{}'.format(col), mu=0., sd=100 ** 2) for col in features}
-        # b = {'b_{}'.format(col): pm.Normal('b_{}'.format(col), mu=mu['mu_{}'.format(col)], sd=sigma['sigma_{}'.format(col)], shape=n_strata) for col in features}
-        #
-        # mu_b0 = pm.Normal('mu_b0', mu=0., sd=100 ** 2)
-        # sigma_b0 = pm.HalfCauchy('sigma_b0', 5)
-        # mu_b1 = pm.Normal('mu_b1', mu=0., sd=100 ** 2)
-        # sigma_b1 = pm.HalfCauchy('sigma_b1', 5)
-        # mu_b2 = pm.Normal('mu_b2', mu=0., sd=100 ** 2)
-        # sigma_b2 = pm.HalfCauchy('sigma_b2', 5)
-        # mu_b3 = pm.Normal('mu_b3', mu=0., sd=100 ** 2)
-        # sigma_b3 = pm.HalfCauchy('sigma_b3', 5)
-        # mu_btreatment = pm.Normal('mu_btreatment', mu=0., sd=100 ** 2)
-        # sigma_btreatment= pm.HalfCauchy('sigma_btreatment', 5)
-
-        # b0 = pm.Normal('b0', mu=mu_b0, sd=sigma_b0, shape=n_strata)
-        # b1 = pm.Normal('b1', mu=mu_b1, sd=sigma_b1, shape=n_strata)
-        # b2 = pm.Normal('b2', mu=mu_b2, sd=sigma_b2, shape=n_strata)
-        # b3 = pm.Normal('b3', mu=mu_b3, sd=sigma_b3, shape=n_strata)
-        # btreatment = pm.Normal('btreatment', mu=mu_btreatment, sd=sigma_btreatment, shape=n_strata)
-
-        # y_est = b0[strata] + b1[strata] * data_t['one'] + b2[strata] * data_t['two'] + b3[strata] * data_t['three'] + btreatment[strata] * data_t['treatment']
-        # y_est = b['b0'][strata] + b['b1'][strata] * data_t['one'] + b['b2'][strata] * data_t['two'] + b['b3'][strata] * data_t['three'] + b['btreatment'][strata] * data_t['treatment']
-
         mu = {'mu_{}'.format(col): pm.Normal('mu_{}'.format(col), mu=0., sd=100 ** 2) for col in features}
         sigma = {'sigma_{}'.format(col): pm.HalfCauchy('sigma_{}'.format(col), 5) for col in features}
         b = {'b_{}'.format(col): pm.Normal('b_{}'.format(col), mu=mu['mu_{}'.format(col)], sd=sigma['sigma_{}'.format(col)], shape=n_strata) for col in features}
@@ -175,65 +66,12 @@ def model_parameter_distribution_estimate(data):
 
         y_like = pm.Normal('y_like', mu=y_est, sd=eps, observed=data_t['y'])
 
-        trace = pm.sample(draws=2000, n_init=1000, chains=1)
+        trace = pm.sample(draws=2000, n_init=1000)
 
         pm.traceplot(trace)
         plt.show()
         # plt.savefig('h1.png')
 
-
-    sys.exit()
-    # with pm.Model() as model_t:
-#         mu_b0 = pm.Normal('mu_b0', mu=0., sd=100 ** 2)
-#         sigma_b0 = pm.HalfCauchy('sigma_b0', 5)
-#         mu_b1 = pm.Normal('mu_b1', mu=0., sd=100 ** 2)
-#         sigma_b1 = pm.HalfCauchy('sigma_b1', 5)
-    #
-    #     b0 = pm.Normal('b0', mu=mu_b0, sd=sigma_b0, shape=n_strata)
-    #     b1 = pm.Normal('b1', mu=mu_b1, sd=sigma_b1, shape=n_strata)
-    #
-    #     eps = pm.HalfCauchy('eps', 5)
-    #
-    #     radon_est = b0[strata] + b1[strata] * data_t['one']
-    #
-    #     # Data likelihood
-    #     radon_like = pm.Normal('radon_like', mu=radon_est, sd=eps, observed=data_t['y'])
-    #
-    #     trace = pm.sample(draws=2000, n_init=1000, chains=1)
-    #
-    #     pm.traceplot(trace)
-    #     plt.show()
-    #     # plt.savefig('h1.png')
-    #
-    #
-    # sys.exit()
-
-    with pm.Model() as model_t:
-        # todo: how do I specify the prior for the model standard deviation?
-
-        mu_b0 = pm.Normal('mu_b0', mu=0, sd=100 ** 2)
-        sigma_b0 = pm.HalfCauchy('sigma_b0', 5)
-        mu_b1 = pm.Normal('mu_b1', mu=0, sd=100 ** 2)
-        sigma_b1 = pm.HalfCauchy('sigma_b1', 5)
-
-        b0 = pm.Normal.dist(mu=mu_b0, sd=sigma_b0)
-        b1 = pm.Normal.dist(mu=mu_b1, sd=sigma_b1)
-
-        priors = {'Intercept': b0, 'Regressor': b1}
-        # pm.glm.GLM.from_formula('y ~ one', data_t, priors=priors)
-        pm.glm.GLM.from_formula('y ~ one + two + three', data_t, priors=priors)
-
-        trace = pm.sample(draws=2000, n_init=1000, chains=1)  # draw 3000 posterior samples using NUTS sampling
-
-        pm.traceplot(trace)
-        plt.show()
-        # plt.savefig('h2.png')
-
-    # with pm.Model() as model_t:
-        # pm.glm.GLM.from_formula('target ~ one + two + three + four', data_t)
-    #     trace = pm.sample(3000, cores=2)  # draw 3000 posterior samples using NUTS sampling
-    # joblib.dump(trace, 'trace_normal_model_t.pkl')
-    #
     # with pm.Model() as model_t:
     #     pm.glm.GLM.from_formula('target ~ one + two + three + four', data_c)
     #     trace = pm.sample(3000, cores=2)  # draw 3000 posterior samples using NUTS sampling
