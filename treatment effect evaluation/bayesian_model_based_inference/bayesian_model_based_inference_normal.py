@@ -59,6 +59,19 @@ def model_parameter_distribution_estimate(data):
         trace = pm.sample(3000, cores=2)  # draw 3000 posterior samples using NUTS sampling
     joblib.dump(trace, 'trace_normal_model_c.pkl')
 
+    # with Model() as model:  # model specifications in PyMC3 are wrapped in a with-statement
+    #     # Define priors
+    #     sigma = HalfCauchy('sigma', beta=10, testval=1.)
+    #     intercept = Normal('Intercept', 0, sd=20)
+    #     x_coeff = Normal('x', 0, sd=20)
+    #
+    #     # Define likelihood
+    #     likelihood = Normal('y', mu=intercept + x_coeff * x,
+    #                         sd=sigma, observed=y)
+    #
+    #     # Inference!
+    #     trace = sample(3000, cores=2)  # draw 3000 posterior samples using NUTS sampling
+
 def posterior_predicted_distribution(trace_model, data):
     """
     Given the estimated distributions of the model parameters, this function estimates the posterior predicted
