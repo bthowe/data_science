@@ -28,7 +28,7 @@ class KnnImpute(object):
 
     def impute(self, X, y):
         df_to_impute = X.query('{0} != {0}'.format(self.impute_feature))
-        X_analysis = X.query('{0} == {0}'.format(self.impute_feature))[model_features].dropna()
+        X_analysis = X.query('{0} == {0}'.format(self.impute_feature))[self.model_features].dropna()
         y_analysis = y.loc[X_analysis.index]
 
         self._fit(X_analysis, y_analysis)
