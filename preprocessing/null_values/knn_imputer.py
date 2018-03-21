@@ -27,8 +27,8 @@ class KnnImpute(object):
         self.standardize = StandardScaler()
 
     def impute(self, X, y):
-        df_to_impute = X.query('{0} != {0}'.format(self.impute_feature))
-        X_analysis = X.query('{0} == {0}'.format(self.impute_feature))[self.model_features].dropna()
+        df_to_impute = X.loc[X[self.impute_feature] != X[self.impute_feature]]
+        X_analysis = X.loc[X[self.impute_feature] == X[self.impute_feature]][self.model_features].dropna()
         y_analysis = y.loc[X_analysis.index]
 
         self._fit(X_analysis, y_analysis)
@@ -41,7 +41,8 @@ class KnnImpute(object):
     def _mean_calc(self, df_to_impute, X):
         df_to_impute_standardized = self.standardize.transform(df_to_impute[self.model_features])
         kneighbors = self.estimator.kneighbors(df_to_impute_standardized)[1]
-        return [X.loc[neighbors][self.impute_feature].values.mean() for neighbors in kneighbors]
+        X_analysis = X.loc[~X.index.isin(df_to_impute.index)]
+        return [X_analysis.iloc[neighbors][self.impute_feature].values.mean() for neighbors in kneighbors]
 
     def _fill(self, df_to_impute, X):
         X.loc[df_to_impute.index, self.impute_feature] = self._mean_calc(df_to_impute, X)
@@ -66,3 +67,16 @@ if __name__ == '__main__':
 
     ki = KnnImpute(estimator, impute_feature, model_features)
     print(ki.impute(X, y))
+
+    # estimator = KNeighborsClassifier(3)
+    # features_dropped = ['Rapid Problem Solving', 'Integrity']
+    # covars = [col for col in X_train.columns if col not in features_dropped]
+    # X_test[features_dropped] = np.nan
+    # X = X_train.append(X_test)
+    # y = y_train.append(y_test)
+    # for remove_feature in features_dropped:
+    #     ki = KnnImpute(estimator, remove_feature, covars)
+    #     X[remove_feature] = ki.impute(X[covars + [remove_feature]], y)[remove_feature]
+    # X_test_imputed = X.loc[X_test.index]
+    #
+    # print('Imputed Model: {}'.format( roc_auc_score(y_test, model.predict_proba(X_test_imputed.drop(xmc.group_key, 1))[:, 1])))
