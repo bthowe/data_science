@@ -19,9 +19,9 @@ class FeatureImportances(object):
 
         if 0 <= sample_size <= 1:
             frac = int(round(len(X) * sample_size))
-            self.X = X.sample(frac=frac)
+            self.X = X.sample(frac=frac, replace=True)
         else:
-            self.X = X.sample(n=sample_size)
+            self.X = X.sample(n=sample_size, replace=True)
         self.y = y.loc[self.X.index]
 
         self.metric = metric
