@@ -14,124 +14,69 @@ pd.set_option('max_colwidth', 4000)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 def data_create():
-    b0 = 4.3
-    b1 = -6.7
-    b2 = 7.9
-    b3 = -10.2
-    b4 = 15.3
+    beta = 2
+    gamma = 1
+    mu = 1
+    sigma_mu = .1
+    sigma_c = .2
+    sigma_t = .3
 
-    df = pd.DataFrame(np.random.uniform(-1, 1, size=(1000, 4)), columns=['one', 'two', 'three', 'four'])
-    df['treatment'] = np.random.randint(0, 2, size=(len(df), 1))
+    np.random.seed(seed=2)
+    N = 100
+    df_t = pd.DataFrame(np.random.uniform(-1, 1, size=(N, 1)), columns=['one'])
+    df_t['stratum'] = np.arange(N)
+    df_t['treatment'] = 1
+    df_c = pd.DataFrame(np.random.uniform(-1, 1, size=(N, 1)), columns=['one'])
+    df_c['stratum'] = np.arange(N)
+    df_c['treatment'] = 0
 
-    def treatment_effect(x):
-        if x['treatment'] == 0:
-            return b0 + x['one'] * b1 + x['two'] * b2 + x['three'] * b3 + x['four'] * b4
+    df = df_t.append(df_c)
+    df['mu_j'] = df.groupby(df['stratum']).apply(lambda x: np.random.normal(mu, sigma_mu))
+
+    def y(x):
+        if x['treatment'] == 1:
+            return np.random.normal(beta * x['one'] + gamma + x['mu_j'], sigma_t)
         else:
-            return 5 + b0 + x['one'] * b1 + x['two'] * b2 + x['three'] * b3 + x['four'] * b4
-    df['mu'] = df.apply(treatment_effect, axis=1)
-    df['sigma'] = 2
-    df['target'] = norm.rvs(df['mu'], df['sigma'])
-    df.drop(['mu', 'sigma'], 1, inplace=True)
+            return np.random.normal(beta * x['one'] + x['mu_j'], sigma_c)
+    df['y'] = df.apply(y, axis=1)
+    return df
 
-    joblib.dump(df, 'data_normal.pkl')
-
-# def model_parameter_distribution_estimate(data):
-#     """
-#     This function estimates the posterior probability distribution of the parameters of a GLM model with logit link
-#     function, where the outcome is distributed as a Bernoulli random variable.
-#
-#     Prior: Uses the default prior specification for GLM---this is p(theta) = N(0, 10^{12} * I). This is a very vague
-#     prior that influences the posterior very little.
-#     Likelihood: The product of n Bernoulli trials, where the probability is given by the logistic function
-#     1 / (1 + e^{-z_i}), where z_i = X*beta.
-#     """
-#     data_t = data.query('treatment == 1')
-#     data_c = data.query('treatment == 0')
-#
-#     strata = data_t['stratum'].values
-#     n_strata = len(data_t['stratum'].unique())
-#
-#     features = ['intercept', 'one', 'two', 'three', 'treatment']
-#     with pm.Model() as model_t:
-#         mu = {'mu_{}'.format(col): pm.Normal('mu_{}'.format(col), mu=0., sd=100 ** 2) for col in features}
-#         sigma = {'sigma_{}'.format(col): pm.HalfCauchy('sigma_{}'.format(col), 5) for col in features}
-#         b = {'b_{}'.format(col): pm.Normal('b_{}'.format(col), mu=mu['mu_{}'.format(col)], sd=sigma['sigma_{}'.format(col)], shape=n_strata) for col in features}
-#
-#         eps = pm.HalfCauchy('eps', 5)
-#
-#         y_est = b['b_intercept'][strata]
-#         for col in [feature for feature in features if feature != 'intercept']:
-#             print(col)
-#             y_est += b['b_{}'.format(col)][strata] * data_t[col]
-#
-#         y_like = pm.Normal('y_like', mu=y_est, sd=eps, observed=data_t['y'])
-#
-#         trace = pm.sample(draws=2000, n_init=1000)
-#
-#         pm.traceplot(trace)
-#         plt.show()
-#         # plt.savefig('h1.png')
-#
-#     # with pm.Model() as model_t:
-#     #     pm.glm.GLM.from_formula('target ~ one + two + three + four', data_c)
-#     #     trace = pm.sample(3000, cores=2)  # draw 3000 posterior samples using NUTS sampling
-#     # joblib.dump(trace, 'trace_normal_model_c.pkl')
-
-def model_parameter_distribution_estimate(data, treatment_ind=1):
+def model_parameter_distribution_estimate(data):
     """
-    This function estimates the posterior probability distribution of the parameters of a GLM model with logit link
-    function, where the outcome is distributed as a Bernoulli random variable.
-
-    Prior: Uses the default prior specification for GLM---this is p(theta) = N(0, 10^{12} * I). This is a very vague
-    prior that influences the posterior very little.
-    Likelihood: The product of n Bernoulli trials, where the probability is given by the logistic function
-    1 / (1 + e^{-z_i}), where z_i = X*beta.
+    This function estimates the posterior probability distribution of the parameters of a hierarchical model.
     """
-    data = data.query('treatment == {}'.format(treatment_ind))
-
     strata = data['stratum'].values
     n_strata = len(data['stratum'].unique())
 
-    if treatment_ind:
-        features = ['intercept', 'one', 'treatment']
-    else:
-        features = ['intercept', 'one']
-
-
-
-    # beta is constant across all pairs
-    # gamma is constant across all pairs
-    # mu(j) is pair specific, but has common priors across all pairs.
-
-
-
+    treat = data['treatment'].values
+    n_treat = len(data['treatment'].unique())
 
     with pm.Model() as model_t:
-        mu = pm.Normal('mu_', mu=0., sd=100 ** 2)
-        sigma = {'sigma_{}'.format(col): pm.HalfCauchy('sigma_{}'.format(col), 5) for col in features}
-        b = {'b_{}'.format(col): pm.Normal('b_{}'.format(col), mu=mu['mu_{}'.format(col)], sd=sigma['sigma_{}'.format(col)], shape=n_strata) for col in features}
+        mu = pm.Normal('mu', mu=0., sd=100 ** 2)
+        sigma_mu = pm.HalfCauchy('sigma_mu', 5)
+        mu_j = pm.Normal('mu_j', mu=mu, sd=sigma_mu, shape=n_strata)
 
-        eps = pm.HalfCauchy('eps', 5)
+        sigma = pm.HalfCauchy('sigma', 5, shape=n_treat)
 
-        y_est = b['b_intercept'][strata]
-        for col in [feature for feature in features if feature != 'intercept']:
-            print(col)
-            y_est += b['b_{}'.format(col)][strata] * data_t[col]
+        beta = pm.Normal('beta', mu=0., sd=100 ** 2)
+        gamma = pm.Normal('gamma', mu=0., sd=100 ** 2)
 
-        y_like = pm.Normal('y_like', mu=y_est, sd=eps, observed=data_t['y'])
+        y_est = mu_j[strata] + gamma * data['treatment'] + beta * data['one']
+        sigma_est = sigma[treat]
 
-        trace = pm.sample(draws=2000, n_init=1000)
+        y_like = pm.Normal('y_like', mu=y_est, sd=sigma_est, observed=data['y'])
 
-        pm.traceplot(trace)
-        plt.show()
-        # plt.savefig('h1.png')
+        trace = pm.sample(target_accept=.95)
+        # trace = pm.sample(draws=10000, n_init=5000)
 
-    # with pm.Model() as model_t:
-    #     pm.glm.GLM.from_formula('target ~ one + two + three + four', data_c)
-    #     trace = pm.sample(3000, cores=2)  # draw 3000 posterior samples using NUTS sampling
-    # joblib.dump(trace, 'trace_normal_model_c.pkl')
+        # pm.traceplot(trace)
+        # plt.show()
+        # print(trace.varnames)
 
-def posterior_predicted_distribution(trace_model, data):
+        joblib.dump(trace, '/Users/travis.howe/Downloads/trace.pkl')
+
+
+def posterior_predicted_distribution(trace, data):
     """
     Given the estimated distributions of the model parameters, this function estimates the posterior predicted
     distribution of the mean.
@@ -140,11 +85,25 @@ def posterior_predicted_distribution(trace_model, data):
     :param data: the data
     :return: posterior predicted distribution of the mean
     """
-    trace = trace_model[1000:]
+    # todo: how do I get the sub mu_js out of the trace?
+    #   -this must be done by index, determined by order of appearance. 
 
-    lm = lambda x, samples: samples['Intercept'] + samples['one']*x['one'] + samples['two']*x['two'] + samples['three']*x['three'] + samples['four']*x['four']  # todo: this isn't very general.
 
-    # todo: do I need to loop or is there a slicker way?
+    # trace = trace_model[1000:]
+
+
+    c_data = data.ix[data.county == c]
+    c_data = c_data.reset_index(drop=True)
+    c_index = np.where(county_names == c)[0][0]
+    z = list(c_data['county_code'])[0]
+
+
+    print(trace.varnames)
+    print(trace['mu_j']['0'])  #[1000:][z]
+    sys.exit()
+
+    lm = lambda x, samples: samples['mu_j'] + samples['gamma'] * x['treatment'] + samples['beta'] * x['one']
+
     data['mu'] = [np.random.choice(lm(row[1], trace)) for row in data.iterrows()]
     data['sigma'] = np.random.choice(trace['sd'], size=(len(data), 1), replace=True)
 
@@ -166,33 +125,14 @@ def treatment_effect_calc(df):
     return (df['y_treatment'] - df['y_control']).mean(), (df['y_treatment'] - df['y_control']).std()
 
 
+
 if __name__ == '__main__':
-    # data_create()
+    df = data_create()
+    # model_parameter_distribution_estimate(df)
 
-    # data = joblib.load('data_normal.pkl')
-    # data = pd.read_csv('radon.csv')[['county', 'log_radon', 'floor', 'county_code']]
-
-    np.random.seed(seed=2)
-    N = 100
-    J = 4
-    df = pd.DataFrame(np.random.uniform(-1, 1, size=(N, 3)), columns=['one', 'two', 'three'])
-    df['stratum'] = np.random.choice(range(J), size=(N, 1))
-    df['treatment'] = np.random.choice([0, 1], size=(N, 1))
-    df['y'] = np.random.uniform(0, 1, size=(N, 1))
-    data = df
-
-    model_parameter_distribution_estimate(data)
-
-    sys.exit()
+    trace = joblib.load('/Users/travis.howe/Downloads/trace.pkl')
+    posterior_predicted_distribution(trace, df)
 
 
-    trace_t = joblib.load('trace_normal_model_t.pkl')
-    trace_c = joblib.load('trace_normal_model_c.pkl')
-    treatment = posterior_predicted_distribution(trace_c, data.query('treatment == 1')).pipe(missing_draws)
-    control = posterior_predicted_distribution(trace_t, data.query('treatment == 0')).pipe(missing_draws)
-
-    tau = treatment.append(control).\
-        pipe(outcomes_create).\
-        pipe(treatment_effect_calc)
-
-    print(tau)
+# todo: https://en.wikipedia.org/wiki/Inverse-gamma_distribution; inverse chi 2 can be cast as an inverse gamma
+# todo: how do you go from the traces to the treatment effect? In finite sample, the same routine as above applies, whereas in super population, the posterior of gamma is what I want.
