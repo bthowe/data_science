@@ -53,6 +53,8 @@ def data_create():
 def model_parameter_distribution_estimate(data):
     """
     This function estimates the posterior probability distribution of the parameters of a hierarchical model.
+
+    https://en.wikipedia.org/wiki/Inverse-gamma_distribution; inverse chi 2 can be cast as an inverse gamma
     """
     strata = data['stratum'].values
     n_strata = len(data['stratum'].unique())
@@ -78,65 +80,26 @@ def model_parameter_distribution_estimate(data):
         trace = pm.sample(target_accept=.95)
         # trace = pm.sample(draws=10000, n_init=5000)
 
-        # pm.traceplot(trace)
-        # plt.show()
-        # print(trace.varnames)
-
         joblib.dump(trace, '/Users/travis.howe/Downloads/trace.pkl')
-
 
 def posterior_predicted_distribution(trace, data):
     """
-    Given the estimated distributions of the model parameters, this function estimates the posterior predicted
-    distribution of the mean.
+    To get the sub mu_js out of the trace, use the strata indeces. They are ordered by strata.
 
-    :param trace_model: estimated distributions of the model parameters
-    :param data: the data
-    :return: posterior predicted distribution of the mean
+    Get estimate of mean and standard deviation of posterior distribution of each row supposing the opposite treatment.
     """
-    # todo: how do I get the sub mu_js out of the trace?
-    #   -this must be done by index, determined by order of appearance.
-    #   -it is not determined by order of appearance, but, rather, by order of strata
-
-    # trace = trace_model[1000:]
-
-    # c_data = data.ix[data.county == c]
-    # c_data = c_data.reset_index(drop=True)
-    # c_index = np.where(county_names == c)[0][0]
-    # z = list(c_data['county_code'])[0]
-
-    # print(trace.varnames)
-
-
-
-
-
-    # print(np.mean(trace['mu_j'], axis=0).tolist())
-    # print(np.mean(trace['mu_j'], axis=0).shape)
-    #
-    # from scipy.stats import mode
-    # print(mode(trace['mu_j'], axis=0))
-    # sys.exit()
-    #
-    # pm.traceplot(trace)
-    # plt.show()
-    # sys.exit()
-
-
-    # todo: this is a mess
-
-    lm = lambda x, samples, ind: samples['mu_j'][:, ind] + samples['gamma'] * (1 - x['treatment']) + samples['beta'] * x['one']
 
     y_est = []
     sigma_est = []
     for row in data.iterrows():
-        stratum = int(row[1]['stratum'])
-        treatment = (1 - int(row[1]['treatment']))
+        x = row[1]
+        stratum = int(x['stratum'])
+        treatment = (1 - int(x['treatment']))
 
-        y_est.append(np.random.choice(lm(row[1], trace, stratum)))
+        y_est.append(np.random.choice(trace['mu_j'][:, stratum] + trace['gamma'] * (1 - x['treatment']) + trace['beta'] * x['one']))
         sigma_est.append(np.random.choice(trace['sigma'][:, treatment]))
 
-    data['y_missing_est'] = y_est
+    data['y_missing'] = y_est
     data['sigma_missing'] = sigma_est
 
     return data
@@ -145,7 +108,7 @@ def missing_draws(df):
     """
     Draws from the distribution of the missing data conditional on the observed data and the parameters.
     """
-    df['target_missing'] = norm.rvs(df['y_missing_est'], df['sigma_missing'])
+    df['target_missing'] = norm.rvs(df['y_missing'], df['sigma_missing'])
     return df
 
 def outcomes_create(df):
@@ -156,8 +119,6 @@ def outcomes_create(df):
 
 def treatment_effect_calc(df):
     return (df['y_treatment'] - df['y_control']).mean(), (df['y_treatment'] - df['y_control']).std()
-
-
 
 if __name__ == '__main__':
     # data_create()
@@ -171,10 +132,3 @@ if __name__ == '__main__':
         pipe(outcomes_create).\
         pipe(treatment_effect_calc)
     print(t_fs)
-
-
-# todo: make sure things are correct here and clean up the messy code
-
-# todo: https://en.wikipedia.org/wiki/Inverse-gamma_distribution; inverse chi 2 can be cast as an inverse gamma
-# todo: how do you go from the traces to the treatment effect? In finite sample, the same routine as above applies, whereas in super population, the posterior of gamma is what I want.
-
