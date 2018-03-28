@@ -7,10 +7,16 @@ df.value_counts()
 
 
 
+## sklearn
+### sample datasets
+```python
+from sklearn import datasets
+iris = datasets.load_iris()
+```
 
 
 
-### PYMC3
+## PYMC3
 ```python
 import pymc3 as pm
 ```
@@ -40,6 +46,7 @@ pm.Deterministic('difference of means', group1_mean - group2_mean)
 
 
 ####Diagnostics
+https://docs.pymc.io/api/diagnostics.html
 
 ### Plotting
 ```python
@@ -56,7 +63,7 @@ pm.forestplot(trace, varnames=['group1_mean', 'group2_mean']);
 ### Summary
 For the variables specified, the following plots the mean, standard deviation, mc error, .025 and .975 quantiles, R hat (the Gelman-Rubin statistic), and the estimate of the effective sample size of a set of traces
 ```python
-pm.summary(trace,varnames=['difference of means', 'difference of stds', 'effect size'])
+pm.summary(trace, varnames=['difference of means', 'difference of stds', 'effect size'])
 ```
 
 ### KDE
@@ -65,5 +72,24 @@ pm.kdeplot(np.random.exponential(30, size=10000), shade=0.5);
 ```
 
 
-https://docs.pymc.io/api/diagnostics.html
 
+
+
+
+
+
+## Tensorflow
+
+#### Sample datasets
+```python
+from tensorflow.examples.tutorials.mnist import input_data
+
+mnist = input_data.read_data_sets('/tmp/data', one_hot=True)
+```
+
+
+
+```python
+from pylib.draw_nn import draw_neural_net_fig
+draw_neural_net_fig([2, 1])
+```
