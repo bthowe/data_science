@@ -160,7 +160,6 @@ $ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framewor
 $ virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve
 
 virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 retention --system-site-packages
-virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 retention --system-site-packages
 ```
 
 to activate a virtual environment named "test_ve":
@@ -202,8 +201,18 @@ alias python3=python3.6
 ```
 
 I had to follow the following in order to install xgboost: https://stackoverflow.com/questions/39315156/how-to-install-xgboost-in-python-on-macos
-* I clone the github repo into .../venv/my_repo/lib/python3.6/site-packages
-* gcc-7, and g++-7
+1. cd into the following directory.../venv/my_repo/lib/python3.6/site-packages
+2. git clone --recursive https://github.com/dmlc/xgboost
+3. cd xgboost
+4. cp make/config.mk ./config.mk
+5. vi config.mk
+6. change # export CC = gcc to export CC = gcc-7 (i.e., uncomment the line and add "-7")
+7. change # export CXX = gcc to export CXX = g++-7
+8. vi Makefile
+9. change export CC = gcc to export CC = gcc-7
+10. change export CXX = gcc to export CXX = g++-7
+11. make clean_all && make -j4
+12. cd python-package; python setup.py install
 
 
 ```bash

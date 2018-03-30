@@ -1,17 +1,24 @@
-Use all but the last step in a pipeline
+
+To get a list of modules in an environment
 ```python
-Pipeline(my_pipeline.steps[:-1]). transform()
-
-df.value_counts()
+import pip
+installed_packages = pip.get_installed_distributions()
+installed_packages_list = sorted(["%s==%s" % (i.key, i.version) for i in installed_packages])
+print(installed_packages_list)
 ```
-
-
 
 ## sklearn
 ### sample datasets
 ```python
 from sklearn import datasets
 iris = datasets.load_iris()
+```
+### Pipeline
+Use all but the last step in a pipeline
+```python
+Pipeline(my_pipeline.steps[:-1]). transform()
+
+df.value_counts()
 ```
 
 
