@@ -23,6 +23,19 @@ df.value_counts()
 
 
 
+
+## statsmodels
+```python
+import statsmodels.api as sm
+mod = sm.OLS(y, X)
+res = mod.fit(cov_type='HC3')
+
+print(dir(res))
+print(res.rsquared_adj)
+print(res.summary())
+```
+
+
 ## PYMC3
 ```python
 import pymc3 as pm
