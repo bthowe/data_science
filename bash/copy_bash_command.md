@@ -160,6 +160,7 @@ $ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framewor
 $ virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve
 
 virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 retention --system-site-packages
+virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve --system-site-packages
 ```
 
 to activate a virtual environment named "test_ve":
@@ -217,6 +218,7 @@ I had to follow the following in order to install xgboost: https://stackoverflow
 
 ```bash
 curl -i http://localhost:5000/todo/api/v1.0/tasks/2
+curl --form addressFile=@/Users/travis.howe/Downloads/test.csv --form benchmark=9 --form vintage=Census2010_Census2010 https://geocoding.geo.census.gov/geocoder/geographies/addressbatch --output geocoderesult.csv
 ```
 For testing endpoints in the command line
 
