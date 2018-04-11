@@ -26,6 +26,32 @@ df.value_counts()
 ```
 
 
+## rpy2
+```python
+os.environ['R_HOME'] = '/Library/Frameworks/R.framework/Resources'
+import rpy2.robjects as robjects
+from rpy2.robjects import pandas2ri
+from rpy2.robjects.packages import importr
+
+r = robjects.r
+pandas2ri.activate()
+wru = importr('wru')
+
+r['load']('/Users/travis.howe/Downloads/voters.RData')
+print(r['voters'])
+
+dfr = pandas2ri.py2ri(df.head())
+print(dfr)
+
+X = r['voters']
+print(X.append(pd.DataFrame([['11', 'Howe', 'MO', '5', '095', '000000', '0000', '0', '35', '0', 'Ind', '0', '0000']], columns=X.columns.tolist())))
+print(X[['surname', 'state', 'county', 'tract', 'block']])
+
+print(dir(wru))
+X_out = wru.predict_race(voter_file=X, census_geo='county', census_key=CENSUS_KEY, party='PID')
+print(pandas2ri.ri2py(X_out))
+```
+
 
 
 ## statsmodels
