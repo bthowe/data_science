@@ -15,8 +15,12 @@ __pycache__/
 *.pkl
 temp.py
 
+spark/dataframe/download_s3.py
+spark/dataframe/rough_example.py
+
 .Python
 metastore_db/
+scratch/
 env/
 build/
 develop-eggs/
