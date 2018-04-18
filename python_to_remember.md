@@ -21,8 +21,16 @@ y = iris.target
 Use all but the last step in a pipeline
 ```python
 Pipeline(my_pipeline.steps[:-1]). transform()
+```
 
+## pandas
+list values of a categorical variable
+```python
 df.value_counts()
+```
+convert a series to a dataframe
+```python
+df.to_frame()
 ```
 
 
