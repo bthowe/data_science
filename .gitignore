@@ -18,6 +18,8 @@ temp.py
 spark/dataframe/download_s3.py
 spark/dataframe/rough_example.py
 
+data_files/
+
 .Python
 metastore_db/
 scratch/
