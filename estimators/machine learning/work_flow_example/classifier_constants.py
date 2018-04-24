@@ -31,8 +31,9 @@ param_grid = [
 ]
 
 param_grid_randomized = {
-    'xgb__max_depth': [3, 4, 5, 6, 7],
-    'xgb__learning_rate': uniform(),
-    'xgb__reg_lambda': uniform(),
-    'xgb__min_child_weight': [10, 12, 14, 16, 18],
+    'classifier': [XGBClassifier(n_estimators=100)],
+    'classifier__max_depth': [3, 4, 5, 6, 7],
+    'classifier__learning_rate': uniform(),
+    'classifier__reg_lambda': uniform(),
+    'classifier__min_child_weight': [10, 12, 14, 16, 18]
 }
