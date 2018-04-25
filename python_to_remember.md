@@ -1,3 +1,8 @@
+Nicely formated printing, such as for dictionaries
+```python
+import pprint
+pprint.pprint(patient_info)
+```
 
 To get a list of modules in an environment
 ```python
