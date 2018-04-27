@@ -1,9 +1,10 @@
-Nicely formated printing, such as for dictionaries
+
+## General Stuff
+### Nicely formated printing, such as for dictionaries
 ```python
 import pprint
 pprint.pprint(patient_info)
 ```
-
 To get a list of modules in an environment
 ```python
 import pip
@@ -11,6 +12,20 @@ installed_packages = pip.get_installed_distributions()
 installed_packages_list = sorted(["%s==%s" % (i.key, i.version) for i in installed_packages])
 print(installed_packages_list)
 ```
+### integer division
+```python
+divmod(13, 3)
+```
+returns the tuple (4, 1).
+```python
+13 // 3
+```
+returns 4. Finally, 
+```python
+13 % 3
+```
+returns the remainder, 1.
+
 
 ## sklearn
 ### sample datasets
@@ -28,6 +43,11 @@ Use all but the last step in a pipeline
 Pipeline(my_pipeline.steps[:-1]). transform()
 ```
 
+## numpy
+```python
+upper = []
+upper = np.concatenate((upper, rfqr.predict(X_test, quantile=98.5)))
+```
 ## pandas
 list values of a categorical variable
 ```python
@@ -68,6 +88,7 @@ print(pandas2ri.ri2py(X_out))
 
 
 ## statsmodels
+### OLS
 ```python
 import statsmodels.api as sm
 mod = sm.OLS(y, X)
@@ -77,7 +98,23 @@ print(dir(res))
 print(res.rsquared_adj)
 print(res.summary())
 ```
+or 
+```python
+import patsy
+import statsmodels.formula.api as smf
+ols = smf.ols('foodexp ~ income', data).fit()
+```
 
+### quantile regression
+```python
+import patsy
+import statsmodels.formula.api as smf
+
+mod = smf.quantreg('foodexp ~ income', df)
+res = mod.fit(q=.5)
+print(res.summary())
+
+```
 
 ## PYMC3
 ```python
