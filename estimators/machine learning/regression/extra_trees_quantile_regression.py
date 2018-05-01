@@ -35,13 +35,6 @@ def interval_predict(model, X_test, y_test):
     df['median'] = df['median'] - mean
     return df
 
-def plotter(df):
-    fig = plt.figure(figsize=(12, 8))
-    ax = fig.add_subplot(1, 1, 1)
-    ax.scatter(range(len(df)), df['actual'], color='red')
-    ax.fill_between(range(len(df)), df['quantile_2.5'], df['quantile_97.5'], alpha=0.2, color='r')
-    plt.show()
-
 def plotter(df, ordered=False):
     if ordered:
         df['diff'] = df['quantile_97.5'] - df['quantile_2.5']
