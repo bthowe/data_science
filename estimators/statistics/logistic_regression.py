@@ -27,6 +27,11 @@ def plot_ci(model, x, alpha):
     proba = model.predict(X)
     cov = model.cov_params()
 
+    print(proba)
+    print(X)
+    import sys
+    sys.exit()
+
     gradient = (proba * (1 - proba) * X.T).T  # matrix of gradients for each observation
     std_errors = np.array([np.sqrt(np.dot(np.dot(g, cov), g)) for g in gradient])
 
