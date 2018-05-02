@@ -46,7 +46,7 @@ def plot_ci(model, alpha):
     a = model.best_params_['a']
     cov = model.best_estimator_.model.cov_params()
 
-    gradient = (proba * (a - proba) * X.T).T  # matrix of gradients for each observation
+    gradient = (proba * (a - proba) * X.T).T  # matrix of gradients for each observation, notice the "a" instead of a 1...consult the delta method.
     std_errors = np.array([np.sqrt(np.dot(np.dot(g, cov), g)) for g in gradient])
 
     c = norm.ppf(1 - (alpha / 2))
@@ -56,9 +56,9 @@ def plot_ci(model, alpha):
 
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(1, 1, 1)
-    ax.plot(X[:, 1], proba, label='predicted probability', color='b')
-    ax.plot(X[:, 1], lower, label='lower 95% CI', color='g')
-    ax.plot(X[:, 1], upper, label='upper 95% CI', color='g')
+    ax.plot(X[:, 1], proba, label='predicted probability', color='cornflowerblue')
+    ax.plot(X[:, 1], lower, label='lower 95% CI', color='seagreen')
+    ax.plot(X[:, 1], upper, label='upper 95% CI', color='seagreen')
     ax.set_ylabel('Probability')
     ax.set_xlabel('x1 value')
     plt.legend()
@@ -86,12 +86,13 @@ class LogRegWrapper(BaseEstimator, ClassifierMixin):
 
 def model_train(X, y):
     lrw = LogRegWrapper()
-    param_grid = {'a': uniform(.9, .1)}
-    grid_search = RandomizedSearchCV(lrw, param_grid, n_iter=10, scoring='roc_auc', verbose=10, n_jobs=-1, cv=5)
+    location = .75
+    param_grid = {'a': uniform(location, 1 - location)}
+    grid_search = RandomizedSearchCV(lrw, param_grid, n_iter=100, scoring='log_loss', verbose=10, n_jobs=-1, cv=5)
     grid_search.fit(X, y)
-    print(grid_search)
     print(grid_search.best_params_)
     print(grid_search.best_score_)
+    print(grid_search.best_estimator_.model.summary())
     return grid_search
 
 if __name__ == '__main__':
