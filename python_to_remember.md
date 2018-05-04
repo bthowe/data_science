@@ -58,6 +58,15 @@ convert a series to a dataframe
 df.to_frame()
 ```
 
+nice printing
+```pythonpd.set_option('max_columns', 1000)
+pd.set_option('max_info_columns', 1000)
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 30000)
+pd.set_option('max_colwidth', 4000)
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+```
+
 
 ## rpy2
 ```python
@@ -93,10 +102,13 @@ print(pandas2ri.ri2py(X_out))
 import statsmodels.api as sm
 mod = sm.OLS(y, X)
 res = mod.fit(cov_type='HC3')
+res.predict(X)  # generates dataframe of predictions
 
 print(dir(res))
 print(res.rsquared_adj)
 print(res.summary())
+
+res.get_prediction(X).summary_frame(alpha=0.05)  # confidence and prediction intervals
 ```
 or 
 ```python
