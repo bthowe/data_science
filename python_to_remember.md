@@ -43,6 +43,24 @@ Use all but the last step in a pipeline
 Pipeline(my_pipeline.steps[:-1]). transform()
 ```
 
+###Change object parameters
+```python
+from sklearn.ensemble import GradientBoostingRegressor
+alpha = 0.05
+clf = GradientBoostingRegressor(
+    loss='quantile', 
+    alpha=1 - alpha / 2,
+    n_estimators=250, 
+    max_depth=3,
+    learning_rate=.1, 
+    min_samples_leaf=9,
+    min_samples_split=9
+)
+clf.set_params(alpha=alpha / 2)
+```
+
+
+
 ## numpy
 ```python
 upper = []
