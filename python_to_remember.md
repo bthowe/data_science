@@ -59,7 +59,8 @@ df.to_frame()
 ```
 
 nice printing
-```pythonpd.set_option('max_columns', 1000)
+```python
+pd.set_option('max_columns', 1000)
 pd.set_option('max_info_columns', 1000)
 pd.set_option('expand_frame_repr', False)
 pd.set_option('display.max_rows', 30000)
@@ -67,6 +68,14 @@ pd.set_option('max_colwidth', 4000)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 ```
 
+filter observations
+```python
+def date_filter(x):
+    if x['condition'] == 'thing':
+        return True
+
+df.loc[df.apply(date_filter, axis=1)]
+```
 
 ## rpy2
 ```python
