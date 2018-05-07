@@ -95,6 +95,12 @@ def date_filter(x):
 df.loc[df.apply(date_filter, axis=1)]
 ```
 
+## matplotlib
+###Latex in the axis labels
+```python
+ax.set_ylabel('$x \cdot sin(x)$')
+ax.set_xlabel('$x$')
+```
 ## rpy2
 ```python
 os.environ['R_HOME'] = '/Library/Frameworks/R.framework/Resources'
