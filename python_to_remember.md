@@ -5,7 +5,7 @@
 import pprint
 pprint.pprint(patient_info)
 ```
-To get a list of modules in an environment
+###To get a list of modules in an environment
 ```python
 import pip
 installed_packages = pip.get_installed_distributions()
@@ -26,6 +26,15 @@ returns 4. Finally,
 ```
 returns the remainder, 1.
 
+###Fix a subset of the arguments of a function
+```python
+from functools import partial
+def func(a, b, c):
+    return a + b + c
+func2 = partial(func, a=2, b=3)
+func2(c=3)
+```
+returns a value of 8
 
 ## sklearn
 ### sample datasets
