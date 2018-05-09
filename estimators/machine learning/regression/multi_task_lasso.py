@@ -1,5 +1,6 @@
 # Author: Alexandre Gramfort <alexandre.gramfort@inria.fr>
 # License: BSD 3 clause
+# http://scikit-learn.org/stable/auto_examples/linear_model/plot_multi_task_lasso_support.html
 
 import sys
 import numpy as np
