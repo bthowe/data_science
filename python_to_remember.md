@@ -136,6 +136,20 @@ X_out = wru.predict_race(voter_file=X, census_geo='county', census_key=CENSUS_KE
 print(pandas2ri.ri2py(X_out))
 ```
 
+###forecast library in R
+```python
+r = robjects.r
+pandas2ri.activate()
+forecast = importr('forecast')
+
+ry_train = r.ts(df, start=r.c(1981, 1), frequency=365)
+
+arima_fit = forecast.auto_arima(ry_train)
+print(r.summary(arima_fit))
+output = forecast.forecast(arima_fit, h=36)
+print(output.names)
+print(output.rx('lower'))
+```
 
 
 ## statsmodels
@@ -167,8 +181,32 @@ import statsmodels.formula.api as smf
 mod = smf.quantreg('foodexp ~ income', df)
 res = mod.fit(q=.5)
 print(res.summary())
-
 ```
+### ARIMA
+```python
+from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+df.plot()
+plot_acf(df, lags=50)
+plot_pacf(df, lags=50)
+plt.show()
+
+model = ARIMA(df, order=(1, 0, 1))
+model_fit = model.fit(disp=0)
+print(model_fit.summary())
+forecast = model_fit.forecast(steps=180, alpha=0.05)
+```
+
+### add constant
+```python
+X = sm.add_constant(X)
+```
+### get coefficients
+```python
+results.params
+```
+
 
 ## PYMC3
 ```python
