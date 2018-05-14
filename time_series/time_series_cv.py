@@ -24,7 +24,7 @@ class TimeSeriesCrossVal(object):
 
     def _rolling_origin(self, X, y, model):
         ssr = 0
-        for i in xrange(self.min_train_obs, len(X) - self.lag_to_score):
+        for i in range(self.min_train_obs, len(X) - self.lag_to_score):
             X_train = X.iloc[:i]
             y_train = y.iloc[:i]
             X_test = X.iloc[i + self.lag_to_score, i + self.lag_to_score + 1]
@@ -33,7 +33,7 @@ class TimeSeriesCrossVal(object):
             model.fit(X_train, y_train)
             ssr += (model.predict(X_test) - y_test) ** 2
 
-        return ssr / len(xrange(self.min_train_obs, len(X) - self.lag_to_score))
+        return ssr / len(range(self.min_train_obs, len(X) - self.lag_to_score))
 
     def fit(self, X, y):
         model = clone(self.model)

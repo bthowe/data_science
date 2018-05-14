@@ -12,7 +12,6 @@ import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
 
-
 pd.set_option('max_columns', 1000)
 pd.set_option('max_info_columns', 1000)
 pd.set_option('expand_frame_repr', False)
@@ -28,25 +27,19 @@ def data_create():
     return df
 
 def corr_plots(df):
-    # df.plot()
-    # (df - df.mean()).plot()
-    # plot_acf(df, lags=50)
-    plot_pacf(df, lags=3)
-
-    # df['temp_mean'] = df['temp'].mean()
-    # fig = plt.figure()
-    # ax = fig.add_subplot(1, 1, 1)
-    # ax.plot(df['temp'])
-    # ax.plot(df['temp_mean'])
-    # ax.plot(df.mean())
-
+    df.plot()
+    plot_acf(df, lags=50)
+    plot_pacf(df, lags=50)
     plt.show()
 
-def regress(df):
+def acf_calculate(df, lag):
+    df['Ltemp'] = df['temp'].shift(lag)
+    print(df.corr())
+
+def pacf_calculate(df, lag):
     df['constant'] = 1
-    df['Ltemp'] = df['temp'].shift()
-    # df['L2temp'] = df['temp'].shift(2)
-    # df['L3temp'] = df['temp'].shift(3)
+    for i in range(1, lag + 1):
+        df['L{}temp'.format(i)] = df['temp'].shift(i)
     df.dropna(inplace=True)
 
     X = df
@@ -54,11 +47,7 @@ def regress(df):
 
     mod = sm.OLS(y, X)
     res = mod.fit()
-    # res = mod.fit(cov_type='HC3')
-    # res.predict(X)  # generates dataframe of predictions
-
-    print(res.rsquared_adj)
-    print(res.summary())
+    print('The partial autocorrelation for lag {0} is {1}'.format(lag, round(res.params[-1], 3)))
 
 def arima_forecast(df):
     r = robjects.r
@@ -110,6 +99,7 @@ def pred_plotter(df_forecast, df_statsmodels):
     plt.show()
 
 def plot_actual_and_forecast(df_actual, df_forecast):
+    print(df_forecast); sys.exit()
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(1, 1, 1)
     ax.plot(range(len(df_actual)), df_actual['temp'], color='cornflowerblue', label='Actual')
@@ -120,9 +110,11 @@ def plot_actual_and_forecast(df_actual, df_forecast):
     plt.show()
 
 if __name__ == '__main__':
-    # data_create().pipe(regress)
-    # data_create().pipe(corr_plots)
-    # data_create().pipe(crazy)
+    df = data_create()
+
+    acf_calculate(df, 3)
+    pacf_calculate(df, 2)
+    corr_plots(df)
 
     # df_f = data_create().pipe(arima_forecast)
     df_sm = data_create().pipe(arima_statsmodels)
