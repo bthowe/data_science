@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import binom, uniform, expon
 
+from sklearn.metrics import roc_auc_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 
@@ -60,7 +61,13 @@ def random_search(df):
     print(grid_search.best_params_)
     print(grid_search.best_score_)
     print(grid_search.best_estimator_.coef_)
+    print(grid_search.best_estimator_.intercept_)
+    print(roc_auc_score(y_test, grid_search.predict_proba(X_test)[:, 1]))
+    print('\n\n')
 
+def _model_pkl(X, y, model):
+    model.fit(X, y)
+    return model
 
 def skopt_search(df):
     X = df
@@ -68,14 +75,23 @@ def skopt_search(df):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=42)
 
+
+    from sklearn.pipeline import Pipeline
+
+    pipeline = Pipeline(
+        [
+            ('classifier', LogisticRegression())
+        ]
+    )
     lr_param_space = [
-        Categorical(['l1', 'l2'], name='penalty'),
-        Real(10 ** -5, 5, "log-uniform", name='C'),
-        Categorical([True, False], name='fit_intercept'),
-        Categorical([None, 'balanced'], name='class_weight')
+        Categorical([LogisticRegression()], name='classifier'),
+        Categorical(['l1', 'l2'], name='classifier__penalty'),
+        Real(10 ** -5, 5, "log-uniform", name='classifier__C'),
+        Categorical([True, False], name='classifier__fit_intercept'),
+        Categorical([None, 'balanced'], name='classifier__class_weight')
     ]
 
-    clsfr = LogisticRegression()
+    clsfr = pipeline
 
     @use_named_args(lr_param_space)
     def objective(**params):
@@ -85,21 +101,26 @@ def skopt_search(df):
 
     res_gp = gp_minimize(objective, lr_param_space, n_calls=50, random_state=0)
 
+    # print(res_gp)
+    # sys.exit()
+
     print('Best score: {}'.format(res_gp.fun))
     print('''Best parameters:\n
     \t- penalty={0}\n
     \t- C={1}\n
     \t- fit_intercept={2}\n
     \t- class_weight={3}
-    '''.format(res_gp.x[0], res_gp.x[1], res_gp.x[2], res_gp.x[3]))
+    '''.format(res_gp.x[1], res_gp.x[2], res_gp.x[3], res_gp.x[4]))
     # plot_convergence(res_gp)
     # plt.show()
 
-    # todo: time each of these.
-    # todo: what are the coefficients here?
-    # todo: how do you save the estimator?
+    model = _model_pkl(X_train, y_train, clsfr.set_params(penalty=res_gp.x[0], C=res_gp.x[1], fit_intercept=res_gp.x[2], class_weight=res_gp.x[3]))
+    print(roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]))
+    print(model.coef_)
+    print(model.intercept_)
 
 if __name__ == '__main__':
     df = data_create()
     random_search(df.copy())
     skopt_search(df.copy())
+    # todo: time each of these. I think here, the random search model would be faster.
