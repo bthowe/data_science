@@ -272,6 +272,79 @@ pm.kdeplot(np.random.exponential(30, size=10000), shade=0.5);
 
 ## Tensorflow
 
+###Useful commands
+####create a tensorflow variable
+```python
+x = tf.Variable(0.05, name='root', dtype=np.float64)
+```
+###update a variable
+```python
+x.assign(x ** 2)
+```
+####create a constant
+```python
+tf.constant(2, dtype=np.int64)
+```
+####like a constant but needs to have a value fed in each time the graph is run.
+```python
+tf.placeholder(np.float64, name="Inscribed_Permimeter")
+```
+####sum
+```python
+tf.add(x, y, name="sum")
+```
+####product
+```python
+tf.multiply(sum_, y, name='multiply')
+```
+####check whether two tensors have the same value
+```python
+tf.equal(tf.constant(7), tf.constant(7))
+```
+####matrix multiplication
+```python
+tf.matmul(mat1, mat2)
+```
+####add across rows of a matrix
+```python
+tf.reduce_sum(mat, axis=0)
+```
+####gradient
+```python
+x = tf.Variable(0.05, name="root", dtype=np.float64)
+f = x * x - 2
+tf.gradients(f, x)[0]
+```
+###Sessions
+####initialize
+```python
+sess = tf.Session()
+```
+####run
+```python
+sess.run(fibonacci)
+sess.run(tf.add(x, y), feed_dict={x: 10, y: 20})
+```
+####close
+```python
+sess.close()
+```
+
+###Resets the session (closes the current section and opens a new one); this is useful in a notebook. Also resets the default graph. 
+```python
+def reset_tf():
+    global sess
+    if sess:
+        sess.close()
+    tf.reset_default_graph()
+    sess = tf.Session()
+```
+###Variables must be initialized before they can be used. This is a global initializer. This function is useful in a notebook. 
+```python
+def reset_vars():
+    sess.run(tf.global_variables_initializer())
+```
+
 #### Sample datasets
 ```python
 from tensorflow.examples.tutorials.mnist import input_data
