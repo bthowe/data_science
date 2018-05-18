@@ -14,10 +14,19 @@ from skopt.plots import plot_convergence
 from skopt.space import Real, Integer, Categorical
 from sklearn.model_selection import cross_val_score
 
+pd.set_option('max_columns', 1000)
+pd.set_option('max_info_columns', 1000)
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 30000)
+pd.set_option('max_colwidth', 4000)
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+
+
+
 np.random.seed(42)
 
 def data_create():
-    n = 10000
+    n = 1000000
 
     b0 = -1.6
     b1 = -0.03
@@ -33,6 +42,30 @@ def data_create():
     df['y'] = binom.rvs(1, df['pi_x'])
 
     return df.drop('pi_x', 1)
+
+def data_create2():
+    n = 600
+    n_features = 3
+    # 60000 and 3, respectively, killed it.
+
+    b = np.random.uniform(-2, 2, size=(n_features + 1, 1))
+
+    df = pd.concat(
+        [
+            pd.DataFrame(np.ones((n, 1)), columns=['constant']),
+            pd.DataFrame(np.random.uniform(-1, 1, size=(n, n_features)))
+        ],
+        axis=1
+    )
+
+    df['pi_x'] = np.exp(df.values.dot(b)) / (1 + np.exp(df.values.dot(b)))
+
+    # df_sample = df.sample(frac=.1)
+    # df.loc[df_sample.index, 'pi_x'] = uniform.rvs(0, 1, size=(len(df_sample),))
+
+    df['y'] = binom.rvs(1, df['pi_x'])
+
+    return df.drop(['constant', 'pi_x'], 1)
 
 def random_search(df):
     X = df
@@ -97,7 +130,7 @@ def skopt_search(df):
     def objective(**params):
         clsfr.set_params(**params)
 
-        return -np.mean(cross_val_score(clsfr, X_train, y_train, verbose=0, cv=5, n_jobs=-1, scoring="roc_auc"))
+        return -np.mean(cross_val_score(clsfr, X_train, y_train, verbose=10, cv=5, n_jobs=-1, scoring="roc_auc"))
 
     res_gp = gp_minimize(objective, lr_param_space, n_calls=50, random_state=0)
 
@@ -111,15 +144,21 @@ def skopt_search(df):
     \t- fit_intercept={2}\n
     \t- class_weight={3}
     '''.format(res_gp.x[1], res_gp.x[2], res_gp.x[3], res_gp.x[4]))
-    # plot_convergence(res_gp)
-    # plt.show()
+    plot_convergence(res_gp)
+    plt.show()
 
-    model = _model_pkl(X_train, y_train, clsfr.set_params(penalty=res_gp.x[0], C=res_gp.x[1], fit_intercept=res_gp.x[2], class_weight=res_gp.x[3]))
+    model = _model_pkl(X_train, y_train, clsfr.set_params(classifier__penalty=res_gp.x[1], classifier__C=res_gp.x[2], classifier__fit_intercept=res_gp.x[3], classifier__class_weight=res_gp.x[4]))
     print(roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]))
-    print(model.coef_)
-    print(model.intercept_)
+    print(model.named_steps['classifier'].coef_)
+    print(model.named_steps['classifier'].intercept_)
 
 if __name__ == '__main__':
+    df = data_create2()
+    # print(df['y'].describe())
+    # sys.exit()
+    skopt_search(df.copy())
+
+    sys.exit()
     df = data_create()
     random_search(df.copy())
     skopt_search(df.copy())

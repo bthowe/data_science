@@ -301,6 +301,10 @@ tf.multiply(sum_, y, name='multiply')
 ```python
 tf.equal(tf.constant(7), tf.constant(7))
 ```
+####cast variable as float, etc.
+```python
+tf.cast(tf.nn.sigmoid(y) > 0.5, np.float32)
+```
 ####matrix multiplication
 ```python
 tf.matmul(mat1, mat2)
