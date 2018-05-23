@@ -1,9 +1,13 @@
 import sys
+import joblib
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from scipy.stats import binom
+import matplotlib.pyplot as plt
+from scipy.stats import binom, uniform
+from sklearn.linear_model import Ridge
 from statsmodels.genmod.families import links as L
+from sklearn.model_selection import RandomizedSearchCV
 
 pd.set_option('max_columns', 1000)
 pd.set_option('max_info_columns', 1000)
@@ -13,90 +17,83 @@ pd.set_option('max_colwidth', 4000)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 
-def artificial_data1():
-    N = 1000
-    N_groups = int(N / 10)
+def data_create_train():
+    X_train = joblib.load('data_files/poisson_data.pkl')
+    y_train = joblib.load('data_files/poisson_outcomes.pkl').reset_index(drop=True)
+    df_train = pd.concat(
+        [
+            X_train,
+            y_train
+        ],
+        axis=1
+    )
+    X_test = joblib.load('data_files/poisson_data_test.pkl')
+    y_test = joblib.load('data_files/poisson_outcomes_test.pkl').reset_index(drop=True)
+    df_test = pd.concat(
+        [
+            X_test,
+            y_test
+        ],
+        axis=1
+    )
+    return df_train, df_test
 
-    beta0 = -1.6
-    beta1 = -0.03
-    beta2 = 0.6
-    beta3 = 1.6
-
-    df = pd.DataFrame(np.random.uniform(-1, 1, size=(N, 3)), columns=['X1', 'X2', 'X3'])
-    df['pi_x'] = np.exp(beta0 + beta1 * df['X1'] + beta2 * df['X2'] + beta3 * df['X3']) / (1 + np.exp(beta0 + beta1 * df['X1'] + beta2 * df['X2'] + beta3 * df['X3']))
-    df['y'] = binom.rvs(1, df['pi_x'])
-    df['constant'] = 1
-    df['group'] = np.random.choice(range(N_groups), size=(N, 1))
-
-    df['covarX1'] = 0
-    df['covarX2'] = 0
-    df['covarX3'] = 0
-    for g in range(N_groups):
-        df.loc[df['group'] == g, 'covarX1'] = df['X1'].loc[df['group'] == g].mean()
-        df.loc[df['group'] == g, 'covarX2'] = df['X2'].loc[df['group'] == g].mean()
-        df.loc[df['group'] == g, 'covarX3'] = df['X3'].loc[df['group'] == g].mean()
-
-    return df
-
-def artificial_data2():
-    # todo: how do the models do given a different data generation process?
-    pass
-
-
-# todo: how do the models' results compare if the number of N across each row is the same?
-
-
-
-def log_reg(df, covars, target):
-    # logit = sm.Logit(df[target], df[covars])
-    # print(logit.fit().params)
-
-    # or
-
-    gamma_model = sm.GLM(df[target], df[covars], family=sm.families.Binomial())
+def poisson_reg(df, covars, target):
+    gamma_model = sm.GLM(df[target], df[covars], family=sm.families.Poisson())
     gamma_results = gamma_model.fit()
     print(gamma_results.summary())
+    return gamma_results
 
-
-def binomial_reg(df, covars, target):
-    """
-    very clear explanation: https://stats.stackexchange.com/questions/144121/logistic-regression-bernoulli-vs-binomial-response-variables?rq=1
-
-    links = [L.logit, L.probit, L.cauchy, L.log, L.cloglog, L.identity]
-    sm.families.Binomial(link=L.probit)
-    default is L.logit
-
-    """
-    gamma_model = sm.GLM(df[target], df[covars], family=sm.families.Binomial(link=L.probit))
+def neg_bin_reg(df, covars, target):
+    gamma_model = sm.GLM(df[target], df[covars], family=sm.families.NegativeBinomial())
     gamma_results = gamma_model.fit()
     print(gamma_results.summary())
+    return gamma_results
 
-def frac_log_reg(df, covars, target):
-    """
-    cov_type='HC0' employs the sandwich (i.e., heteroskedastic consistent) covariance
-    While not mentioned explicityly, I'm assuming the estimation is done using quasi-maximum likelihood since the
-    target is not an integer and so the usual logistic regression likelihood function cannot be used. Maybe I should
-     scour the code
-    """
-    logit = sm.Logit(df[target], df[covars])
-    print(logit.fit(cov_type='HC0').params)
+def normal_reg(df, covars, target):
+    params = {
+        'alpha': uniform(),
+        'fit_intercept': [True, False],
+        'normalize': [True, False]
+    }
+
+    grid_search = RandomizedSearchCV(Ridge(), params, n_iter=150, scoring='neg_mean_absolute_error',
+                                     verbose=10, n_jobs=1, cv=3)
+    grid_search.fit(df[covars], df[target])
+    print(grid_search.best_params_)
+    print(grid_search.best_score_)
+    return grid_search
+
+def plotter(df, model, model_name, covars):
+    df['y_pred'] = model.predict(df[covars])
+
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(1, 1, 1)
+
+    for bucket in [('Boberdoo (fixed)', 'sandybrown'), ('Boberdoo (dynamic)', 'cornflowerblue'), ('SciOps', 'seagreen'), ('first_party', 'firebrick')]:
+        df_temp = df.loc[df['bucket={}'.format(bucket[0])] == 1]
+        df_temp.sort_values('spend', inplace=True)
+        ax.scatter(df_temp['spend'], df_temp['ltv'], alpha=0.25, color=bucket[1], label='{} actual'.format(bucket[0]))
+        ax.plot(df_temp['spend'], model.predict(df_temp[covars]), color=bucket[1], label='{} predicted'.format(bucket[0]))
+    # ax.plot(np.linspace(0, max(df['spend'].max(), df['ltv'].max()), 1000), np.linspace(0, max(df['spend'].max(), df['ltv'].max()), 1000), color='black', linestyle='--')
+
+    plt.xlabel('Spend')
+    plt.ylabel('Apps')
+    plt.legend()
+    plt.title('Apps vs Spend, test set, {}'.format(model_name))
+    plt.savefig('/Users/travis.howe/Downloads/apps_vs_Spend_by_bucket_{}.png'.format(model_name))
+    # plt.show()
 
 
 if __name__ == '__main__':
-    np.random.seed(2)
-    df = artificial_data1()
+    covars = ['bucket=Boberdoo (dynamic)', 'bucket=Boberdoo (fixed)', 'bucket=SciOps', 'bucket=first_party', 'spend', 'spend2', 'spend_bucket=Boberdoo (dynamic)', 'spend2_bucket=Boberdoo (dynamic)', 'spend_bucket=Boberdoo (fixed)', 'spend2_bucket=Boberdoo (fixed)', 'spend_bucket=SciOps', 'spend2_bucket=SciOps', 'spend_bucket=first_party', 'spend2_bucket=first_party']
+    df_train, df_test = data_create_train()
 
-    log_reg(df, ['constant', 'X1', 'X2', 'X3'], 'y')
-    log_reg(df, ['constant', 'covarX1', 'covarX2', 'covarX3'], 'y')
+    poisson = poisson_reg(df_train, covars, 'ltv')
+    neg_bin = neg_bin_reg(df_train, covars, 'ltv')
+    normal = normal_reg(df_train, covars, 'ltv')
 
-    df = df.groupby(df['group']).agg({'y': ['sum', 'count'], 'covarX1': 'mean', 'covarX2': 'mean', 'covarX3': 'mean'}).reset_index(drop=True)
-    df.columns = ['y_success', 'y_count', 'covarX1', 'covarX2', 'covarX3']
-    df['constant'] = 1
-    df['y_failure'] = df['y_count'] - df['y_success']
-    df['y_frac'] = df['y_success'] / df['y_count']
-    df.drop('y_count', 1, inplace=True)
-
-    # print(df.head())
-
-    binomial_reg(df, ['constant', 'covarX1', 'covarX2', 'covarX3'], ['y_success', 'y_failure'])
-    frac_log_reg(df, ['constant', 'covarX1', 'covarX2', 'covarX3'], 'y_frac')
+    plotter(df_test, poisson, 'Poisson', covars)
+    plotter(df_test, neg_bin, 'Negative Binomial', covars)
+    plotter(df_test, normal, 'Normal', covars)
+    plt.show()
