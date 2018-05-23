@@ -172,6 +172,21 @@ import patsy
 import statsmodels.formula.api as smf
 ols = smf.ols('foodexp ~ income', data).fit()
 ```
+### poisson regularized regression
+```python
+import statsmodels.api as sm
+gamma_model = sm.GLM(df[target], df[covars], family=sm.families.Poisson())
+gamma_results = gamma_model.fit_regularized(alpha=.5, L1_wt=.5)
+gamma_results.predict(X_test)
+```
+### poisson regression (without the regularization)
+```python
+import statsmodels.api as sm
+gamma_model = sm.GLM(df[target], df[covars], family=sm.families.Poisson())
+gamma_results = gamma_model.fit()
+gamma_results.predict(X_test)
+```
+Setting alpha=0 when calling fit_regularized does not yield the same result as fit(). 
 
 ### quantile regression
 ```python
