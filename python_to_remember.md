@@ -95,6 +95,26 @@ pd.set_option('max_colwidth', 4000)
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 ```
 
+crosstab
+```python
+pd.crosstab(df[0], df[1])
+```
+
+map
+```python
+df[0].map(lambda x: x + 1)
+```
+applymap
+```python
+df.applymap(lambda x: x + 1)
+```
+apply
+```python
+df.apply(lambda x: x[0] + 1, axis=1)
+```
+Map works elementwise on a series. Apply works on series or rows or columns of dataframe. Applymap applies the function elementwise to the entire dataframe.
+
+
 filter observations
 ```python
 def date_filter(x):
