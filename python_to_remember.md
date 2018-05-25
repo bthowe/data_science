@@ -391,6 +391,23 @@ from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('/tmp/data', one_hot=True)
 ```
 
+### Layers
+#### max_pooling
+```python
+tf.layers.max_pooling2d(out_conv, pool_size=(2, 2), strides=(2,2), padding='same')
+```
+#### convolutional
+```python
+tf.layers.conv2d(x_reshape, 16, filt_size, padding='same', activation=tf.nn.relu, name="convolution")
+```
+#### dense
+```python
+tf.layers.dense(out_pool_reshape, 100, activation=tf.nn.relu)
+```
+#### dropout
+```python
+tf.layers.dropout(hidden2, dropout, training=training)
+```
 
 
 ```python
