@@ -25,6 +25,10 @@ batch_size = 50
 num_iterations = 400 #1500
 display_step = 100
 
+now = datetime.now()
+logs_path = now.strftime("%Y%m%d-%H%M%S") + '/summaries'
+print(logs_path)
+
 def data_create():
     return input_data.read_data_sets('/tmp/data/', one_hot=True)
 
@@ -36,7 +40,10 @@ def _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations):
     init = tf.global_variables_initializer()
     # saver = tf.train.Saver()
     with tf.Session() as sess:
+        merged = tf.summary.merge_all()
         sess.run(init)
+        train_writer = tf.summary.FileWriter(logs_path + '/train', graph=tf.get_default_graph())
+        test_writer = tf.summary.FileWriter(logs_path + '/test', graph=tf.get_default_graph())
 
         step = 1
         for i in range(num_iterations):
@@ -50,18 +57,18 @@ def _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations):
 
             # Print status every 100 iterations.
             if (i % display_step == 0) or (i == num_iterations - 1):
-                # summary = sess.run(merged, feed_dict={x: x_batch, y_true: y_true_batch})
-                # train_writer.add_summary(summary, step)
+                summary = sess.run(merged, feed_dict={x: x_batch, y_true: y_true_batch})
+                train_writer.add_summary(summary, step)
 
                 # ----------------------- TEST ---------------------------
                 # Test model
-                # summary, l, acc = sess.run([merged, loss, accuracy], feed_dict={x: data.test.images,
-                #                                                                 y_true: data.test.labels})
-                # test_writer.add_summary(summary, step)
+                summary, l, acc = sess.run([merged, loss, accuracy], feed_dict={x: data.test.images,
+                                                                                y_true: data.test.labels})
+                test_writer.add_summary(summary, step)
 
                 # Message for network evaluation
-                # msg = "Optimization Iteration: {0:>6}, Test Loss: {1:>6}, Test Accuracy: {2:>6.1%}"
-                # print(msg.format(i, l, acc))
+                msg = "Optimization Iteration: {0:>6}, Test Loss: {1:>6}, Test Accuracy: {2:>6.1%}"
+                print(msg.format(i, l, acc))
 
                 step += 1
 
@@ -73,6 +80,9 @@ def _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations):
 
         # Print the time-usage.
         print("Time usage: " + str(timedelta(seconds=int(round(time_dif)))))
+
+        train_writer.close()
+        test_writer.close()
 
 def conv_neural_net(data):
     data.test.cls = np.argmax(data.test.labels, axis=1)
@@ -89,12 +99,14 @@ def conv_neural_net(data):
     y_pred = tf.layers.dense(out, n_classes, activation=None)
 
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
+    tf.summary.scalar('loss', loss)
 
     optimizer = tf.train.AdamOptimizer().minimize(loss)
 
     y_pred_cls = tf.argmax(y_pred, dimension=1)
     correct_prediction = tf.equal(y_pred_cls, y_true_cls)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.scalar('accuracy', accuracy)
 
     # _optimize(data, num_iterations)
     _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations)
@@ -117,6 +129,6 @@ if __name__ == '__main__':
     conv_neural_net(df)
 
 
-# todo: get the reporting of the fitting process
+# todo: get tensorboard working: make sure you're in the correct directory, type tensorboard --logdir=20180526-231700/summaries, and then go to localhost:6006
 # todo: why not train and test like in the hierarchical nn
 # todo: change the architecture to be like in the notes.

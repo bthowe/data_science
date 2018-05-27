@@ -414,3 +414,13 @@ tf.layers.dropout(hidden2, dropout, training=training)
 from pylib.draw_nn import draw_neural_net_fig
 draw_neural_net_fig([2, 1])
 ```
+
+### activating tensorboard
+#### in terminal
+```bash
+tensorboard --logdir=<directory>
+```
+#### in browser
+```html
+localhost:6006
+```
