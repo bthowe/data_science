@@ -416,6 +416,7 @@ draw_neural_net_fig([2, 1])
 ```
 
 ### activating tensorboard
+After cd-ing into the correct directory.
 #### in terminal
 ```bash
 tensorboard --logdir=<directory>

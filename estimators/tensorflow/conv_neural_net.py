@@ -111,6 +111,35 @@ def conv_neural_net(data):
     # _optimize(data, num_iterations)
     _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations)
 
+def conv_neural_net2(data):
+    data.test.cls = np.argmax(data.test.labels, axis=1)
+
+    x = tf.placeholder(tf.float32, shape=[None, img_size_flat], name='x')
+    y_true = tf.placeholder(tf.float32, shape=[None, n_classes], name='y_true')
+    y_true_cls = tf.argmax(y_true, dimension=1)
+
+    x_reshape = tf.reshape(x, shape=[-1, img_size, img_size, 1])  # the -1 infers the number of rows, img_size is the number of pixels in one row/column, the last 1 refers to the number of channels? (I think)
+    out_conv = tf.layers.conv2d(x_reshape, 32, filt_size, padding='same', activation=tf.nn.relu, name="convolution")
+    out_pool = tf.layers.max_pooling2d(out_conv, pool_size=(2, 2), strides=(2,2), padding='same')
+    out_conv2 = tf.layers.conv2d(out_pool, 64, [5, 5], padding='same', activation=tf.nn.relu, name="convolution")
+    out_pool2 = tf.layers.max_pooling2d(out_conv2, pool_size=(2, 2), strides=(2,2), padding='same')
+    out_pool_reshape = tf.reshape(out_pool2, [-1, out_pool2.shape[1:].num_elements()])
+    out = tf.layers.dense(out_pool_reshape, 100, activation=tf.nn.relu)
+    y_pred = tf.layers.dense(out, n_classes, activation=None)
+
+    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
+    tf.summary.scalar('loss', loss)
+
+    optimizer = tf.train.AdamOptimizer().minimize(loss)
+
+    y_pred_cls = tf.argmax(y_pred, dimension=1)
+    correct_prediction = tf.equal(y_pred_cls, y_true_cls)
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.scalar('accuracy', accuracy)
+
+    # _optimize(data, num_iterations)
+    _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations)
+
 
 def prediction():
     prediction = tf.argmax(y_pred, 1)
@@ -126,9 +155,9 @@ def prediction():
 
 if __name__ == '__main__':
     df = data_create()
-    conv_neural_net(df)
+    conv_neural_net2(df)
 
 
-# todo: get tensorboard working: make sure you're in the correct directory, type tensorboard --logdir=20180526-231700/summaries, and then go to localhost:6006
+# todo: understand the train test piece in tensorboard
 # todo: why not train and test like in the hierarchical nn
 # todo: change the architecture to be like in the notes.
