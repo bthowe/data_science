@@ -1,18 +1,10 @@
 import sys
-import matplotlib
-import seaborn as sns
+import time
 import numpy as np
 import tensorflow as tf
-from tensorflow.examples.tutorials.mnist import input_data
-
 import matplotlib.pyplot as plt
-
-import time
 from datetime import datetime, timedelta
-
-# import pylib.conv_widget as cw
-# from pylib.tensorboardcmd import tensorboard_cmd
-
+from tensorflow.examples.tutorials.mnist import input_data
 
 img_size = 28
 img_size_flat = img_size * img_size
@@ -38,6 +30,7 @@ def _train(data, x, y_true, loss, accuracy, optimizer, num_iterations):
     start_time = time.time()
 
     init = tf.global_variables_initializer()
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         merged = tf.summary.merge_all()
         sess.run(init)
@@ -68,6 +61,7 @@ def _train(data, x, y_true, loss, accuracy, optimizer, num_iterations):
 
         train_writer.close()
         test_writer.close()
+        saver.save(sess, './mnis_model')  # , global_step=i)
 
 
 def deep_conv_neural_net_architecture(x):
@@ -100,7 +94,8 @@ def deep_conv_neural_net_architecture(x):
 
     out_pool_reshape = tf.reshape(out_pool2, [-1, out_pool2.shape[1:].num_elements()])  # reshape to a (img_size / 4) * (img_size / 4) * 64 (= 3136) X 1 dimension tensor
     out = tf.layers.dense(out_pool_reshape, 1024, activation=tf.nn.relu)  # fully connected layer
-    return tf.layers.dense(out, n_classes, activation=None)  # output layer (n_classes long)
+    y_pred = tf.layers.dense(out, n_classes, activation=None, name='pred')  # output layer (n_classes long)
+    return y_pred
 
 
 def deep_conv_neural_net_run(data):
@@ -123,22 +118,27 @@ def deep_conv_neural_net_run(data):
     _train(data, x, y_true, loss, accuracy, optimizer, num_iterations)
 
 
-def prediction():
-    prediction = tf.argmax(y_pred, 1)
+def prediction(data, index):
+    image = data.test.images[index]
+    with tf.Session() as sess:
+        saver = tf.train.import_meta_graph('mnis_model.meta')
+        saver.restore(sess, tf.train.latest_checkpoint('./'))
 
-    def predict(idx):
-        image = data.test.images[idx]
-        return sess.run(prediction, feed_dict={x: [image]})
+        graph = tf.get_default_graph()
 
-    idx = 0
-    actual = np.argmax(data.test.labels[idx])
-    print("Predicted: %d, Actual: %d" % (predict(idx), actual))
-    plt.imshow(data.test.images[idx].reshape((28, 28)), cmap=plt.cm.gray_r)
+        pred = graph.get_tensor_by_name('pred:0')
+        x = graph.get_tensor_by_name('x:0')
+
+        y_pred = sess.run(pred, feed_dict={x: [image]})
+
+    y_actual = np.argmax(data.test.labels[index])
+    print("Predicted: {0:1d}, Actual: {1:1d}".format(y_pred[0], y_actual))
+    plt.imshow(data.test.images[index].reshape((28, 28)), cmap=plt.cm.gray_r)
+    plt.show()
 
 if __name__ == '__main__':
     df = data_create()
-    deep_conv_neural_net_run(df)
+    # deep_conv_neural_net_run(df)
 
-# todo: understand the train test piece in tensorboard
-# todo: why not train and test like in the hierarchical nn
-# todo: prediction piece
+    index = 2
+    prediction(df, index)

@@ -453,6 +453,11 @@ tf.layers.dense(out_pool_reshape, 100, activation=tf.nn.relu)
 tf.layers.dropout(hidden2, dropout, training=training)
 ```
 
+#### list operations in tensorflow graph
+```python
+for op in graph.get_operations():
+    print(op.name)
+```
 
 ```python
 from pylib.draw_nn import draw_neural_net_fig
@@ -469,3 +474,4 @@ tensorboard --logdir=<directory>
 ```html
 localhost:6006
 ```
+
