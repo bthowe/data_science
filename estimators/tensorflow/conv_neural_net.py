@@ -1,3 +1,4 @@
+import sys
 import matplotlib
 import seaborn as sns
 import numpy as np
@@ -32,13 +33,11 @@ print(logs_path)
 def data_create():
     return input_data.read_data_sets('/tmp/data/', one_hot=True)
 
-def _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations):
-    # (data, x, y_label, loss, accuracy, train, training, n_steps, 1000)
-    # Start-time used for printing time-usage below.
+
+def _train(data, x, y_true, loss, accuracy, optimizer, num_iterations):
     start_time = time.time()
 
     init = tf.global_variables_initializer()
-    # saver = tf.train.Saver()
     with tf.Session() as sess:
         merged = tf.summary.merge_all()
         sess.run(init)
@@ -47,12 +46,8 @@ def _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations):
 
         step = 1
         for i in range(num_iterations):
-
-            # Get a batch of training examples.
+            # train weights, mini-batch
             x_batch, y_true_batch = data.train.next_batch(batch_size)
-
-            # ---------------------- TRAIN -------------------------
-            # Optimize model
             sess.run(optimizer, feed_dict={x: x_batch, y_true: y_true_batch})
 
             # Print status every 100 iterations.
@@ -60,85 +55,72 @@ def _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations):
                 summary = sess.run(merged, feed_dict={x: x_batch, y_true: y_true_batch})
                 train_writer.add_summary(summary, step)
 
-                # ----------------------- TEST ---------------------------
-                # Test model
-                summary, l, acc = sess.run([merged, loss, accuracy], feed_dict={x: data.test.images,
-                                                                                y_true: data.test.labels})
+                # test data on current model
+                summary, l, acc = sess.run([merged, loss, accuracy], feed_dict={x: data.test.images, y_true: data.test.labels})
                 test_writer.add_summary(summary, step)
-
-                # Message for network evaluation
                 msg = "Optimization Iteration: {0:>6}, Test Loss: {1:>6}, Test Accuracy: {2:>6.1%}"
                 print(msg.format(i, l, acc))
 
                 step += 1
 
-        # Ending time.
-        end_time = time.time()
-
-        # Difference between start and end-times.
-        time_dif = end_time - start_time
-
-        # Print the time-usage.
+        time_dif = time.time() - start_time
         print("Time usage: " + str(timedelta(seconds=int(round(time_dif)))))
 
         train_writer.close()
         test_writer.close()
 
-def conv_neural_net(data):
-    data.test.cls = np.argmax(data.test.labels, axis=1)
 
-    x = tf.placeholder(tf.float32, shape=[None, img_size_flat], name='x')
-    y_true = tf.placeholder(tf.float32, shape=[None, n_classes], name='y_true')
-    y_true_cls = tf.argmax(y_true, dimension=1)
-
+def deep_conv_neural_net_architecture(x):
+    # have to reshape the data into four dimensions (number of images X row pixels X column pixels X number of channels)
+    # the -1 infers the number of rows of the flattened df (i.e., the number of distinct images), img_size is the number of pixels in one row/column of the image, and the last 1 refers to the number of channels
     x_reshape = tf.reshape(x, shape=[-1, img_size, img_size, 1])
-    out_conv = tf.layers.conv2d(x_reshape, 16, filt_size, padding='same', activation=tf.nn.relu, name="convolution")
-    out_pool = tf.layers.max_pooling2d(out_conv, pool_size=(2, 2), strides=(2,2), padding='same')
-    out_pool_reshape = tf.reshape(out_pool, [-1, out_pool.shape[1:].num_elements()])
-    out = tf.layers.dense(out_pool_reshape, 100, activation=tf.nn.relu)
-    y_pred = tf.layers.dense(out, n_classes, activation=None)
 
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
-    tf.summary.scalar('loss', loss)
+    # send in the reshaped data and specify 32 distinct filters of dimension filt_size (5 X 5)
+    out_conv = tf.layers.conv2d(
+        x_reshape,
+        32,
+        kernel_size=filt_size,
+        padding='same',
+        activation=tf.nn.relu,
+        name="convolution"
+    )
+    out_pool = tf.layers.max_pooling2d(out_conv, pool_size=(2, 2), strides=2, padding='same')
+    # the output at this point will be (img_size / 2) X (img_size / 2) X filter number (32) because of the max pooling downsampling size and stride length.
 
-    optimizer = tf.train.AdamOptimizer().minimize(loss)
+    out_conv2 = tf.layers.conv2d(
+        out_pool,
+        64,
+        kernel_size=[5, 5],
+        padding='same',
+        activation=tf.nn.relu,
+        name="convolution2"
+    )
+    out_pool2 = tf.layers.max_pooling2d(out_conv2, pool_size=(2, 2), strides=2, padding='same')
+    # the output at this point will be (img_size / 4) X (img_size / 4) X filter number (64) because of the twice max pooled data.
 
-    y_pred_cls = tf.argmax(y_pred, dimension=1)
-    correct_prediction = tf.equal(y_pred_cls, y_true_cls)
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    tf.summary.scalar('accuracy', accuracy)
+    out_pool_reshape = tf.reshape(out_pool2, [-1, out_pool2.shape[1:].num_elements()])  # reshape to a (img_size / 4) * (img_size / 4) * 64 (= 3136) X 1 dimension tensor
+    out = tf.layers.dense(out_pool_reshape, 1024, activation=tf.nn.relu)  # fully connected layer
+    return tf.layers.dense(out, n_classes, activation=None)  # output layer (n_classes long)
 
-    # _optimize(data, num_iterations)
-    _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations)
 
-def conv_neural_net2(data):
+def deep_conv_neural_net_run(data):
     data.test.cls = np.argmax(data.test.labels, axis=1)
 
     x = tf.placeholder(tf.float32, shape=[None, img_size_flat], name='x')
     y_true = tf.placeholder(tf.float32, shape=[None, n_classes], name='y_true')
-    y_true_cls = tf.argmax(y_true, dimension=1)
-
-    x_reshape = tf.reshape(x, shape=[-1, img_size, img_size, 1])  # the -1 infers the number of rows, img_size is the number of pixels in one row/column, the last 1 refers to the number of channels? (I think)
-    out_conv = tf.layers.conv2d(x_reshape, 32, filt_size, padding='same', activation=tf.nn.relu, name="convolution")
-    out_pool = tf.layers.max_pooling2d(out_conv, pool_size=(2, 2), strides=(2,2), padding='same')
-    out_conv2 = tf.layers.conv2d(out_pool, 64, [5, 5], padding='same', activation=tf.nn.relu, name="convolution")
-    out_pool2 = tf.layers.max_pooling2d(out_conv2, pool_size=(2, 2), strides=(2,2), padding='same')
-    out_pool_reshape = tf.reshape(out_pool2, [-1, out_pool2.shape[1:].num_elements()])
-    out = tf.layers.dense(out_pool_reshape, 100, activation=tf.nn.relu)
-    y_pred = tf.layers.dense(out, n_classes, activation=None)
+    y_pred = deep_conv_neural_net_architecture(x)
 
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y_true))
     tf.summary.scalar('loss', loss)
-
     optimizer = tf.train.AdamOptimizer().minimize(loss)
 
+    y_true_cls = tf.argmax(y_true, dimension=1)
     y_pred_cls = tf.argmax(y_pred, dimension=1)
     correct_prediction = tf.equal(y_pred_cls, y_true_cls)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.summary.scalar('accuracy', accuracy)
 
-    # _optimize(data, num_iterations)
-    _optimize(data, x, y_true, loss, accuracy, optimizer, num_iterations)
+    _train(data, x, y_true, loss, accuracy, optimizer, num_iterations)
 
 
 def prediction():
@@ -155,9 +137,8 @@ def prediction():
 
 if __name__ == '__main__':
     df = data_create()
-    conv_neural_net2(df)
-
+    deep_conv_neural_net_run(df)
 
 # todo: understand the train test piece in tensorboard
 # todo: why not train and test like in the hierarchical nn
-# todo: change the architecture to be like in the notes.
+# todo: prediction piece
