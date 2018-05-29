@@ -5,6 +5,50 @@
 import pprint
 pprint.pprint(patient_info)
 ```
+
+#### .format command (in what follows, the 0 is the index; it could be withheld)
+align right
+```python
+'{0:>10}'.format('test')
+```
+align right, pad with underscores
+```python
+'{0:_>10}'.format('test')
+```
+align left
+```python
+'{0:10}'.format('test')
+```
+align center
+```python
+'{0:^10}'.format('test')
+```
+truncate strings
+```python
+'{0:.2}'.format('test')
+```
+truncate and pad strings
+```python
+'{0:4.2}'.format('test')
+```
+round and pad numbers
+```python
+'{0:5d}'.format(3141)
+# yields  3141  # there is a blank in front of the number
+```
+```python
+'{0:.3f}'.format(3.1415926535)
+# yields 3.142
+```
+```python
+'{0:6.3f}'.format(3.1415926535)
+# yields  3.142  # there is a space in front of the 3
+```
+```python
+'{0:06.3f}'.format(3.1415926535)
+# yields 03.142  # now there is a zero in front of the 3
+```
+
 ###To get a list of modules in an environment
 ```python
 import pip
