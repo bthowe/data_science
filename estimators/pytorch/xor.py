@@ -7,18 +7,14 @@ import torch.optim as optim
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
 
+
 def data_create():
-    centers = np.array([[0, 0]] * 100 + [[1, 1]] * 100
-                       + [[0, 1]] * 100 + [[1, 0]] * 100)
-    np.random.seed(42)
-    data = np.random.normal(0, 0.2, (400, 2)) + centers
-    data_torch = torch.Tensor(data)
+    centers = np.array([[0, 0]] * 100 + [[1, 1]] * 100 + [[0, 1]] * 100 + [[1, 0]] * 100)
+    data = torch.Tensor(np.random.normal(0, 0.2, (400, 2)) + centers)
 
-    lab = np.array([0] * 200 + [1] * 200)
-    lab_torch = torch.Tensor(lab)
-    lab_torch = lab_torch.type(torch.IntTensor)
+    lab = torch.Tensor(np.array([0] * 200 + [1] * 200)).int()
 
-    return data_torch, lab_torch
+    return data, lab
 
 
 class Net(nn.Module):
@@ -29,41 +25,40 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = F.sigmoid(self.fc1(x))
-        # x = self.fc2(x)
         x = F.sigmoid(self.fc2(x))
         return x
 
 def train(model, loss_func, optimizer, batch_size, epochs, inputs, targets):
-    print("Training loop:")
+    '''This function trains the model.'''
     for idx in range(0, epochs):
-        j = np.random.choice(len(inputs.numpy()), batch_size, replace=False)
-        X = Variable(torch.Tensor(inputs.numpy()[j, :]))
-        y = Variable(torch.Tensor(targets.numpy()[j].reshape(batch_size, 1)))
+        j = np.random.choice(len(inputs.numpy()), batch_size, replace=False)  # batch indeces
+        X = Variable(torch.Tensor(inputs.numpy()[j, :]))  # batch of features of size "batch_size"
+        y = Variable(torch.Tensor(targets.numpy()[j].reshape(batch_size, 1)))  # corresponding batch of outcomes
 
         optimizer.zero_grad()  # zero the gradient buffers
 
-        output = model(X)
+        output = model(X)  # predictions from the model
 
-        loss = loss_func(output, y)
-        loss.backward()
-        optimizer.step()  # Does the update
+        loss = loss_func(output, y)  # calculate loss from the predictions
+        loss.backward()  # computes gradients
+        optimizer.step()  # updates weights based on gradients
 
         if idx % 50 == 0:
-            print("Epoch {: >8} Loss: {}".format(idx, loss.data.numpy()))
+            print("Epoch {: >8} Loss: {}".format(idx, loss.data.numpy()))  # every 50 batches prints the loss
     return model
 
 def plot(X, y, model):
-    weights = model.fc1.weight.detach().numpy()
-    num_base_log_regs = weights.shape[0]
+    '''Plots the predicted probabilities based on the weights and biases from the hidden and output layers'''
+    weights = model.fc1.weight.detach().numpy()  # weights from the hidden layer
+    num_base_log_regs = weights.shape[0]  # number of nodes in the hidden layer
 
-    biases = model.fc1.bias.detach().numpy().reshape((1, num_base_log_regs))
+    biases = model.fc1.bias.detach().numpy().reshape((1, num_base_log_regs))  # biases in the hidden layer
 
     mesh = np.column_stack(a.reshape(-1) for a in np.meshgrid(np.r_[-1:2:100j], np.r_[-1:2:100j]))
 
     ones = np.ones((len(mesh), 1))
-    ymesh1 = np.dot(mesh, weights.T) + np.dot(ones, biases)
-
-    ymesh2 = model(torch.Tensor(mesh)).detach().numpy()
+    ymesh1 = np.dot(mesh, weights.T) + np.dot(ones, biases)  # hidden layer predicted probabilities
+    ymesh2 = model(torch.Tensor(mesh)).detach().numpy()  # output layer predicted probabilities
 
     for i in range(0, num_base_log_regs):
         fig = plt.figure()
@@ -71,6 +66,7 @@ def plot(X, y, model):
         mesh = ax.imshow(ymesh1[:, i].reshape(100, 100), cmap=plt.cm.RdYlBu, origin='lower', extent=(-1, 2, -1, 2), vmin=0, vmax=1)
         ax.scatter(X[:, 0], X[:, 1], c=y.detach().numpy(), cmap=plt.cm.RdYlBu, edgecolor='w', lw=1)
         ax.axis((-1, 2, -1, 2))
+        plt.title('Predicted Probabilities, Node {}'.format(i + 1))
         plt.colorbar(mesh, ax=ax)
 
     fig = plt.figure()
@@ -79,6 +75,7 @@ def plot(X, y, model):
     ax2.scatter(X[:, 0], X[:, 1], c=y.detach().numpy(), cmap=plt.cm.RdYlBu, edgecolor='w', lw=1)
     ax2.axis((-1, 2, -1, 2))
     plt.colorbar(mesh2, ax=ax2)
+    plt.title('Output Predicted Probabilities')
     plt.show()
 
 if __name__ == '__main__':
