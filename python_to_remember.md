@@ -119,6 +119,16 @@ clf.set_params(alpha=alpha / 2)
 upper = []
 upper = np.concatenate((upper, rfqr.predict(X_test, quantile=98.5)))
 ```
+#### linspace stuff
+```python
+np.r_[-1:2:100j]
+```
+is the same as 
+```python
+np.linspace(-1, 2, 100, endpoint=1)
+```
+
+
 ## pandas
 list values of a categorical variable
 ```python
@@ -475,3 +485,12 @@ tensorboard --logdir=<directory>
 localhost:6006
 ```
 
+## Pytorch
+#### convert numpy array to tensor with type long
+```python
+torch.Tensor(y).long()
+```
+#### concatenate two column tensors (change 1 to 0 for row tensors)
+```python
+torch.cat((1 - output, output), 1)
+```
