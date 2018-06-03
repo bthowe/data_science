@@ -33,20 +33,20 @@ def _get_next_batch(batch_size, time_steps, data):
     return x_batch, y_batch
 
 
-def _run_step(seed, chars, init_value):
+def _run_step(seed, chars, init_value, y_pred):
     test_data = [[chars.index(c) for c in seed]]
 
-    out, next_lstm_state = sess.run([final_out, lstm_new_state],
+    out, next_lstm_state = sess.run([y_pred, lstm_new_state],
                                     {x: test_data, lstm_init_value: [init_value]})
     return out[0][0], next_lstm_state[0]
 
 
-def _generate_text(seed, len_test_txt=500):
+def _generate_text(seed, len_test_txt, y_pred):
     seed = seed.lower()
 
     lstm_last_state = np.zeros((n_layers * 2 * lstm_size,))
     for c in seed:
-        out, lstm_last_state = _run_step(c, data_idx, lstm_last_state)
+        out, lstm_last_state = _run_step(c, data_idx, lstm_last_state, y_pred)
 
     gen_str = seed
     for i in range(len_test_txt):
@@ -57,11 +57,11 @@ def _generate_text(seed, len_test_txt=500):
     return gen_str
 
 
-def _train(x, y_true, lstm_init_value, loss, optimizer):
+def _train(x, y_true, y_pred, lstm_init_value, loss, optimizer):
     start_time = time.time()
 
     init = tf.global_variables_initializer()
-    # saver = tf.train.Saver()
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         merged = tf.summary.merge_all()
         sess.run(init)
@@ -81,18 +81,19 @@ def _train(x, y_true, lstm_init_value, loss, optimizer):
             init_value = np.zeros((x_batch.shape[0], n_layers * 2 * lstm_size))
             sess.run(optimizer, feed_dict={x: x_batch, y_true: y_true_batch, lstm_init_value: init_value})
 
-            # todo: fix this
-            # # Print status every 100 iterations.
-            # if (i % display_step == 0) or (i == num_iterations - 1):
-            #     summary, l = sess.run([merged, loss], feed_dict={x: x_batch, y_true: y_true_batch, lstm_init_value: init_value})
-            #     train_writer.add_summary(summary, step)
-            #
-            #     # Message for network evaluation
-            #     msg = "Optimization Iteration: {0:>6}, Training Loss: {1:>6}"
-            #     print(msg.format(i, l))
-            #     print("  " + _generate_text("We", 60))
-            #
-            #     step += 1
+            # Print status every 100 iterations.
+            if (i % display_step == 0) or (i == num_iterations - 1):
+                saver.save(sess, './strata_model', global_step=i)
+
+                # summary, l = sess.run([merged, loss], feed_dict={x: x_batch, y_true: y_true_batch, lstm_init_value: init_value})
+                # train_writer.add_summary(summary, step)
+                #
+                # # Message for network evaluation
+                # msg = "Optimization Iteration: {0:>6}, Training Loss: {1:>6}"
+                # print(msg.format(i, l))
+                # print("  " + _generate_text("We", 60, y_pred))
+                #
+                # step += 1
 
         # Difference between start and end-times.
         time_dif = time.time() - start_time
@@ -115,8 +116,7 @@ def rnn_architecture(x, lstm_init_value):
     out_reshaped = tf.reshape(out, [-1, lstm_size])
     y = tf.layers.dense(out_reshaped, n_chars, activation=None)
 
-    print(out[0])
-    y_pred = tf.reshape(tf.nn.softmax(y), (out[0], out[1], n_chars))
+    y_pred = tf.reshape(tf.nn.softmax(y), (tf.shape(out)[0], tf.shape(out)[1], n_chars), name='pred')
     return y_pred, lstm_new_state
 
 
@@ -134,7 +134,63 @@ def rnn_run():
     tf.summary.scalar('loss', loss)
     optimizer = tf.train.RMSPropOptimizer(0.003, 0.9).minimize(loss)
 
-    _train(x, y_true, lstm_init_value, loss, optimizer)
+    _train(x, y_true, y_pred, lstm_init_value, loss, optimizer)
+
+
+def run_step(seed, chars, init_value):
+    test_data = [[chars.index(c) for c in seed]]
+
+    out, next_lstm_state = sess.run([final_out, lstm_new_state],
+                                    {x: test_data, lstm_init_value: [init_value]})
+    return out[0][0], next_lstm_state[0]
+
+
+def generate(seed, gen_length=500):
+    # seed = seed.lower()
+    #
+    # lstm_last_state = np.zeros((n_layers * 2 * lstm_size,))
+    # for c in seed:
+    #     out, lstm_last_state = _run_step(c, data_idx, lstm_last_state)
+    #
+    # gen_str = seed
+    # for i in range(gen_length):
+    #     ele = np.random.choice(range(len(data_idx)), p=out)
+    #     gen_str += data_idx[ele]
+    #     out, lstm_last_state = _run_step(data_idx[ele], data_idx, lstm_last_state)
+    #
+    # # return gen_str
+
+
+    with tf.Session() as sess:
+        saver = tf.train.import_meta_graph('strata_model-{}.meta'.format(num_iterations - 1))
+        saver.restore(sess, tf.train.latest_checkpoint('./'))
+
+        graph = tf.get_default_graph()
+
+        for op in graph.get_operations():
+            print(op.name)
+
+        sys.exit()
+
+
+        pred = graph.get_tensor_by_name('pred:0')
+        x = graph.get_tensor_by_name('x:0')
+        lstm_innit_value = graph.get_tensor_by_name('lstm_innit_value:0')
+
+
+        seed = seed.lower()
+
+        lstm_last_state = np.zeros((n_layers * 2 * lstm_size,))
+        for c in seed:
+            # out, lstm_last_state = _run_step(c, data_idx, lstm_last_state)
+            test_data = data_idx.index(c)
+
+            out, next_lstm_state = sess.run([pred, lstm_new_state], {x: test_data, lstm_init_value: [lstm_last_state]})
+            return out[0][0], next_lstm_state[0]
+
+        y_pred = sess.run(pred, feed_dict={x: [image]})
+
+
 
 
 if __name__ == '__main__':
@@ -147,4 +203,6 @@ if __name__ == '__main__':
     lstm_size = 256
     display_step = 50
 
-    rnn_run()
+    # rnn_run()
+
+    generate('Hi')
