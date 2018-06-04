@@ -49,6 +49,12 @@ round and pad numbers
 # yields 03.142  # now there is a zero in front of the 3
 ```
 
+#### Days in a calendar month
+```python
+from calendar import monthrange
+monthrange(2018, 6)
+```
+
 ###To get a list of modules in an environment
 ```python
 import pip
