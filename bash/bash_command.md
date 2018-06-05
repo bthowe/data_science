@@ -225,3 +225,13 @@ For testing endpoints in the command line
 ```bash
 curl -i -H "Content-Type: application/json" -X POST -d '{"title":"Read a book"}' http://localhost:5000/todo/api/v1.0/tasks
 ```
+
+Copying contents of a directory versus the entire directory 
+```bash
+cp -r ../I_and_R_treatment\ effect\ evaluation .
+```
+versus
+```bash
+cp -r ../I_and_R_treatment\ effect\ evaluation/ .
+```
+The former copies the directory and everything in it. The latter only copies the files of the directory. So if you want to move a directory into another, creating a subdirectory, use the former. 
