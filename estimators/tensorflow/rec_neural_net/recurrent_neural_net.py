@@ -99,12 +99,13 @@ def rnn_architecture(x, lstm_init_value):
 def rnn_run():
     x = tf.placeholder(tf.int32, shape=(None, None), name="x")
     y_true = tf.placeholder(tf.int32, (None, None))
-    lstm_init_value = tf.placeholder(tf.float32, shape=(None, n_layers * 2 * lstm_size), name="lstm_init_value")
+    lstm_init_value = tf.placeholder(tf.float32, shape=(None, n_layers * 2 * lstm_size), name="lstm_init_value")  # there are two state variables...I need to learn more about lstm cells
 
     x_enc = tf.one_hot(x, depth=n_chars)
     y_true_enc = tf.one_hot(y_true, depth=n_chars)
 
     y_pred, out, lstm_new_state = rnn_architecture(x_enc, lstm_init_value)
+
     final_out = tf.reshape(tf.nn.softmax(y_pred), (out[0], out[1], n_chars), name='pred')
 
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=tf.reshape(y_true_enc, [-1, n_chars])))
@@ -122,7 +123,6 @@ def rnn_run():
 
 # todo: these three functions can be improved
 def run_step(sess, placeholders, outcomes, seed, chars, init_value):
-# def run_step(sess, final_out, lstm_new_state, x, lstm_init_value, seed, chars, init_value):
     x = placeholders['x']
     lstm_init_value = placeholders['lstm_init_value']
 
@@ -132,6 +132,15 @@ def run_step(sess, placeholders, outcomes, seed, chars, init_value):
     test_data = [[chars.index(c) for c in seed]]
 
     out, next_lstm_state = sess.run([prob, state], {x: test_data, lstm_init_value: [init_value]})
+    # I was thinking the output and the state should look the same at the last line.
+    print(out)
+    print(out.shape)
+    print(out[0][0])
+    print(next_lstm_state)
+    print(next_lstm_state[0])
+    print(next_lstm_state.shape)
+
+    sys.exit()
     return out[0][0], next_lstm_state[0]
 
 def generate_text(sess, placeholders, outcomes, seed, len_test_txt=500):
@@ -177,7 +186,13 @@ if __name__ == '__main__':
     lstm_size = 256
     display_step = 50
 
-    # rnn_run()
+    rnn_run()
 
     print(generate('Hey there!'))
     # print(generate('Hel'))
+
+# todo: https://www.tensorflow.org/tutorials/recurrent#lstm
+
+
+
+# todo: what going on here: https://stackoverflow.com/questions/42440565/how-to-feed-back-rnn-output-to-input-in-tensorflow
