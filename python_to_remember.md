@@ -1,5 +1,20 @@
 
 ## General Stuff
+
+### get name of function as string
+```python
+function_name.__name__
+```
+
+### hasattr
+```python
+from sklearn.linear_model import LinearRegression
+hasattr(LinearRegression, 'fit')
+```
+returns True. 
+
+### 
+
 ### Nicely formated printing, such as for dictionaries
 ```python
 import pprint
