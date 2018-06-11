@@ -87,6 +87,6 @@ def viz(data_test, index):
 
 if __name__ == '__main__':
     data_train, data_test = data_create()
-    main(data_train, data_test)
+    # main(data_train, data_test)
 
     viz(data_test, 30)
