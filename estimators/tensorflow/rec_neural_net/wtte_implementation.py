@@ -4,10 +4,19 @@ import random
 import functools
 import itertools
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
 from tensorflow.python import debug as tf_debug
+
+
+pd.set_option('max_columns', 1000)
+pd.set_option('max_info_columns', 1000)
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 30000)
+pd.set_option('max_colwidth', 4000)
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 
 def lazy_property(function):
@@ -23,7 +32,7 @@ def lazy_property(function):
 
 
 class SequenceClassification(object):
-    def __init__(self, data, target, uncensored, dropout, num_hidden=2, num_layers=1):  #dropout, num_hidden=200, num_layers=3):
+    def __init__(self, data, target, uncensored, dropout, num_hidden=100, num_layers=2):  #dropout, num_hidden=200, num_layers=3):
         self.data = data
         self.target = target
         self.uncensored = uncensored
@@ -31,7 +40,7 @@ class SequenceClassification(object):
         self._num_hidden = num_hidden
         self._num_layers = num_layers
 
-        self._time_steps = self.target.shape[1]
+        self._time_steps = int(self.target.shape[1])
 
         self.prediction
         self.error
@@ -47,19 +56,29 @@ class SequenceClassification(object):
 
         network = tf.contrib.rnn.MultiRNNCell([make_cell() for _ in range(self._num_layers)])
         # outputs, states = tf.nn.dynamic_rnn(network, self.data, dtype=tf.float32, time_major=True)
+
         outputs, states = tf.nn.dynamic_rnn(network, self.data, dtype=tf.float32)
 
         outputs_reshaped = tf.reshape(outputs, [-1, self._num_hidden * self.data.shape[1]])  # nodes in hidden layer times the number of features which is the size of the second dimension
-        outputs_dense = tf.layers.dense(outputs_reshaped, 2)
+        outputs_dense = tf.layers.dense(outputs_reshaped, 2 * self.data.shape[1])
 
         return tf.concat(
             [
-                tf.exp(tf.slice(outputs_dense, [0, 0], [-1, 1])),
-                tf.nn.sigmoid(tf.slice(outputs_dense, [0, 1], [-1, 1]))
-                # tf.nn.softplus(tf.slice(outputs_dense, [0, 1], [-1, 1]))
+                # tf.multiply(5., tf.nn.sigmoid(tf.slice(outputs_dense, [0, 0], [-1, self._time_steps]))),
+                # tf.exp(tf.slice(outputs_dense, [0, 0], [-1, self._time_steps])),
+                tf.exp(tf.slice(outputs_dense, [0, 0], [-1, self._time_steps])),
+                # tf.slice(outputs_dense, [0, 0], [-1, self._time_steps]),
+
+                # tf.nn.sigmoid(tf.slice(outputs_dense, [0, self._time_steps], [-1, self._time_steps]))
+                tf.nn.tanh(tf.slice(outputs_dense, [0, self._time_steps], [-1, self._time_steps])) + 1.
+                # tf.nn.softplus(tf.slice(outputs_dense, [0, self._time_steps], [-1, self._time_steps]))
             ],
             axis=1
         )
+
+    # todo: what I think is the problem: when I use the sigmoid activation function for beta, this only gives values between 0 and 1, which is too small to give a distribution that has a mode other than the left-most value (i.e., zero tte).
+    # todo: however, initially, any other activation is giving a beta that is too large.
+
 
     def _loglikelihood(self, a_b, tte, uncensored):
         location=10.0
@@ -68,8 +87,8 @@ class SequenceClassification(object):
         loglikelihood = 0
         penalty = 0
 
-        a = tf.slice(a_b, [0, 0], [-1, 1])
-        b = tf.slice(a_b, [0, 1], [-1, 1])
+        a = tf.slice(a_b, [0, 0], [-1, self._time_steps])
+        b = tf.slice(a_b, [0, self._time_steps], [-1, self._time_steps])
         tte = tf.reshape(tte, [-1, self._time_steps])
         uncensored = tf.reshape(uncensored, [-1, self._time_steps])
 
@@ -146,10 +165,6 @@ def data_create(timesteps, span, num_obs):
         tte[t, timesteps - start[t]:] = range(start[t], 0, -1)  #[::-1]
         uncensored[t, timesteps - start[t]:] = [0] * start[t]
 
-    # todo: censored only on the last one.
-    # todo: last count down one should be a zero
-
-
     return tte, uncensored, np.where(tte == (span - 1), 1, 0)
 
 def main():
@@ -174,6 +189,7 @@ def main():
 
     # execution
     sess = tf.Session()
+    tf.set_random_seed(1)
     # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 
     sess.run(tf.global_variables_initializer())
@@ -181,10 +197,10 @@ def main():
         print('epoch {}'.format(epoch))
         for iteration in range(len(data_tte) // batch_size):
             X_batch, y_batch = _get_next_batch(batch_size, n_steps, data_tte, data_uncensored)
-            print(sess.run(model.prediction, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
-            print(sess.run(model.cost, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
+            # print(sess.run(model.prediction, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
+            # print(sess.run(model.cost, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
             sess.run(model.optimize, {data: X_batch, uncensored: y_batch, dropout: 0.5})
-            print(sess.run(model.prediction, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
+            # print(sess.run(model.prediction, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
             print(sess.run(model.cost, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
 
         # if epoch == 0:
@@ -195,29 +211,45 @@ def main():
 
 
     X_test, y_test = _get_next_batch(1, n_steps, data_tte, data_uncensored)
-    print(X_test)
     preds = sess.run(model.prediction, {data: X_test, uncensored: y_test, dropout: 1})
-    print(preds)
-    sys.exit()
-    scorer(preds)
+    scorer(preds, n_steps)
 
 
-def scorer(preds):
-    preds = preds[0]
-    n_obs = preds.shape[0]
+def scorer(preds, time_steps):
+    import functools
+    n = 10
 
-    w = np.c_[np.zeros((n_obs, 1)), np.ones((n_obs, 1))]
+    a = preds[0][:time_steps]
+    b = preds[0][time_steps:]
 
-    probs = np.zeros((n_obs, 2))
-    for t in range(preds.shape[0]):
-        probs[t, :] = np.exp(-((w[t, :] / preds[t, 0]) ** preds[t, 1])) - np.exp(-(((w[t, :] + 1) / preds[t, 0]) ** preds[t, 1]))
-    print(probs)
-    # print(np.argmax(probs, axis=1))
+
+    probs = np.zeros((time_steps, n))
+    for i, params in enumerate(zip(a, b)):
+        for j in range(n - 1, -1, -1):
+            probs[i, j] = np.exp(-(j / params[0]) ** params[1]) - np.exp(-((j + 1) / params[0]) ** params[1])
+            print(i, j, probs[i, j], params)
+    df = pd.DataFrame(probs, columns=list(map(str, range(n - 1, -1, -1))))
+    print(df)
+
+
+    # n = 5
+    # a = np.repeat(np.array([preds[0][:time_steps]]).T, n, axis=1)
+    # b = np.repeat(np.array([preds[0][time_steps:]]).T, n, axis=1)
+    #
+    # tte = np.repeat(np.array([np.arange(n, 0, -1)]), time_steps, axis=0)
+    #
+    # df = pd.DataFrame(np.exp(-((tte / a) ** b)) - np.exp(-(((tte + 1) / a) ** b)))
+    # print(df)
+# todo: this is fine
 
 
 if __name__ == '__main__':
     main()
     # full_data_plotter(20)
+
+
+# todo: I think the problem is that my betas are not large enough.
+
 
 # todo: what would the test data be, then? That is, what would the holdout data look like?
 # in (neural network): covariates
