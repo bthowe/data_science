@@ -31,15 +31,15 @@ def lazy_property(function):
     return wrapper
 
 class SequenceClassification(object):
-    def __init__(self, data, target, uncensored, dropout, num_hidden=100, num_layers=2):  #dropout, num_hidden=200, num_layers=3):
-        self.data = data
-        self.target = target
+    def __init__(self, X, y, uncensored, dropout, num_hidden=10, num_layers=1):
+        self.X = X
+        self.y = y
         self.uncensored = uncensored
         self.dropout = dropout
         self._num_hidden = num_hidden
         self._num_layers = num_layers
 
-        self._time_steps = int(self.target.shape[1])
+        self._time_steps = int(self.y.shape[1])
 
         self.prediction
         self.error
@@ -54,60 +54,37 @@ class SequenceClassification(object):
             )
 
         network = tf.contrib.rnn.MultiRNNCell([make_cell() for _ in range(self._num_layers)])
-        # initial_state = get_state_variables(50, network)  # 50 is batch_size
 
-        # outputs, states = tf.nn.dynamic_rnn(network, self.data, initial_state=initial_state, dtype=tf.float32)
-        outputs, states = tf.nn.dynamic_rnn(network, self.data, dtype=tf.float32)
-        # outputs, states = tf.nn.dynamic_rnn(network, self.data, dtype=tf.float32, time_major=True)
+        outputs, states = tf.nn.dynamic_rnn(network, self.X, dtype=tf.float32)
 
-        outputs_reshaped = tf.reshape(outputs, [-1, self._num_hidden * self.data.shape[1]])  # nodes in hidden layer times the number of features which is the size of the second dimension
-        print(outputs_reshaped)
+        outputs_reshaped = tf.reshape(outputs, [-1, self._num_hidden * self.X.shape[1]])  # nodes in hidden layer times the number of features which is the size of the second dimension
 
-        outputs_dense = tf.layers.dense(outputs_reshaped, 2 * self.data.shape[1])
-        print(outputs_dense)
-
-        W1 = tf.Variable(tf.zeros([10000, 200]), name='Weights')
-        print(tf.matmul(outputs_reshaped, W1))
-        # W1 = tf.Variable(YOUR_WEIGHT_MATRIX, name='Weights')
+        W1 = tf.Variable(tf.zeros([self._num_hidden * self.X.shape[1], 2 * self.X.shape[1]]), name='Weights')
         b = tf.concat(
             [
-                tf.multiply(tf.ones([1, 100]), tf.log(4.)),
-                tf.multiply(tf.ones([1, 100]), 2)
+                tf.multiply(tf.ones([1, self.X.shape[1]]), tf.log(4.)),
+                tf.multiply(tf.ones([1, self.X.shape[1]]), 2)
             ],
             axis=1
         )
         b1 = tf.Variable(b, name='Biases')
-        print(b1)
         outputs_dense = tf.add(tf.matmul(outputs_reshaped, W1), b1)
-        print(outputs_dense)
-        # sys.exit()
 
         return tf.concat(
             [
-                # tf.multiply(5., tf.nn.sigmoid(tf.slice(outputs_dense, [0, 0], [-1, self._time_steps]))),
-                # tf.exp(tf.slice(outputs_dense, [0, 0], [-1, self._time_steps])),
                 tf.exp(tf.slice(outputs_dense, [0, 0], [-1, self._time_steps])),
-                # tf.slice(outputs_dense, [0, 0], [-1, self._time_steps]),
-
-                # tf.nn.sigmoid(tf.slice(outputs_dense, [0, self._time_steps], [-1, self._time_steps]))
-                # tf.nn.tanh(tf.slice(outputs_dense, [0, self._time_steps], [-1, self._time_steps])) + 1.
                 tf.nn.softplus(tf.slice(outputs_dense, [0, self._time_steps], [-1, self._time_steps]))
             ],
             axis=1
         )
 
-    # todo: what I think is the problem: when I use the sigmoid activation function for beta, this only gives values between 0 and 1, which is too small to give a distribution that has a mode other than the left-most value (i.e., zero tte).
-    # todo: however, initially, any other activation is giving a beta that is too large.
-
-
     def _loglikelihood(self, a_b, tte, uncensored):
-        location=10.0
-        growth=20.0
+        location = 10.0
+        growth = 20.0
 
         loglikelihood = 0
         penalty = 0
 
-        # print(a_b); sys.exit()
         a = tf.slice(a_b, [0, 0], [-1, self._time_steps])
         b = tf.slice(a_b, [0, self._time_steps], [-1, self._time_steps])
         tte = tf.reshape(tte, [-1, self._time_steps])
@@ -122,29 +99,25 @@ class SequenceClassification(object):
 
     @lazy_property
     def cost(self):
-        return self._loglikelihood(self.prediction, self.data, self.uncensored)
+        return self._loglikelihood(self.prediction, self.y, self.uncensored)
 
     @lazy_property
     def optimize(self):
         learning_rate = 0.001
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
-        # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         return optimizer.minimize(self.cost)
 
     @lazy_property
     def error(self):
-        self.uncensored
-
-
         return self.cost
 
 
-def _get_next_batch(batch_size, time_steps, X, y, test=False):
+def _get_next_batch(batch_size, time_steps, X, y, uncensored, test=False):
     '''Returns batch of covariates and corresponding outcomes of size "batch_size" and length "time_steps"'''
 
-    print(X)
-    x_batch = np.zeros((batch_size, time_steps))
+    X_batch = np.zeros((batch_size, time_steps))
     y_batch = np.zeros((batch_size, time_steps))
+    uncensored_batch = np.zeros((batch_size, time_steps))
 
     if test:
         batch_id = [1]
@@ -152,27 +125,14 @@ def _get_next_batch(batch_size, time_steps, X, y, test=False):
         batch_id = np.random.choice(range(X.shape[0]), batch_size, replace=False)
 
     for t in range(batch_size):
-        x_batch[t, :] = X[batch_id[t], :]
+        X_batch[t, :] = X[batch_id[t], :]
         y_batch[t, :] = y[batch_id[t], :]
+        uncensored_batch[t, :] = uncensored[batch_id[t], :]
 
-    return np.expand_dims(x_batch, axis=3), np.expand_dims(y_batch, axis=3)
-    # return np.expand_dims(x_batch, axis=3), y_batch
+    return np.expand_dims(X_batch, axis=3), np.expand_dims(y_batch, axis=3), np.expand_dims(uncensored_batch, axis=3)
 
-
-def fit_plotter(y_pred, y_true):
-    l = len(y_pred)
-    fig = plt.figure(figsize=(12, 8))
-    ax = fig.add_subplot(1, 1, 1)
-    for i in range(l):
-        ax.plot([i, i], [y_pred[i], y_true[i]], c="k", linewidth=0.5)
-    ax.plot(y_pred, 'o', label='Prediction', color='cornflowerblue', alpha=.6)
-    ax.plot(y_true, 'o', label='Ground Truth', color = 'firebrick', alpha=.6)
-    plt.legend()
-    plt.show()
 
 def data_create(timesteps, span, num_obs):
-    np.random.seed(42)
-
     start = np.random.randint(0, span, size=(num_obs,))
 
     tte_temp = []
@@ -184,137 +144,94 @@ def data_create(timesteps, span, num_obs):
     uncensored = np.ones((num_obs, timesteps))
     for t in range(num_obs):
         tte[t, :] = tte_temp[t, start[t]: start[t] + timesteps]
-        tte[t, timesteps - start[t]:] = range(start[t], 0, -1)  #[::-1]
+        tte[t, timesteps - start[t]:] = range(start[t], 0, -1)
         uncensored[t, timesteps - start[t]:] = [0] * start[t]
 
     return tte, uncensored, np.where(tte == (span - 1), 1, 0)
 
-def main():
-    # data construction
-    n_steps = 100
-    event_span = 50
-    n_obs = 1000
-    data_tte, data_uncensored, data_event = data_create(n_steps, event_span, n_obs)
 
-    # nn construction
-    n_inputs = 1
-    n_epochs = 100
-    batch_size = 50
-
-    data = tf.placeholder(tf.float32, [None, n_steps, n_inputs], name='data')
-    outcome = tf.placeholder(tf.float32, [None, n_steps], name='outcome')
-    uncensored = tf.placeholder(tf.float32, [None, n_steps, n_inputs], name='uncensored')
-    dropout = tf.placeholder(tf.float32, name='dropout')
-    model = SequenceClassification(data, outcome, uncensored, dropout)
-
-    # X_test, y_test = _get_next_batch(1, n_steps, data_tte, data_uncensored, test=True)  # prep test data so don't have to do it every iteration
-
-    # execution
-    sess = tf.Session()
-    tf.set_random_seed(1)
-    # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
-
-    sess.run(tf.global_variables_initializer())
-    for epoch in range(n_epochs):
-        print('epoch {}'.format(epoch))
-        for iteration in range(len(data_tte) // batch_size):
-            X_batch, y_batch = _get_next_batch(batch_size, n_steps, data_tte, data_uncensored)
-            # print(sess.run(model.prediction, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
-            # print(sess.run(model.cost, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
-            sess.run(model.optimize, {data: X_batch, uncensored: y_batch, dropout: 0.5})
-            # print(sess.run(model.prediction, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
-            print(sess.run(model.cost, {data: X_batch, uncensored: y_batch, dropout: 0.5}))
-
-        # if epoch == 0:
-        #     sys.exit()
-
-        # train_acc = sess.run(model.error, {data: X_batch, uncensored: y_batch, dropout: 1})
-
-
-
-    tte_test, uncensored_test = _get_next_batch(1, n_steps, data_tte, data_uncensored)
-    preds = sess.run(model.prediction, {data: tte_test, uncensored: uncensored_test, dropout: 1})  # tte_test and uncensored_test are not used to generate the prediction. This doesn't make sense...where's the input?
-    scorer(tte_test, preds, n_steps)
-
-
-def scorer(y_actual, preds, time_steps):
+def test_plot(y_actual, preds, time_steps):
     n = 50
 
     a = preds[0][:time_steps]
     b = preds[0][time_steps:]
 
-
     probs = np.zeros((time_steps, n))
     for i, params in enumerate(zip(a, b)):
         for j in range(n - 1, -1, -1):
             probs[i, j] = np.exp(-(j / params[0]) ** params[1]) - np.exp(-((j + 1) / params[0]) ** params[1])
-            print(i, j, probs[i, j], params)
     df = pd.DataFrame(probs, columns=list(map(str, range(0, n))))
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    # mesh = ax.imshow(df, cmap=plt.cm.RdYlBu, origin='lower'
     ax.plot(range(0, len(y_actual.reshape(100,))), y_actual.reshape(100,), color='black')
     mesh = ax.imshow(df.transpose(), cmap=plt.cm.RdYlBu, origin='lower', interpolation='none', aspect='auto')
     plt.colorbar(mesh, ax=ax)
-
-    print(df)
     plt.show()
 
-# def plot(X, y, model):
-#     '''Plots the predicted probabilities based on the weights and biases from the hidden and output layers'''
-#     weights = model.fc1.weight.detach().numpy()  # weights from the hidden layer
-#     num_base_log_regs = weights.shape[0]  # number of nodes in the hidden layer
-#
-#     biases = model.fc1.bias.detach().numpy().reshape((1, num_base_log_regs))  # biases in the hidden layer
-#
-#     mesh = np.column_stack(a.reshape(-1) for a in np.meshgrid(np.r_[-1:2:100j], np.r_[-1:2:100j]))
-#
-#     ones = np.ones((len(mesh), 1))
-#     ymesh1 = np.dot(mesh, weights.T) + np.dot(ones, biases)  # hidden layer predicted probabilities
-#     ymesh2 = model(torch.Tensor(mesh)).detach().numpy()  # output layer predicted probabilities
-#
-#     for i in range(0, num_base_log_regs):
-#         fig = plt.figure()
-#         ax = fig.add_subplot(1, 1, 1)
-#         mesh = ax.imshow(ymesh1[:, i].reshape(100, 100), cmap=plt.cm.RdYlBu, origin='lower', extent=(-1, 2, -1, 2), vmin=0, vmax=1)
-#         ax.scatter(X[:, 0], X[:, 1], c=y.detach().numpy(), cmap=plt.cm.RdYlBu, edgecolor='w', lw=1)
-#         ax.axis((-1, 2, -1, 2))
-#         plt.title('Predicted Probabilities, Node {}'.format(i + 1))
-#         plt.colorbar(mesh, ax=ax)
-#
-#     fig = plt.figure()
-#     ax2 = fig.add_subplot(1, 1, 1)
-#     mesh2 = ax2.imshow(ymesh2.reshape(100, 100), cmap=plt.cm.RdYlBu, origin='lower', extent=(-1, 2, -1, 2), vmin=0, vmax=1)
-#     ax2.scatter(X[:, 0], X[:, 1], c=y.detach().numpy(), cmap=plt.cm.RdYlBu, edgecolor='w', lw=1)
-#     ax2.axis((-1, 2, -1, 2))
-#     plt.colorbar(mesh2, ax=ax2)
-#     plt.title('Output Predicted Probabilities')
-#     plt.show()
 
+def main():
+    # data construction
+    n_steps = 100
+    event_span = 25
+    n_obs = 1000
+    y_array, uncensored_array, X_array = data_create(n_steps, event_span, n_obs)
 
+    test_ind = np.random.choice(n_obs)
+    print(test_ind)
+    train_ind = np.arange(n_obs)
+    train_ind = train_ind[train_ind != test_ind]
+
+    y_array_test = np.expand_dims(y_array[test_ind, :], axis=0)
+    uncensored_array_test = np.expand_dims(uncensored_array[test_ind, :], axis=0)
+    X_array_test = np.expand_dims(X_array[test_ind, :], axis=0)
+    y_array = y_array[train_ind, :]
+    uncensored_array = uncensored_array[train_ind, :]
+    X_array = X_array[train_ind, :]
+
+    # nn construction
+    n_inputs = 1
+    n_epochs = 500
+    batch_size = 50
+
+    X = tf.placeholder(tf.float32, [None, n_steps, n_inputs], name='X')
+    y = tf.placeholder(tf.float32, [None, n_steps, n_inputs], name='y')
+    uncensored = tf.placeholder(tf.float32, [None, n_steps, n_inputs], name='uncensored')
+    dropout = tf.placeholder(tf.float32, name='dropout')
+    model = SequenceClassification(X, y, uncensored, dropout)
+
+    # execution
+    sess = tf.Session()
+    # tf.set_random_seed(1)
+    # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+
+    sess.run(tf.global_variables_initializer())
+    for epoch in range(n_epochs):
+        for iteration in range(len(y_array) // batch_size):
+            X_batch, y_batch, uncensored_batch = _get_next_batch(batch_size, n_steps, X_array, y_array, uncensored_array)
+            sess.run(model.optimize, {X: X_batch, y: y_batch, uncensored: uncensored_batch, dropout: 0.5})
+        print('epoch {0}, loss {1}'.format(epoch, sess.run(model.cost, {X: X_batch, y: y_batch, uncensored: uncensored_batch, dropout: 0.5})))
+
+    X_test, y_test, uncensored_test = _get_next_batch(1, n_steps, X_array_test, y_array_test, uncensored_array_test)
+    preds = sess.run(model.prediction, {X: X_test, y: y_test, uncensored: uncensored_test, dropout: 1})
+    print(y_test[0, 0, 0])
+    test_plot(y_test, preds, n_steps)
 
 
 if __name__ == '__main__':
-    np.random.seed(42)
+    np.random.seed(44)
     main()
-    # full_data_plotter(20)
 
 
-# todo: how am I supposed to use the X? It doesn't seem to be using anything covariates.
 
-# todo: what would the test data be, then? That is, what would the holdout data look like?
 # in (neural network): covariates
 # out (neural network): a, b
-    # how many would be outputed?
+    # what is the shape of the output tensor?
+        # (n_obs, time_steps * 2)
 # in (likelihood function): a, b, outcome (tte), censor variable
 # out (likelihood function): likelihood score
-    # how does the optimizer know what to change? It changes Variables.
-
-# how does the data with which I'm working need to change?
-    # if the event occurs after the "end" then the time period should be censored.
-    # the outcome is the time to the event, not the binary event vector
-    # the X is the event binary? (this makes more sense to me because we would know what happened yesterday but not the tte.
+    # What does the optimizer change? The weights and biases of the neural network.
 
 
-# what should the shape of the parameter tensor be? I'm thinking it should be 2X1
+# todo next: variable input length
+# todo next: try my hand at the engine data
