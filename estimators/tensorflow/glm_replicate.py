@@ -149,4 +149,4 @@ if __name__ == '__main__':
 # 1. using tf.reduce_mean instead of reduce_sum?
 # 2. what optimizer am I using?
 # 3. are the initial values for the weights and bises in the ballpark?
-# 4.
+# 4. change the learning rate
