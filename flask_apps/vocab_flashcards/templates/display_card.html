@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--<title>Index</title>-->
+
+    <!--<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />-->
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/vocab_app.css') }}">-->
+
+    <!--<link rel="stylesheet" href="static/css/vocab_app.css">-->
+
+    <style>
+        .hidden {
+      display: none;
+    }
+
+        img {
+            wight: 200px;
+            height: 200px;
+        }
+    </style>
+
+    <!--<script>-->
+    <!--function toggleImage() {-->
+      <!--var image = document.getElementById('image');-->
+      <!--image.classList.toggle('hidden');-->
+    <!--}-->
+
+    <!--var button = document.getElementById('button')-->
+    <!--button.addEventListener('click', toggleImage)-->
+<!--    </script>-->
+
+    <!--<script type="text/javascript" src="static/js/vocab_app.js"></script>-->
+
+
+    <!--<script>-->
+    <!--function buttonPressed(event){-->
+      <!--alert('Button was pressed!');-->
+    <!--}-->
+
+    <!--var button = document.getElementById("okbutton");-->
+    <!--button.addEventListener('command', buttonPressed, true);-->
+    <!--</script>-->
+
+</head>
+<body>
+
+    <!--<img src="{{ user_image1 }}" alt="User Image1">-->
+
+    <!--<button id='okbutton'>Click Me!</button>-->
+    <!--<br />-->
+
+
+    <button id="button" label="OK"/>Click Me!</button>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', init, false);
+    function init(){
+        function message () {
+        alert("Hello!");
+        }
+
+        var button = document.getElementById('button');
+        button.addEventListener('click', message, true);
+    };
+    </script>
+
+
+    <!--<script>-->
+    <!--function buttonPressed(event){-->
+      <!--alert('Button was pressed!');-->
+    <!--}-->
+
+    <!--var button = document.getElementById("okbutton");-->
+    <!--button.addEventListener('command', buttonPressed, true);-->
+    <!--</script>-->
+
+
+    <!--<img id="image" class="hidden" src="{{ user_image2 }}">-->
+    <!--<img src="{{ user_image2 }}" class='hidden' onclick="myFunction()" />-->
+
+</body>
+</html>
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+    <!--&lt;!&ndash;<title>Index</title>&ndash;&gt;-->
+  <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/vocab_app.css') }}">-->
+<!--</head>-->
+<!--<body>-->
+    <!--<div>-->
+        <!--<img src="{{ user_image1 }}" alt="User Image1", height="300px", width="400px">-->
+
+        <!--<input type="button" value="Show Button" onclick="showImage();"/>-->
+        <!--<img id="loadingImage" src="{{ user_image2 }}" alt="User Image2", height="300px", width="400px", style="visibility:hidden"/>-->
+        <!--&lt;!&ndash;<img id="loadingImage" src="yourimage.gif" style="visibility:hidden"/>&ndash;&gt;-->
+
+    <!--</div>-->
+
+
+<!--</body>-->
+<!--</html>-->
