@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def submission_page():
     return '''
@@ -22,52 +23,46 @@ def submission_page():
         </form>
         '''
 
+
 @app.route('/quiz', methods=['POST'])
 def quiz():
-    lesson_num = str(request.form['user_input'])
-    # prompt_type = str(request.form['prompt_type'])
-
-    d = {
-        'user_image1': 'static/{0}/photo1.png'.format(lesson_num),
-        'user_image2': 'static/{0}/photo2.png'.format(lesson_num)
-    }
-    return render_template("display_card.html", **d)  #, user_image1=full_filename1)
-
-    # full_filename2 = 'static/{0}/photo2.png'.format(lesson_num)
-    # return render_template(
-    #     "display_card.html",
-    #     user_image1='static/{0}/photo1.png'.format(lesson_num),
-    #
-    # )  #, user_image1=full_filename1)
-    #
-
-# @app.route('/')
-# def show_index():
-#     # lesson_num = str(request.form['user_input'])
-#     # prompt_type = str(request.form['prompt_type'])
-#
-#     full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'photo2.png')
-#     print(full_filename)
-#     return render_template("display_card.html", user_image=full_filename)
-
-    # return '''
-    #     <img src="/photo2.png", alt="yo", height="200", width="200">
-    #     '''
+    global quiz_count, cards, discards
+    quiz_count += 1
 
 
-        # <img src="/Users/travis.howe/Desktop/rc/vocab_images_chapters/4/photo2.png">
+    # print(str(request.form['next']))
 
-        # <div class="nav3" style="height:705px;">
-        #     <img src="photo2.png">
-        #     <img src="photo2.png">
-        # </div>
-        # '''
+    if quiz_count == 1:
+        lesson_num = str(request.form['user_input'])
+        prompt_type = str(request.form['prompt_type'])
+        num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
+        if prompt_type == 'word':
+            cards = [('static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
+                      'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1)) for num in range(0, num_cards, 2)]
+        else:
+            cards = [('static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
+                      'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)) for num in range(0, num_cards, 2)]
+        discards = []
 
+    if cards:
+        card = cards.pop(0)
+        discards.append(card)
 
-# run the following:
-# gunicorn --bind 0.0.0.0:8000 server:app
+        d = {
+            'user_image1': card[0],
+            'user_image2': card[1],
+        }
+        return render_template("display_card.html", **d)
+    else:
+        quiz_count = 0
+        return render_template("finished.html")
+
 
 if __name__ == '__main__':
+    cards = []
+    discards = []
+    quiz_count = 0
+
     app.run(host='0.0.0.0', port=8000, debug=True)
 
 
