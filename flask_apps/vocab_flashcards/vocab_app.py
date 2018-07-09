@@ -19,6 +19,7 @@ def submission_page():
 
             <LABEL for="chapter">Lesson Number: </LABEL>
             <input type="text" name="user_input" />
+            <input id="prodId" name="next_back" type="hidden" value="xm234jq">
             <input type="submit" />
         </form>
         '''
@@ -26,36 +27,17 @@ def submission_page():
 
 @app.route('/quiz', methods=['POST'])
 def quiz():
-    global quiz_count, cards, discards
-    quiz_count += 1
-
-
-    # print(str(request.form['next']))
-
-    if quiz_count == 1:
-        lesson_num = str(request.form['user_input'])
-        prompt_type = str(request.form['prompt_type'])
-        num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
-        if prompt_type == 'word':
-            cards = [('static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
-                      'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1)) for num in range(0, num_cards, 2)]
-        else:
-            cards = [('static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
-                      'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)) for num in range(0, num_cards, 2)]
-        discards = []
-
-    if cards:
-        card = cards.pop(0)
-        discards.append(card)
-
-        d = {
-            'user_image1': card[0],
-            'user_image2': card[1],
-        }
-        return render_template("display_card.html", **d)
+    lesson_num = str(request.form['user_input'])
+    prompt_type = str(request.form['prompt_type'])
+    num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
+    if prompt_type == 'word':
+        cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
+                  'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1)] for num in range(0, num_cards, 2)]
     else:
-        quiz_count = 0
-        return render_template("finished.html")
+        cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
+                  'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)] for num in range(0, num_cards, 2)]
+
+    return render_template("display_card.html", cards=cards)
 
 
 if __name__ == '__main__':
