@@ -23,11 +23,17 @@
         }
 
         .button {
-            passing: 5px;
+            background: whitesmoke;
+            padding: 5px;
             width: 100%;
             height: 50px;
         }
-
+        .top_button {
+            background: whitesmoke;
+            padding: 5px;
+            width: 100%;
+            height: 50px;
+        }
         #button_next{
             width: 50%;
             float: right;
@@ -36,17 +42,26 @@
             background: blanchedalmond;
         }
         #button_flip{
-            width: 50%;
+            width: 45%;
             float: left;
-            height: 100%;
+            height: 90%;
             padding: 5px;
-            background: lightgray;
+            background: blanchedalmond;
         }
         #button_back{
-            width: 100%;
-            height: 100%;
+            width: 45%;
+            /*float: right;*/
+            height: 90%;
             padding: 5px;
-            background: lightcyan;
+            background: blanchedalmond;
+        }
+        #ind{
+            float: left;
+            width: 20%;
+        }
+        #b_ind{
+            float: right;
+            width: 20%;
         }
         .button_column {
             float: left;
@@ -83,23 +98,20 @@
 <body>
 
     <div>
-        <div>
-            <form name="batch_size" id="batch_size">
-                <LABEL for="batch_size">Batch Size: </LABEL> <br>
-                <input id="five" type="radio" name="batch_size" value="five"> 5 <br>
-                <input id="ten" type="radio" name="batch_size" value="ten"> 10 <br>
-                <input id="all" type="radio" name="batch_size" value="all" checked> Entire Deck <br> <br>
-            </form>
-        </div>
-        <div>
-            <p id="output"></p>
-        </div>
+        <form name="batch_size" id="batch_size">
+            <LABEL for="batch_size">Batch Size: </LABEL> <br>
+            <input id="five" type="radio" name="batch_size" value="five"> 5 <br>
+            <input id="ten" type="radio" name="batch_size" value="ten"> 10 <br>
+            <input id="all" type="radio" name="batch_size" value="all" checked> Entire Deck <br> <br>
+        </form>
     </div>
 
 
     <div class="card_control">
-        <div class="button">
+        <div class="top_button">
+            <p id="ind"></p>
             <button id="button_back" label="OK" class="hidden"/>Previous Card</button>
+            <p id="b_ind"></p>
         </div>
         <div class="row">
             <div class="column">
@@ -138,9 +150,11 @@
     var cards
     var index = 0
     var batch_index = 0
+    var batch_size = cards_ordered.length
+    var num_batches = Math.ceil(cards_ordered.length / batch_size)
 
-//    todo: start here
-    document.getElementById('output').innerHTML = index;
+    document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
+    document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards_ordered.length;
 
     function shuffle(array) {
         var currentIndex = array.length, temporaryValue, randomIndex;
@@ -184,6 +198,8 @@
 
         function next () {
             index++;
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards.length;
+
             var image = document.getElementById('image_hidden');
             if (image.className == "unhidden") {
                 image.className = "hidden"
@@ -204,6 +220,8 @@
 
         function back () {
             index--;
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards.length;
+
             var image = document.getElementById('image_hidden');
             if (image.className == "unhidden") {
                 image.className = "hidden"
@@ -228,16 +246,25 @@
                 if (this.value == "five") {
                     cards = shuffle(cards_ordered).slice(0, 5)
                     document.getElementById('button_next_batch').className = "unhidden"
+                    batch_size = 5
+                    num_batches = Math.ceil(cards_ordered.length / batch_size)
                 }
                 else if (this.value == "ten") {
                     cards = shuffle(cards_ordered).slice(0, 10)
                     document.getElementById('button_next_batch').className = "unhidden"
+                    batch_size = 10
+                    num_batches = Math.ceil(cards_ordered.length / batch_size)
                 }
                 else {
                     cards = shuffle(cards_ordered)
+                    batch_size = cards_ordered.length
+                    num_batches = Math.ceil(cards_ordered.length / batch_size)
                 }
                 index = 0
+                document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + batch_size;
+
                 batch_index = 0
+                document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
                 document.getElementById("image").src = cards[index][0];
                 document.getElementById('button_next').className = "unhidden"
                 document.getElementById('button_back').className = "hidden"
@@ -248,6 +275,8 @@
         function reshuffle () {
             cards = shuffle(cards)
             index = 0
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + batch_size;
+
             document.getElementById("image").src = cards[index][0];
             document.getElementById('button_next').className = "unhidden"
             document.getElementById('button_back').className = "hidden"
@@ -258,39 +287,13 @@
         button_reshuffle.addEventListener('click', reshuffle, true);
 
 
-        function getRadioVal(form, name) {
-            var val;
-            // get list of radio buttons with specified name
-            var radios = form.elements[name];
-
-            // loop through list of radio buttons
-            for (var i=0, len=radios.length; i<len; i++) {
-                if ( radios[i].checked ) { // radio checked?
-                    val = radios[i].value; // if so, hold its value in val
-                    break; // and break out of for loop
-                }
-            }
-            return val; // return value of checked radio or undefined if none checked
-        }
-
-        function val_converter(value) {
-            if (value == "five") {
-                return 5
-            }
-            else if (value == "ten") {
-                return 10
-            }
-            else {
-                return 0
-            }
-        }
-
-
         function next_batch () {
             batch_index++
-            batch_size = val_converter(getRadioVal(document.getElementById('batch_size'), 'batch_size'))
             cards = cards_shuffled.slice(batch_size * batch_index, batch_size * (batch_index + 1))
             index = 0
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards.length;
+            document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
+
             document.getElementById("image").src = cards[index][0];
             document.getElementById('button_next').className = "unhidden"
             document.getElementById('button_back').className = "hidden"
@@ -306,7 +309,10 @@
 
         function deck_again () {
             index=0
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + batch_size;
+
             batch_index=0
+            document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
             cards = cards_ordered
 
             document.getElementById("all").checked = true
@@ -329,7 +335,7 @@
 </body>
 </html>
 
-<!--todo: counter/cards done and left in batch and batches left-->
+<!--todo: make sure it all works-->
 <!--todo: should probably add keystrokes to flip and arrows to go to next and back-->
 
 
