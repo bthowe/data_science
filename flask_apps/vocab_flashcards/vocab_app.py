@@ -11,24 +11,14 @@ app = Flask(__name__)
 
 @app.route('/')
 def submission_page():
-    return '''
-        <form action="/quiz" method='POST' >
-            <LABEL for="prompt_type">Prompt Type: </LABEL> <br>
-            <input type="radio" name="prompt_type" value="word" checked> Word <br>
-            <input type="radio" name="prompt_type" value="def"> Definition/Sentence <br> <br>
-
-            <LABEL for="chapter">Lesson Number: </LABEL>
-            <input type="text" name="user_input" />
-            <input id="prodId" name="next_back" type="hidden" value="xm234jq">
-            <input type="submit" />
-        </form>
-        '''
-
+    return render_template("main_menu.html")
 
 @app.route('/quiz', methods=['POST'])
 def quiz():
     lesson_num = str(request.form['user_input'])
     prompt_type = str(request.form['prompt_type'])
+    # batch_size = str(request.form['batch_size'])
+
     num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
     if prompt_type == 'word':
         cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
@@ -37,6 +27,8 @@ def quiz():
         cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
                   'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)] for num in range(0, num_cards, 2)]
 
+
+    # return render_template("display_card.html", **{'cards': cards)
     return render_template("display_card.html", cards=cards)
 
 
