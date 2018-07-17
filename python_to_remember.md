@@ -149,6 +149,23 @@ is the same as
 np.linspace(-1, 2, 100, endpoint=1)
 ```
 
+#### add another dimension to an array
+```python
+np.expand_dims(x, axis=0)
+```
+
+#### repeat row
+```python
+np.repeat()
+```
+
+#### split array
+```python
+np.array_split
+```
+
+
+
 
 ## pandas
 list values of a categorical variable
@@ -246,6 +263,16 @@ print(output.names)
 print(output.rx('lower'))
 ```
 
+## scipy
+### Savitzky-Golay filter
+```python
+from scipy.signal import savgol_filter
+outcome = savgol_filter(
+                x=self.X_predictions.loc[index]['predicted_target'] - self.X_predictions.loc[index].iloc[0]['predicted_target'],
+                window_length=5,
+                polyorder=2
+            )
+```
 
 ## statsmodels
 ### OLS
@@ -505,6 +532,19 @@ tensorboard --logdir=<directory>
 ```html
 localhost:6006
 ```
+
+
+#### tf debugger
+```python
+from tensorflow.python import debug as tf_debug
+sess = tf.Session()
+sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+```
+
+```python
+run -f has_inf_or_nan
+```
+
 
 ## Pytorch
 #### convert numpy array to tensor with type long
