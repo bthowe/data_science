@@ -7,18 +7,16 @@ from sklearn.externals import joblib
 from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
-
+lesson_lst = list(range(4, 13)) + list(range(14, 75))
 
 @app.route('/')
 def submission_page():
-    return render_template("main_menu.html")
+    return render_template('main_menu.html')
 
-@app.route('/quiz', methods=['POST'])
-def quiz():
+@app.route('/practice', methods=['POST'])
+def practice():
     lesson_num = str(request.form['user_input'])
     prompt_type = str(request.form['prompt_type'])
-    # batch_size = str(request.form['batch_size'])
-
     num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
     if prompt_type == 'word':
         cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
@@ -27,9 +25,47 @@ def quiz():
         cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
                   'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)] for num in range(0, num_cards, 2)]
 
-
-    # return render_template("display_card.html", **{'cards': cards)
     return render_template("display_card.html", cards=cards)
+
+
+@app.route('/quiz', methods=['POST'])
+def quiz():
+    practice_type = str(request.form['practice_type'])
+    lesson_num = str(request.form['user_input'])
+    prompt_type = str(request.form['prompt_type'])
+    num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
+    if prompt_type == 'word':
+        cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
+                  'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1)] for num in range(0, num_cards, 2)]
+
+        alternatives = []
+        for card_i in range(len(cards)):
+            alternatives_i = []
+            for j in range(3):
+                random_lesson = np.random.choice(lesson_lst)
+                num_cards_in_random_lesson = len(os.listdir('static/{0}'.format(random_lesson)))
+                random_card = np.random.choice(range(0, num_cards_in_random_lesson, 2))
+                alternatives_i.append('static/{0}/rc_vocab_{0}_{1}.png'.format(random_lesson, random_card + 1))
+            alternatives.append(alternatives_i)
+
+    else:
+        cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
+                  'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)] for num in range(0, num_cards, 2)]
+
+        alternatives = []
+        for card_i in range(len(cards)):
+            alternatives_i = []
+            for j in range(3):
+                random_lesson = np.random.choice(lesson_lst)
+                num_cards_in_random_lesson = len(os.listdir('static/{0}'.format(random_lesson)))
+                random_card = np.random.choice(range(0, num_cards_in_random_lesson, 2))
+                alternatives_i.append('static/{0}/rc_vocab_{0}_{1}.png'.format(random_lesson, random_card))
+            alternatives.append(alternatives_i)
+
+    if practice_type == 'practice':
+        return render_template('display_card.html', cards=cards)
+    else:
+        return render_template('quiz_card.html', cards=cards, alts=alternatives)
 
 
 if __name__ == '__main__':
@@ -37,25 +73,4 @@ if __name__ == '__main__':
     discards = []
     quiz_count = 0
 
-    app.run(host='0.0.0.0', port=8000, debug=True)
-
-
-# intro page:
-# buttons:
-# - choose sentence or definition
-# - ask definition to word or word to definition (can I then udpate this from the choice of sentence or definition)
-# - choose book
-# - groups of five, ten, etc.
-
-# vocab page:
-# buttons:
-# back to intro page
-# flip card
-# next
-# previous
-# repeat group of five, etc.
-
-# display:
-# two panels: word or definition on the left and the other on the right.
-
-# todo: css, split the definition/sentence card
+    app.run(host='0.0.0.0', port=8001, debug=True)

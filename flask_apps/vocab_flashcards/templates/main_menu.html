@@ -5,6 +5,10 @@
 
 <body>
     <form action="/quiz" method='POST' >
+        <LABEL for="practice_type">What do you want to do? </LABEL> <br>
+        <input type="radio" name="practice_type" value="practice" checked> Practice <br>
+        <input type="radio" name="practice_type" value="quiz"> Quiz <br> <br>
+
         <LABEL for="prompt_type">Prompt Type: </LABEL> <br>
         <input type="radio" name="prompt_type" value="word" checked> Word <br>
         <input type="radio" name="prompt_type" value="def"> Definition/Sentence <br> <br>

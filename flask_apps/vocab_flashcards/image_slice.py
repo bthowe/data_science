@@ -1,6 +1,7 @@
 import os
 import sys
 import image_slicer
+from PIL import Image
 from shutil import copyfile, rmtree
 
 
@@ -30,17 +31,31 @@ def renamer():
             copyfile('{0}/{1}'.format(directory, file), '{0}/rc_vocab_{1}_{2}.png'.format(destination_directory, num, ind))
 
 
-def test():
-    dir = '/Users/travis.howe/Projects/github/data_science/flask_apps/vocab_flashcards/static/3'
-    if not os.path.exists('/Users/travis.howe/Downloads/vocab/'):
-        os.makedirs('/Users/travis.howe/Downloads/vocab/')
+def image_trim():
+    directory_num = list(range(4, 13)) + list(range(14, 150))
+    for num in directory_num:
+        print("Folder: ", num)
+        directory = '/Users/travis.howe/Desktop/rc/vocab_images_chapters/{0}'.format(num)
 
-    for ind, file in enumerate(os.listdir(dir)):
-        copyfile('{0}/{1}'.format(dir, file), '/Users/travis.howe/Downloads/vocab/rc_vocab{0}.png'.format(ind))
+        destination_directory = '/Users/travis.howe/Projects/github/data_science/flask_apps/vocab_flashcards/static/{}'.format(num)
+        if not os.path.exists(destination_directory):
+            print('Directory does not exist...creating it.')
+            os.makedirs(destination_directory)
+        else:
+            print('Directory already exists...removing and then creating it anew.')
+            rmtree(destination_directory)
+            os.makedirs(destination_directory)
+
+        for ind, file in enumerate(os.listdir(directory)):
+            # copyfile('{0}/{1}'.format(directory, file), '{0}/rc_vocab_{1}_{2}.png'.format(destination_directory, num, ind))
+
+            # filename = '/Users/travis.howe/Desktop/rc/vocab_images_chapters/4/VocFC_502_-_Vocabulary_Flash_Cards_1-80-01.png_01_01.png'
+            im = Image.open('{0}/{1}'.format(directory, file))
+            w, h = im.size
+            im.crop((0, 75, w, h)).save('{0}/rc_vocab_{1}_{2}.png'.format(destination_directory, num, ind))
 
 
 if __name__ == '__main__':
     # slicer()
-    # test()
-    renamer()
-
+    # renamer()
+    image_trim()
