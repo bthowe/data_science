@@ -28,9 +28,16 @@ can I get something coded up in tensorflow that computes this equilibrium?
 
 
 Theoretical:
-
+x
 
 
 
 Empirical:
 used reinforced learning
+observe an outcome
+give a point if the ball was blocked
+it seems this could lead to the best response function for the keeper
+but this isn't the essence of the nash equilibrium. it's not really a maximization problem, but rather conditional on the other guys actions, i have no incentive to deviate and visa versa. So finding his values that make me indifferent, and visa versa.
+But data assumes something like repeated play and actions taken therein. So I could come up with a best response. 
+So the idea of learning the nash equilibrium is not possible unless I have data on many different policies. 
+But I can learn, assuming a single policy, what the best response would be. 

@@ -1,0 +1,2 @@
+model_checkpoint_path: "penalty_kicks.ckpt"
+all_model_checkpoint_paths: "penalty_kicks.ckpt"
