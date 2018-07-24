@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
 
-end_of_book_list = ['Moroni 10', 'Doctrine and Covenants 138', 'Articles of Faith 1', 'Malachi 4', 'Revelation 22']
+end_of_book_list = ['Moroni 10', 'Doctrine and Covenants 138', 'Articles of Faith 1', 'Malachi 3', 'Revelation 22']
 go = True
 
 client = MongoClient()
