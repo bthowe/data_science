@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pymongo import MongoClient
 from sklearn.externals import joblib
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 lesson_lst = list(range(4, 13)) + list(range(14, 75))
@@ -73,7 +73,8 @@ def quiz():
     else:
         return render_template('quiz_card.html', cards=cards, alts=alternatives)
 
-@app.route('/mongo_call', methods=['POST'])  # , methods=['POST'] todo: add the post
+
+@app.route('/mongo_call', methods=['POST'])
 def mongo_call():
     js = json.loads(request.data)
 
@@ -84,19 +85,16 @@ def mongo_call():
     return ''
 
 
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
 
-
-
-
-# show dbs
-# show collections
-# use <database name>
-# use <collection name>
-# db.collection_name.find()   shows all documents in this collections
-# db.bofm.find({'book': '2-ne', 'chapter': '20'})
-# db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
-# db.bofm.stats().count
-# db['dc-testament'].stats().count
+@app.route('/logout')
+def shutdown():
+    shutdown_server()
+    return render_template('logout.html')
 
 
 if __name__ == '__main__':

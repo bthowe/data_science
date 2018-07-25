@@ -139,7 +139,8 @@
                 <button id="button_deck_again" class="hidden">Practice Deck Again</button>
             </div>
             <div class="button_column">
-                <button id="main_menu" onclick="window.location.href='/'">Main Menu</button>
+                <button id="main_menu">Main Menu</button>
+                <!--<button id="main_menu" onclick="window.location.href='/'">Main Menu</button>-->
             </div>
         </div>
     </div>
@@ -191,6 +192,20 @@
                     document.getElementById('button_deck_again').className = "unhidden"
                 }
             }
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Flip",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_flip = document.getElementById('button_flip');
         button_flip.addEventListener('click', flip, true);
@@ -213,6 +228,20 @@
             if (index == (cards.length - 1)) {
                 button_next.className = "hidden"
             }
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Next Card",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_next = document.getElementById('button_next');
         button_next.addEventListener('click', next, true);
@@ -235,6 +264,20 @@
             if (index == 0) {
                 button_back.className = "hidden"
             }
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Previous Card",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_back = document.getElementById('button_back');
         button_back.addEventListener('click', back, true);
@@ -282,6 +325,21 @@
             document.getElementById('button_back').className = "hidden"
             document.getElementById('button_reshuffle_batch').className = "hidden"
             document.getElementById('image_hidden').className = "hidden"
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Practice Batch Again",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_reshuffle = document.getElementById('button_reshuffle_batch');
         button_reshuffle.addEventListener('click', reshuffle, true);
@@ -302,6 +360,21 @@
             if (((cards_ordered.length / batch_size | 0) == batch_index) | ((cards_ordered.length % batch_size == 0) & ((cards_ordered.length / batch_size | 0) == batch_index + 1))) {
                 document.getElementById('button_next_batch').className = "hidden"
             }
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Next Batch",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_next_batch= document.getElementById('button_next_batch');
         button_next_batch.addEventListener('click', next_batch, true);
@@ -322,11 +395,45 @@
             document.getElementById('button_back').className = "hidden"
             document.getElementById('button_reshuffle_batch').className = "hidden"
             document.getElementById('button_deck_again').className = "hidden"
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Practice Deck Again",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_deck_again = document.getElementById('button_deck_again');
         button_deck_again.addEventListener('click', deck_again, true);
 
 
+        function main_menu() {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Main Menu",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+            window.location.href = '/';
+        }
+        var button_main_menu = document.getElementById('main_menu');
+        button_main_menu.addEventListener('click', main_menu, true);
     };
 </script>
 
@@ -334,12 +441,3 @@
 
 </body>
 </html>
-
-<!--todo: should probably add keystrokes to flip and arrows to go to next and back-->
-<!--todo: incorporate the separate js file...I can't figure out how to do it, for some reason-->
-<!--todo: how can I make this easy for them to start?-->
-<!--todo: I think I can pretty easily write a bash script that will start things up. But can I make something that is clickable?-->
-<!--todo: I think maybe I want him to just run the bash script-->
-
-
-<!--todo: make quiz...it shouldn't be too hard either-->

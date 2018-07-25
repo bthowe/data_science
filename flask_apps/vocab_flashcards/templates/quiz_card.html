@@ -87,6 +87,15 @@
 </head>
 <body>
 
+    <div>
+        <div class="button">
+            <div class="button_column">
+                <button id="logout"/>Logout</button>
+            </div>
+        </div>
+    </div>
+
+
     <div class="row">
         <div class="column">
             <div><img id="hero_image"></div>
@@ -157,6 +166,8 @@
     var first_push = true
     var radios
     var alts
+    var button_i
+    var correct_bin = false
 
     document.getElementById('b_ind').innerHTML = "Completed: " + 0 + " / " + cards_ordered.length;
     document.getElementById('ind').innerHTML = "Correct: " + 0 + " / " + completed;
@@ -208,71 +219,84 @@
     document.addEventListener('DOMContentLoaded', init, false);
     function init() {
         function right_wrong() {
-            document.getElementById('field_container1').style.backgroundColor = "white";
-            document.getElementById('field_container2').style.backgroundColor = "white";
-            document.getElementById('field_container3').style.backgroundColor = "white";
-            document.getElementById('field_container4').style.backgroundColor = "white";
-            var button_i = checked_radio()
-            if (alts[button_i] == cards_shuffled[index][1]) {
-                if (first_push) {
-                    correct++
-                }
-                if (button_i == 0) {
-                    document.getElementById('field_container1').style.backgroundColor = "green";
-                }
-                else if (button_i == 1) {
-                    document.getElementById('field_container2').style.backgroundColor = "green";
-                }
-                else if (button_i == 2) {
-                    document.getElementById('field_container3').style.backgroundColor = "green";
-                }
-                else if (button_i == 3) {
-                    document.getElementById('field_container4').style.backgroundColor = "green";
-                }
+            button_i = checked_radio()
+
+            if (button_i == undefined) {
+                alert('You need to choose an answer!')
+                return
             }
             else {
-                if (button_i == 0) {
-                    document.getElementById('field_container1').style.backgroundColor = "red";
-                }
-                else if (button_i == 1) {
-                    document.getElementById('field_container2').style.backgroundColor = "red";
-                }
-                else if (button_i == 2) {
-                    document.getElementById('field_container3').style.backgroundColor = "red";
-                }
-                else if (button_i == 3) {
-                    document.getElementById('field_container4').style.backgroundColor = "red";
-                }
-            }
-            first_push = false
 
-            if (index + 1 == cards_shuffled.length) {
-                completed++
-                document.getElementById('b_ind').className = "hidden"
-                document.getElementById('ind').innerHTML = "You answered " + correct + " out of " + completed + " correctly. Nice Work! You're a genius! Perfect practice makes perfect.";
-                document.getElementById('button_start_over').className = "unhidden"
-                document.getElementById('button_main_menu').className = "unhidden"
-            }
-            else {
-                document.getElementById('button_next').className = "unhidden"
-            }
+                document.getElementById('field_container1').style.backgroundColor = "white";
+                document.getElementById('field_container2').style.backgroundColor = "white";
+                document.getElementById('field_container3').style.backgroundColor = "white";
+                document.getElementById('field_container4').style.backgroundColor = "white";
+//            var button_i = checked_radio()
 
-            var request = new XMLHttpRequest();
-            request.open("POST", "/mongo_call", true);
-            request.send(JSON.stringify(
-                {
-                    "page": "Quiz",
-                    "button": "Submit",
-                    "radio_button_chosen": button_i,
-                    "prompt": cards_shuffled[index][0],
-                    "alternatives": alts,
-                    "answer_card": cards_shuffled[index][1],
-                    "chosen_card": alts[button_i],
-                    "completed": completed,
-                    "correct": correct,
-                    "index": index,
-                    "timestamp": Math.floor(Date.now() / 1000)
-                }));
+                correct_bin = (alts[button_i] == cards_shuffled[index][1])
+                if (correct_bin) {
+                    if (first_push) {
+                        correct++
+                    }
+                    if (button_i == 0) {
+                        document.getElementById('field_container1').style.backgroundColor = "green";
+                    }
+                    else if (button_i == 1) {
+                        document.getElementById('field_container2').style.backgroundColor = "green";
+                    }
+                    else if (button_i == 2) {
+                        document.getElementById('field_container3').style.backgroundColor = "green";
+                    }
+                    else if (button_i == 3) {
+                        document.getElementById('field_container4').style.backgroundColor = "green";
+                    }
+                }
+                else {
+                    if (button_i == 0) {
+                        document.getElementById('field_container1').style.backgroundColor = "red";
+                    }
+                    else if (button_i == 1) {
+                        document.getElementById('field_container2').style.backgroundColor = "red";
+                    }
+                    else if (button_i == 2) {
+                        document.getElementById('field_container3').style.backgroundColor = "red";
+                    }
+                    else if (button_i == 3) {
+                        document.getElementById('field_container4').style.backgroundColor = "red";
+                    }
+                }
+                first_push = false
+
+                if (index + 1 == cards_shuffled.length) {
+                    completed++
+                    document.getElementById('b_ind').className = "hidden"
+                    document.getElementById('ind').innerHTML = "You answered " + correct + " out of " + completed + " correctly. Nice Work! You're a genius! Perfect practice makes perfect.";
+                    document.getElementById('button_start_over').className = "unhidden"
+                    document.getElementById('button_main_menu').className = "unhidden"
+                }
+                else {
+                    if (correct_bin) {
+                        document.getElementById('button_next').className = "unhidden"
+                    }
+                }
+
+                var request = new XMLHttpRequest();
+                request.open("POST", "/mongo_call", true);
+                request.send(JSON.stringify(
+                    {
+                        "page": "Quiz",
+                        "button": "Submit",
+                        "radio_button_chosen": button_i,
+                        "prompt": cards_shuffled[index][0],
+                        "alternatives": alts,
+                        "answer_card": cards_shuffled[index][1],
+                        "chosen_card": alts[button_i],
+                        "completed": completed,
+                        "correct": correct,
+                        "index": index,
+                        "timestamp": Math.floor(Date.now() / 1000)
+                    }));
+            }
         }
         var button_push = document.getElementById('button');
         button_push.addEventListener('click', right_wrong, true);
@@ -399,6 +423,29 @@
         }
         var button_main_menu = document.getElementById('button_main_menu');
         button_main_menu.addEventListener('click', main_menu, true);
+
+
+        function logout() {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Quiz",
+                    "button": "Logout",
+                    "radio_button_chosen": "None",
+                    "prompt": cards_shuffled[index][0],
+                    "alternatives": alts,
+                    "answer_card": cards_shuffled[index][1],
+                    "chosen_card": "None",
+                    "completed": completed,
+                    "correct": correct,
+                    "index": index,
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+            window.location.href = '/logout';
+        }
+        var button_logout = document.getElementById('logout');
+        button_logout.addEventListener('click', logout, true);
     }
 
 
@@ -409,15 +456,12 @@
 </body>
 </html>
 
+<!--logout button finesse-->
 
-<!--interact the practice_card.html with flask-->
-
-<!--format statistics-->
 <!--make a log of the one's he missed-->
 <!--send the one's he missed to the practice thing-->
 <!--make the kid sign in with his name-->
 <!--drop down list of lesson number or a correspondence between the lesson number and book-->
-<!--in a database collect information: name, lesson, time, which were missed-->
 <!--I should split the card along the dashed-->
 
 
@@ -428,5 +472,8 @@
 <!--have a mixed random type section-->
 
 
-<!--logout button-->
 <!--i could clean up duplicate code above by making functions-->
+
+
+<!--todo: should probably add keystrokes to flip and arrows to go to next and back-->
+<!--todo: incorporate the separate js file...I can't figure out how to do it, for some reason-->
