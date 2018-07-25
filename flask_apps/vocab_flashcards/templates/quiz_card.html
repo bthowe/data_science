@@ -140,7 +140,7 @@
                 <button id="button_start_over" class="hidden"/>Repeat Lesson</button>
             </div>
             <div class="button_column">
-                <button id="button_main_menu" onclick="window.location.href='/'"/>Main Menu</button>
+                <button id="button_main_menu"/>Main Menu</button>
             </div>
         </div>
     </div>
@@ -152,11 +152,11 @@
     alternatives = {{ alts | tojson}}
     var cards_shuffled
     var index = 0
-    var radios
-    var alts
     var correct = 0
     var completed = 0
     var first_push = true
+    var radios
+    var alts
 
     document.getElementById('b_ind').innerHTML = "Completed: " + 0 + " / " + cards_ordered.length;
     document.getElementById('ind').innerHTML = "Correct: " + 0 + " / " + completed;
@@ -187,7 +187,6 @@
     }
     cards_shuffled = shuffle(cards_ordered)
     alts = shuffle([cards_shuffled[index][1], alternatives[index][0], alternatives[index][1], alternatives[index][2]])
-//    cards = cards_shuffled
 
     document.getElementById('hero_image').src = cards_shuffled[index][0];
 
@@ -200,7 +199,6 @@
         radios = document.getElementsByName('c1');
         for (var i = 0, length = radios.length; i < length; i++) {
             if (radios[i].checked) {
-//                alert(radios[i].value);
                 return i
                 break;
             }
@@ -231,7 +229,6 @@
                 else if (button_i == 3) {
                     document.getElementById('field_container4').style.backgroundColor = "green";
                 }
-                document.getElementById('button_next').className = "unhidden"
             }
             else {
                 if (button_i == 0) {
@@ -252,10 +249,30 @@
             if (index + 1 == cards_shuffled.length) {
                 completed++
                 document.getElementById('b_ind').className = "hidden"
-                document.getElementById('ind').innerHTML = "You answered " + correct + " out of " + completed + " correctly. Nice Work! You're a genius! Remember perfect practice makes perfect.";
+                document.getElementById('ind').innerHTML = "You answered " + correct + " out of " + completed + " correctly. Nice Work! You're a genius! Perfect practice makes perfect.";
                 document.getElementById('button_start_over').className = "unhidden"
                 document.getElementById('button_main_menu').className = "unhidden"
             }
+            else {
+                document.getElementById('button_next').className = "unhidden"
+            }
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Quiz",
+                    "button": "Submit",
+                    "radio_button_chosen": button_i,
+                    "prompt": cards_shuffled[index][0],
+                    "alternatives": alts,
+                    "answer_card": cards_shuffled[index][1],
+                    "chosen_card": alts[button_i],
+                    "completed": completed,
+                    "correct": correct,
+                    "index": index,
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_push = document.getElementById('button');
         button_push.addEventListener('click', right_wrong, true);
@@ -274,7 +291,6 @@
             document.getElementById('b_ind').innerHTML = "Completed: " + completed + " / " + cards_ordered.length;
             document.getElementById('ind').innerHTML = "Correct: " + correct + " / " + completed;
 
-
             document.getElementById('button_next').className = "hidden"
 
             document.getElementById('field_container1').style.backgroundColor = "white";
@@ -289,9 +305,100 @@
             document.getElementById('alternative_hidden2').src = alts[1]
             document.getElementById('alternative_hidden3').src = alts[2]
             document.getElementById('alternative_hidden4').src = alts[3]
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Quiz",
+                    "button": "Next",
+                    "radio_button_chosen": "None",
+                    "prompt": cards_shuffled[index][0],
+                    "alternatives": alts,
+                    "answer_card": cards_shuffled[index][1],
+                    "chosen_card": "None",
+                    "completed": completed,
+                    "correct": correct,
+                    "index": index,
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
         }
         var button_next = document.getElementById('button_next');
         button_next.addEventListener('click', go_next, true);
+
+        function start_over() {
+            index = 0
+            completed = 0
+            correct = 0
+            first_push = true
+            cards_shuffled = shuffle(cards_ordered)
+            alts = shuffle([cards_shuffled[index][1], alternatives[index][0], alternatives[index][1], alternatives[index][2]])
+
+            document.getElementById('radio1').checked = false
+            document.getElementById('radio2').checked = false
+            document.getElementById('radio3').checked = false
+            document.getElementById('radio4').checked = false
+
+            document.getElementById('b_ind').innerHTML = "Completed: " + completed + " / " + cards_ordered.length;
+            document.getElementById('ind').innerHTML = "Correct: " + correct + " / " + completed;
+
+            document.getElementById('b_ind').className = "unhidden"
+            document.getElementById('button_start_over').className = "hidden"
+
+            document.getElementById('field_container1').style.backgroundColor = "white";
+            document.getElementById('field_container2').style.backgroundColor = "white";
+            document.getElementById('field_container3').style.backgroundColor = "white";
+            document.getElementById('field_container4').style.backgroundColor = "white";
+
+            document.getElementById('hero_image').src = cards_shuffled[index][0];
+
+            document.getElementById('alternative_hidden1').src = alts[0]
+            document.getElementById('alternative_hidden2').src = alts[1]
+            document.getElementById('alternative_hidden3').src = alts[2]
+            document.getElementById('alternative_hidden4').src = alts[3]
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Quiz",
+                    "button": "Repeat Lesson",
+                    "radio_button_chosen": "None",
+                    "prompt": cards_shuffled[index][0],
+                    "alternatives": alts,
+                    "answer_card": cards_shuffled[index][1],
+                    "chosen_card": "None",
+                    "completed": completed,
+                    "correct": correct,
+                    "index": index,
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+        }
+        var button_start_over = document.getElementById('button_start_over');
+        button_start_over.addEventListener('click', start_over, true);
+
+
+        function main_menu() {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Quiz",
+                    "button": "Main Menu",
+                    "radio_button_chosen": "None",
+                    "prompt": cards_shuffled[index][0],
+                    "alternatives": alts,
+                    "answer_card": cards_shuffled[index][1],
+                    "chosen_card": "None",
+                    "completed": completed,
+                    "correct": correct,
+                    "index": index,
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+            window.location.href = '/';
+        }
+        var button_main_menu = document.getElementById('button_main_menu');
+        button_main_menu.addEventListener('click', main_menu, true);
     }
 
 
@@ -303,6 +410,8 @@
 </html>
 
 
+<!--interact the practice_card.html with flask-->
+
 <!--format statistics-->
 <!--make a log of the one's he missed-->
 <!--send the one's he missed to the practice thing-->
@@ -310,3 +419,14 @@
 <!--drop down list of lesson number or a correspondence between the lesson number and book-->
 <!--in a database collect information: name, lesson, time, which were missed-->
 <!--I should split the card along the dashed-->
+
+
+<!--fix the color thing-->
+<!--put the lesson at the top of the page-->
+
+<!--make it so could scroll over the card in quiz after hitting submit and see the answer-->
+<!--have a mixed random type section-->
+
+
+<!--logout button-->
+<!--i could clean up duplicate code above by making functions-->

@@ -1,13 +1,19 @@
 import os
 import sys
+import json
 import joblib
 import numpy as np
 import pandas as pd
+from pymongo import MongoClient
 from sklearn.externals import joblib
 from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 lesson_lst = list(range(4, 13)) + list(range(14, 75))
+
+client = MongoClient()
+client.drop_database('vocab')
+db = client['vocab']
 
 @app.route('/')
 def submission_page():
@@ -66,6 +72,31 @@ def quiz():
         return render_template('display_card.html', cards=cards)
     else:
         return render_template('quiz_card.html', cards=cards, alts=alternatives)
+
+@app.route('/mongo_call', methods=['POST'])  # , methods=['POST'] todo: add the post
+def mongo_call():
+    js = json.loads(request.data)
+
+    tab = db[js['page']]
+    tab.insert_one(js)
+
+    print('data inserted: {}'.format(js))
+    return ''
+
+
+
+
+
+
+# show dbs
+# show collections
+# use <database name>
+# use <collection name>
+# db.collection_name.find()   shows all documents in this collections
+# db.bofm.find({'book': '2-ne', 'chapter': '20'})
+# db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
+# db.bofm.stats().count
+# db['dc-testament'].stats().count
 
 
 if __name__ == '__main__':
