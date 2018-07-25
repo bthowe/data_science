@@ -234,4 +234,28 @@ versus
 ```bash
 cp -r ../I_and_R_treatment\ effect\ evaluation/ .
 ```
-The former copies the directory and everything in it. The latter only copies the files of the directory. So if you want to move a directory into another, creating a subdirectory, use the former. 
+The former copies the directory and everything in it. The latter only copies the files of the directory. So if you want to move a directory into another, creating a subdirectory, use the former.
+ 
+ 
+ 
+ Update brew and install mongodb
+ ```bash
+ brew update
+ brew install mongodb
+ ```
+ Create the data directory
+ ```bash
+ sudo mkdir -p /data/db
+ ```
+ Set permissions in directory (this much permission is bad, but it's local and for development)
+ ```bash 
+ sudo chmod -R 777 /data/db
+ ```
+ Run MongoDB
+ ```bash
+ mongod
+ ```
+ Open Mongo shell
+ ```bash
+ mongo
+ ```
