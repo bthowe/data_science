@@ -255,7 +255,38 @@ The former copies the directory and everything in it. The latter only copies the
  ```bash
  mongod
  ```
- Open Mongo shell
+ See other instances of mongod running
  ```bash
- mongo
+ ps ax | grep mongod
  ```
+ Kill an instance
+ ```bash
+ kill -9 98555
+ ```
+ Kill all mongodb instances
+ ```bash
+ killall mongod
+ ```
+ 
+Shutdown from command line
+```bash
+mongod --shutdown
+```
+
+Open Mongo shell
+```bash
+mongo
+```
+ 
+Mongo commands
+```bash
+show dbs
+show collections
+use <database name>
+use <collection name>
+db.collection_name.find()   shows all documents in this collections
+db.bofm.find({'book': '2-ne', 'chapter': '20'})
+db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
+db.bofm.stats().count
+db['dc-testament'].stats().count
+```

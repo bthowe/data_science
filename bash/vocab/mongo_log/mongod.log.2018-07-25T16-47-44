@@ -1,0 +1,44 @@
+2018-07-25T11:14:38.943-0500 I CONTROL  [initandlisten] MongoDB starting : pid=16008 port=27017 dbpath=/data/db 64-bit host=installadmins-MacBook-Pro-5.local
+2018-07-25T11:14:38.943-0500 I CONTROL  [initandlisten] db version v4.0.0
+2018-07-25T11:14:38.944-0500 I CONTROL  [initandlisten] git version: 3b07af3d4f471ae89e8186d33bbb1d5259597d51
+2018-07-25T11:14:38.944-0500 I CONTROL  [initandlisten] allocator: system
+2018-07-25T11:14:38.944-0500 I CONTROL  [initandlisten] modules: none
+2018-07-25T11:14:38.944-0500 I CONTROL  [initandlisten] build environment:
+2018-07-25T11:14:38.944-0500 I CONTROL  [initandlisten]     distarch: x86_64
+2018-07-25T11:14:38.944-0500 I CONTROL  [initandlisten]     target_arch: x86_64
+2018-07-25T11:14:38.944-0500 I CONTROL  [initandlisten] options: { processManagement: { fork: true }, systemLog: { destination: "file", path: "../../bash/vocab/mongo_log/mongod.log" } }
+2018-07-25T11:14:38.944-0500 W STORAGE  [initandlisten] Detected unclean shutdown - /data/db/mongod.lock is not empty.
+2018-07-25T11:14:38.945-0500 I STORAGE  [initandlisten] Detected data files in /data/db created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2018-07-25T11:14:38.945-0500 W STORAGE  [initandlisten] Recovering data from the last clean checkpoint.
+2018-07-25T11:14:38.945-0500 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2018-07-25T11:14:39.841-0500 I STORAGE  [initandlisten] WiredTiger message [1532535279:841309][16008:0x7fffb42423c0], txn-recover: Main recovery loop: starting at 9/11008
+2018-07-25T11:14:39.841-0500 I STORAGE  [initandlisten] WiredTiger message [1532535279:841889][16008:0x7fffb42423c0], txn-recover: Recovering log 9 through 10
+2018-07-25T11:14:39.917-0500 I STORAGE  [initandlisten] WiredTiger message [1532535279:917027][16008:0x7fffb42423c0], file:sizeStorer.wt, txn-recover: Recovering log 10 through 10
+2018-07-25T11:14:39.970-0500 I STORAGE  [initandlisten] WiredTiger message [1532535279:970074][16008:0x7fffb42423c0], file:sizeStorer.wt, txn-recover: Set global recovery timestamp: 0
+2018-07-25T11:14:40.088-0500 I RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
+2018-07-25T11:14:40.236-0500 I CONTROL  [initandlisten] 
+2018-07-25T11:14:40.236-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-07-25T11:14:40.237-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-07-25T11:14:40.237-0500 I CONTROL  [initandlisten] 
+2018-07-25T11:14:40.237-0500 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-07-25T11:14:40.237-0500 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2018-07-25T11:14:40.237-0500 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2018-07-25T11:14:40.238-0500 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-07-25T11:14:40.238-0500 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-07-25T11:14:40.238-0500 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-07-25T11:14:40.238-0500 I CONTROL  [initandlisten] 
+2018-07-25T11:14:40.364-0500 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/data/db/diagnostic.data'
+2018-07-25T11:14:40.365-0500 I NETWORK  [initandlisten] waiting for connections on port 27017
+2018-07-25T11:14:41.008-0500 I FTDC     [ftdc] Unclean full-time diagnostic data capture shutdown detected, found interim file, some metrics may have been lost. OK
+2018-07-25T11:14:41.079-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:60402 #1 (1 connection now open)
+2018-07-25T11:14:41.080-0500 I NETWORK  [conn1] received client metadata from 127.0.0.1:60402 conn1: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-07-25T11:14:41.080-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:60403 #2 (2 connections now open)
+2018-07-25T11:14:41.081-0500 I NETWORK  [conn2] received client metadata from 127.0.0.1:60403 conn2: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-07-25T11:14:41.081-0500 I COMMAND  [conn2] dropDatabase vocab - starting
+2018-07-25T11:14:41.081-0500 I COMMAND  [conn2] dropDatabase vocab - dropping 0 collections
+2018-07-25T11:14:41.108-0500 I COMMAND  [conn2] dropDatabase vocab - finished
+2018-07-25T11:14:41.829-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:60404 #3 (3 connections now open)
+2018-07-25T11:14:41.829-0500 I NETWORK  [conn3] received client metadata from 127.0.0.1:60404 conn3: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-07-25T11:14:41.830-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:60405 #4 (4 connections now open)
+2018-07-25T11:14:41.830-0500 I NETWORK  [conn4] received client metadata from 127.0.0.1:60405 conn4: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-07-25T11:15:02.369-0500 I STORAGE  [conn4] createCollection: vocab.Quiz with generated UUID: 6253b7bb-e2bd-47f7-b4b0-4c8bc95a4bc5
