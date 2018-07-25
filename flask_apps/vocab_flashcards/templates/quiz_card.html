@@ -87,15 +87,6 @@
 </head>
 <body>
 
-    <div>
-        <div class="button">
-            <div class="button_column">
-                <button id="logout"/>Logout</button>
-            </div>
-        </div>
-    </div>
-
-
     <div class="row">
         <div class="column">
             <div><img id="hero_image"></div>
@@ -423,29 +414,6 @@
         }
         var button_main_menu = document.getElementById('button_main_menu');
         button_main_menu.addEventListener('click', main_menu, true);
-
-
-        function logout() {
-            var request = new XMLHttpRequest();
-            request.open("POST", "/mongo_call", true);
-            request.send(JSON.stringify(
-                {
-                    "page": "Quiz",
-                    "button": "Logout",
-                    "radio_button_chosen": "None",
-                    "prompt": cards_shuffled[index][0],
-                    "alternatives": alts,
-                    "answer_card": cards_shuffled[index][1],
-                    "chosen_card": "None",
-                    "completed": completed,
-                    "correct": correct,
-                    "index": index,
-                    "timestamp": Math.floor(Date.now() / 1000)
-                }));
-            window.location.href = '/logout';
-        }
-        var button_logout = document.getElementById('logout');
-        button_logout.addEventListener('click', logout, true);
     }
 
 
@@ -456,7 +424,6 @@
 </body>
 </html>
 
-<!--logout button finesse-->
 
 <!--make a log of the one's he missed-->
 <!--send the one's he missed to the practice thing-->

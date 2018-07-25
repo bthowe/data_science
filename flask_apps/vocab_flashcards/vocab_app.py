@@ -12,7 +12,7 @@ app = Flask(__name__)
 lesson_lst = list(range(4, 13)) + list(range(14, 75))
 
 client = MongoClient()
-client.drop_database('vocab')
+# client.drop_database('vocab')
 db = client['vocab']
 
 @app.route('/')
@@ -91,10 +91,10 @@ def shutdown_server():
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
 
-@app.route('/logout')
-def shutdown():
+@app.route('/quit')
+def quit():
     shutdown_server()
-    return render_template('logout.html')
+    return render_template('quit.html')
 
 
 if __name__ == '__main__':

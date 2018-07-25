@@ -6,17 +6,59 @@
 <body>
     <form action="/quiz" method='POST' >
         <LABEL for="practice_type">What do you want to do? </LABEL> <br>
-        <input type="radio" name="practice_type" value="practice" checked> Practice <br>
-        <input type="radio" name="practice_type" value="quiz"> Quiz <br> <br>
+        <input type="radio" name="practice_type" value="practice" id="practice" checked> Practice <br>
+        <input type="radio" name="practice_type" value="quiz" id="quiz"> Quiz <br> <br>
 
         <LABEL for="prompt_type">Prompt Type: </LABEL> <br>
-        <input type="radio" name="prompt_type" value="word" checked> Word <br>
-        <input type="radio" name="prompt_type" value="def"> Definition/Sentence <br> <br>
+        <input type="radio" name="prompt_type" value="word" id="word" checked> Word <br>
+        <input type="radio" name="prompt_type" value="def" id="def"> Definition/Sentence <br> <br>
 
         <LABEL for="chapter">Lesson Number: </LABEL>
-        <input type="text" name="user_input" />
-        <input id="prodId" name="next_back" type="hidden" value="xm234jq">
-        <input type="submit" />
+        <input type="text" name="user_input" id="lesson"/>
+        <!--<input id="prodId" name="next_back" type="hidden" value="xm234jq">-->
+        <input id="submit" type="submit" />
     </form>
+    <button id="button_quit"/>Quit</button>
 </body>
+<script>
+
+
+    document.addEventListener('DOMContentLoaded', init, false);
+    function init() {
+        function submit() {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Main",
+                    "button": "Submit",
+                    "practice": document.getElementById('practice').checked,
+                    "quiz": document.getElementById('quiz').checked,
+                    "word": document.getElementById('word').checked,
+                    "def": document.getElementById('def').checked,
+                    "lesson": document.getElementById('lesson').value,
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+//            window.location.href = '/quit';
+        }
+
+        var button_submit = document.getElementById('submit');
+        button_submit.addEventListener('click', submit, true);
+
+        function quit() {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Main",
+                    "button": "Quit",
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+            window.location.href = '/quit';
+        }
+
+        var button_quit = document.getElementById('button_quit');
+        button_quit.addEventListener('click', quit, true);
+    }
+</script>
 </html>
