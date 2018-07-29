@@ -177,6 +177,12 @@ convert a series to a dataframe
 df.to_frame()
 ```
 
+.any() and .all()
+```python
+mask = (~(df[app_submit_cols] == '')).any(axis=1)
+```
+
+
 nice printing
 ```python
 pd.set_option('max_columns', 1000)
