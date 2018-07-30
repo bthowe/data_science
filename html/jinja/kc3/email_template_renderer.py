@@ -15,32 +15,39 @@ with open('email_template.html') as file_:
         scripture_prompt="Read Elder Ashton's talk",
         announcements='''
         <ul>
-        <li>Emily McCulloch is scheduled to be baptized this coming Saturday (7/28). The time is still TBD. </li>
-        <li>Beginning the week of July 29th, members of the Elders Quorum will have periodic team-up assignments with the full-time missionaries. These typically take place in the evening (and last between one and two hours) but can occur in the morning or afternoon if that is better for your schedule.</li>
-        <li>Finally, over the next few weeks (before summer vacation ends) the full-time missionaries will begin visiting and teaching lessons to the young men and young women of the ward. Please welcome them into your home as they try to strengthen our youth and their friends.</li>
+        <li>ICYMI: Emily McCulloch was baptized and confirmed this past weekend. Congratulations to her and her family! We are excited to have her as part of our ward! </li>
+        <li>Beginning this week, members of the Elders Quorum will have periodic team-up assignments with the full-time missionaries. These typically take place in the evening (and last between one and two hours) but can occur in the morning or afternoon if that is better for your schedule. See below for assignments for the next four weeks.</li>
+        <li>Over the next few weeks (before summer vacation ends) the full-time missionaries will be visiting and teaching lessons to the young men and young women of the ward. Please welcome them into your home as they try to strengthen our youth and their friends.</li>
+        <li>Finally, Bro. Howe will be out of town for the next three Sundays. Please contact Bro. Josephson (contact information found below) if you have a question or comment related to the ward's missionary efforts.</li>
 
 
         </ul>
         ''',
         dinners='''
-        <li>7/23: Ellibee</li>
-        <li>7/24: Bakkedahl</li>
-        <li>7/25: </li>
-        <li>7/26: McCain</li>
-        <li>7/27: Hornaday</li>
-        <li>7/28: Gammon</li>
-        <li>7/29: Jenkins</li>
+        <li>7/30: Semones</li>
+        <li>7/31: Davis</li>
+        <li>8/1: <i> available </i></li>
+        <li>8/2: <i> available </i></li>
+        <li>8/3: Goin</li>
+        <li>8/4: <i> available </i></li>
+        <li>8/5: Bakkedahl</li>
         ''',
         teamups='''
         <li>7/31: James Allen</li>
         <li>8/1: Andy Bakkedahl</li>
         <li>8/2: Nathan Breneman</li>
+
         <li>8/7: Sam Lunceford</li>
         <li>8/8: Will Burke</li>
         <li>8/9: Steve Daniels</li>
+
         <li>8/14: Curt Davidson</li>
         <li>8/15: Kay Davis</li>
-        <li>8/16: John Davis </li>
+        <li>8/16: John Davis</li>
+
+        <li>8/21: Bill Ellibee</li>
+        <li>8/22: Bill Ellis</li>
+        <li>8/23: Craig Fitt</li>
         ''',
         missionary1='''
         <a href="https://www.facebook.com/cameron.clayton.3344">Elder Clayton</a>

@@ -8,7 +8,10 @@ def login():
     url = 'https://ident.lds.org/sso/UI/Login'
     url2 = 'https://www.lds.org/mls/mbr/records/member-list?lang=eng'
 
-    s = Session('email_lst_scrape/chromedriver', browser='chrome', default_timeout=15)
+    import os
+    print(os.getcwd())
+
+    s = Session('/Users/travis.howe/Projects/github/data_science/scrape/email_lst_scrape/chromedriver', browser='chrome', default_timeout=15)
     s.driver.get(url)
 
     print('Waiting for elements to load...')
@@ -32,16 +35,14 @@ def login():
         new_page = s.driver.page_source
         if 'Ziemann, Donella' in new_page:
             go = False
-        soup = BeautifulSoup(new_page, 'lxml')
-        email_lst += [href.split(':')[1] for href in [a_tag['href'] for a_tag in soup.findAll('a') if a_tag.has_attr('ng-href')] if '@' in href]
+    soup = BeautifulSoup(new_page, 'lxml')
+    email_lst += [href.split(':')[1] for href in [a_tag['href'] for a_tag in soup.findAll('a') if a_tag.has_attr('ng-href')] if '@' in href]
     return email_lst
 
 def lst_to_txt_file(lst):
-    with open ('email_lst_scrape/ward_email_lst.txt', 'w') as text_file:
-        for email in lst:
+    with open ('/Users/travis.howe/Projects/github/data_science/scrape/email_lst_scrape/ward_email_lst.txt', 'w') as text_file:
+        for email in set(lst):
             text_file.write('{}, '.format(email))
 
 if __name__ == '__main__':
     lst_to_txt_file(login())
-
-# todo: make sure I'm not forgetting someone and no one is included multiple times.
