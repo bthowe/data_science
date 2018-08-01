@@ -10,6 +10,9 @@ driver.get("http://www.gmail.com")
 
 time.sleep(90)
 
+count = 1
 while True:
+    print(count)
     driver.get("http://www.gmail.com")
-    time.sleep(120)
+    time.sleep(300)
+    count += 1
