@@ -164,6 +164,11 @@ np.repeat()
 np.array_split
 ```
 
+Reshape a one dimensional array into a two dimensional array
+```python
+.reshape(-1, 1)
+```
+
 
 
 
