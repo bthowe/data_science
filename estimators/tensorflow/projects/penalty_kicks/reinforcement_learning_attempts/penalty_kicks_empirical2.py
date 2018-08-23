@@ -1,15 +1,14 @@
 # https://github.com/dennybritz/reinforcement-learning/blob/master/PolicyGradient/CliffWalk%20REINFORCE%20with%20Baseline%20Solution.ipynb
-import gym
-import itertools
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
-import sys
-import tensorflow as tf
 import collections
+import itertools
+import sys
 
-from cw import CliffWalkingEnv
-import plotting
+import matplotlib
+import numpy as np
+import tensorflow as tf
+
+from reinforcement_learning_attempts import plotting
+from reinforcement_learning_attempts.cw import CliffWalkingEnv
 
 matplotlib.style.use('ggplot')
 

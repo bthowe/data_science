@@ -5,6 +5,7 @@ from functools import partial
 from itertools import product
 from scipy.linalg import solve
 from scipy.optimize import minimize
+import constants
 
 
 count = 0
@@ -117,7 +118,8 @@ def keeper_scorer():
 
 
 if __name__ == '__main__':
-    a = [.15, .15, .15, .2, .15, .2]
+    import constants
+    a = list(constants.p_shot.values())
     print(keeper_best_response(a))
 
 

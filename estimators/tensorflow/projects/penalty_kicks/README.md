@@ -41,3 +41,32 @@ but this isn't the essence of the nash equilibrium. it's not really a maximizati
 But data assumes something like repeated play and actions taken therein. So I could come up with a best response. 
 So the idea of learning the nash equilibrium is not possible unless I have data on many different policies. 
 But I can learn, assuming a single policy, what the best response would be. 
+
+
+
+
+What if I used a multiarmed bandit...would this work?
+It seems like it would. During the exploration phase, you randomly choose an "arm" and observe the outcome. Then you update. Or something like this.
+ 
+ 
+ 
+How is a multiarmed bandit like reinforcement learning?
+
+
+
+
+
+
+
+# Bandit
+Two important features the bandit should achieve are (1) the probability of a win for each strategy and (2) the probability of a strategy being chosen.
+
+I need a methodology that converges to the correct probability distribution of choosing a strategy. The Bayesian would not do this---the trials and wins would have to be the same for lower_right and lower_left.
+Similarly, the epsilon greedy would not work because during the exploration stage anything could be chosen according to a uniform distribution, whereas during the exploitation phase the alternative with the highest win to trial ratio is chosen.
+The UCB1 likewise does not work because it penalizes alternatives that have been chosen more, everything else equal. Thus, while the number of lower_right and lower_left chosen might be equal, the probability of one would depend on whatever values were realized recently. 
+
+Using the softmax, we get a convergence to the following probability of keeper strategy choice distribution: [0.08664848 0.05617447 0.09048345 0.34544559 0.06878271 0.3524653 ]. I don't understand why it converged (more or less) to this.
+changing the value of tau from .1 to .035 gives roughly the correct answer. The fraction of wins are approximately correct as well. However, the probability of choosing another strategy is too high.
+Is tuning tau something that is even possible prior to running the bandit in the wild?
+
+Can I think of an alternative solution?
