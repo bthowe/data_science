@@ -53,7 +53,7 @@ class PropensityScoreSpecification(object):
     def _likelihood_calc(self, X):
         self._lr.fit(X, self.t)
         t_pred = self._lr.predict_proba(X)
-        return log_loss(self.t, t_pred)
+        return -log_loss(self.t, t_pred)  # log-loss is the negative log likelihood
 
     def _choose_covar(self, method):
         score = {'score': 0, 'covar': '', 'data': None}
@@ -70,7 +70,8 @@ class PropensityScoreSpecification(object):
             )
             l1 = self._likelihood_calc(X_temp)
 
-            new_score = self._l0 / l1
+            new_score = 2 * (l1 - self._l0)
+            # new_score = self._l0 / l1
             if score['score'] < new_score:
                 score['score'] = new_score
                 score['covar'] = covar
