@@ -1,15 +1,9 @@
 import sys
-import joblib
-import datetime
 import numpy as np
 import pandas as pd
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import roc_auc_score
-from sklearn.feature_selection import RFE
+from sklearn.metrics import log_loss
 from itertools import combinations_with_replacement
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV, train_test_split
-from sklearn.metrics import log_loss
 
 pd.set_option('max_columns', 1000)
 pd.set_option('max_info_columns', 1000)
@@ -116,3 +110,13 @@ if __name__ == '__main__':
     basic_covariates = ['monthly_premium', 'policy_wait']
     pss = PropensityScoreSpecification(df, t, basic_covariates)
     print(pss.specification_create().score())
+
+    ## How to use
+    # df = pd.read_csv('test_data.csv').pipe(preprocess)
+    # t = df.pop('treatment_group')
+    #
+    # basic_covariates = ['monthly_premium', 'policy_wait']
+    # pss = prop.PropensityScoreSpecification(df, t, basic_covariates)
+    # df['e'] = pss.specification_create().score()
+    # df['t'] = t
+    # joblib.dump(df, 'df.pkl')
