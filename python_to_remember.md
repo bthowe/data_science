@@ -173,6 +173,12 @@ Reshape a one dimensional array into a two dimensional array
 
 
 ## pandas
+read the data from the clipboard into a dataframe
+```python
+df = pd.read_clipboard()
+```
+
+
 list values of a categorical variable
 ```python
 df.value_counts()
