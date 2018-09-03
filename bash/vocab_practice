@@ -1,0 +1,12 @@
+#!/bin/sh
+
+source activate py3
+
+cd ~/PycharmProjects/data_science/flask_apps/vocab_flashcards/
+
+ls
+mongod --fork --logpath ~/vocab/mongo_log/mongod.log
+python3 vocab_app.py
+killall mongod
+
+source deactivate
