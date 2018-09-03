@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import joblib
+import webbrowser
 import numpy as np
 import pandas as pd
 from pymongo import MongoClient
@@ -13,7 +14,12 @@ lesson_lst = list(range(4, 13)) + list(range(14, 75))
 
 client = MongoClient()
 # client.drop_database('vocab')
+# sys.exit()
 db = client['vocab']
+
+# @app.before_first_request
+# def browser_launch():
+#     webbrowser.open('http://localhost:8001/')
 
 @app.route('/')
 def submission_page():
@@ -76,7 +82,7 @@ def quiz():
 
 @app.route('/mongo_call', methods=['POST'])
 def mongo_call():
-    js = json.loads(request.data)
+    js = json.loads(request.data.decode('utf-8'))
 
     tab = db[js['page']]
     tab.insert_one(js)
