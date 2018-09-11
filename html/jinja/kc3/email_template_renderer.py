@@ -2,55 +2,58 @@ from jinja2 import Template
 with open('email_template.html') as file_:
     template = Template(file_.read())
     t = template.render(
-        hero_image='https://www.mormonnewsroom.org/media/960x540/Kansas-City-Missouri-Temple1.jpg',
+        # hero_image="https://media.ldscdn.org/images/media-library/gospel-art/book-of-mormon/and-he-healed-them-all-every-one-290248-print-do-not-copy-notice.jpg",
+        hero_image="https://knowhy.bookofmormoncentral.org/sites/default/files/knowhy-img/2016/3/main/doctrineofchrist.jpg",
         missionary_message='''
-        <p style="margin: 0; padding-top: .5cm">Hello Kansas City 3rd Ward!</p>
-        <p> In a talk about commitment given in the October 1983 General Conference, Elder Marvin Ashton said </p>
-            <blockquote>
-                True happiness is not made in getting something. True happiness is becoming something. This can be done by being committed to lofty goals. We cannot become something without commitment...Each day we must be committed to lofty Christian performance because commitment to the truths of the Gospel of Jesus Christ is essential to our eternal joy and happiness. The time to commit and recommit is now.
-            </blockquote>
-        <p style="...">Let us all recommit ourselves when we take the sacrament this coming Sunday to living the Gospel of Jesus Christ more fully. Let us think of a righteous goal for our lives and then take the steps required to accomplish it. We promise that as you prayerfully ponder, set goals, and strive your absolute best to complete them, God will help you every step along the way and you will look back and say that, through the process, you are a better person. There is no greater joy than righteous progression.</p>
+        <p style="margin: 0; padding-top: .5cm">Greetings Kansas City 3rd Ward!</p>
+        <p>“For I neither received it of man, neither was I taught it, but by the revelation of Jesus Christ." (Galatians 1: 12) These are the words of Paul, a powerful disciple of Christ in the New Testament, while he was telling his story of conversion to the Galatians who had only ever heard myths about him before. This dictates clearly the way that we receive our testimony of our Lord Jesus Christ, through the Holy Ghost and revelation.</p>
+        <p>Let us all hearken unto the words of our Prophet, President Nelson, and apply his advice given to us on receiving personal revelation in this past General Conference and specifically apply it to our own personal testimonies.</p>
+        <p>We promise that as you study the word of God and ponder on what he would like you to do next, that you will receive the guidance necessary to grow your testimonies and become worthy disciples of Jesus Christ.</p>
+        <p>We love you and pray for you!</p>
         ''',
-        scripture_button='https://www.lds.org/general-conference/1983/10/the-word-is-commitment?lang=eng',
-        scripture_prompt="Read Elder Ashton's talk",
+        scripture_button='https://www.lds.org/scriptures/nt/gal/1.12?lang=eng',
+        scripture_prompt="Read Galatians 1",
+        tip_of_week='''
+        <p>We succeed as member missionaries when we invite people to learn and accept the truth regardless of how that invitation is received.</p>
+        ''',
+        tip_button="https://www.lds.org/ensign/2005/02/seven-lessons-on-sharing-the-gospel?lang=eng#title5",
+        tip_prompt="Read Ensign Article",
         announcements='''
         <ul>
-        <li>ICYMI: Emily McCulloch was baptized and confirmed this past weekend. Congratulations to her and her family! We are excited to have her as part of our ward! </li>
-        <li>Beginning this week, members of the Elders Quorum will have periodic team-up assignments with the full-time missionaries. These typically take place in the evening (and last between one and two hours) but can occur in the morning or afternoon if that is better for your schedule. See below for assignments for the next four weeks.</li>
-        <li>Over the next few weeks (before summer vacation ends) the full-time missionaries will be visiting and teaching lessons to the young men and young women of the ward. Please welcome them into your home as they try to strengthen our youth and their friends.</li>
-        <li>Finally, Bro. Howe will be out of town for the next three Sundays. Please contact Bro. Josephson (contact information found below) if you have a question or comment related to the ward's missionary efforts.</li>
-
-
+        <li>ICYMI: Chris Lawrie was baptized and confirmed a member of the Church this past weekend. Congratulations to him and his family!</li>
         </ul>
         ''',
         dinners='''
-        <li>7/30: Semones</li>
-        <li>7/31: Davis</li>
-        <li>8/1: <i> available </i></li>
-        <li>8/2: <i> available </i></li>
-        <li>8/3: Goin</li>
-        <li>8/4: <i> available </i></li>
-        <li>8/5: Bakkedahl</li>
+        <li>9/10: Pace</li>
+        <li>9/11: Allen</li>
+        <li>9/12: Davis</li>
+        <li>9/13: Ellis</li>
+        <li>9/14: Davidson</li>
+        <li>9/15: Crawford</li>
+        <li>9/16: Bakkedahl</li>
         ''',
-        teamups='''
-        <li>7/31: James Allen</li>
-        <li>8/1: Andy Bakkedahl</li>
-        <li>8/2: Nathan Breneman</li>
-
-        <li>8/7: Sam Lunceford</li>
-        <li>8/8: Will Burke</li>
-        <li>8/9: Steve Daniels</li>
-
-        <li>8/14: Curt Davidson</li>
-        <li>8/15: Kay Davis</li>
-        <li>8/16: John Davis</li>
-
-        <li>8/21: Bill Ellibee</li>
-        <li>8/22: Bill Ellis</li>
-        <li>8/23: Craig Fitt</li>
+        teamups1='''
+        <li>9/11: Russell Hayes</li>
+        <li>9/12: Jacob Henderson</li>
+        <li>9/13: Steve Hirschi</li>
+        ''',
+        teamups2='''
+        <li>9/18: Brock Josephson</li>
+        <li>9/19: Carl Kent </li>
+        <li>9/20: Lonny Kintner</li>
+        ''',
+        teamups3='''
+        <li>9/25: Terry Lewis</li>
+        <li>9/26: David Martin</li>
+        <li>9/27: Phillip Lunceford</li>
+        ''',
+        teamups4='''
+        <li>10/2: Bruce McCain</li>
+        <li>10/3: Robert Mayo</li>
+        <li>10/4: Adam McDonald</li>
         ''',
         missionary1='''
-        <a href="https://www.facebook.com/cameron.clayton.3344">Elder Clayton</a>
+        <a href="https://www.facebook.com/hunter.coley.96">Elder Coley</a>
         ''',
         missionary2='''
         <a href="https://www.facebook.com/isaac.watts.503">Elder Watts</a>
