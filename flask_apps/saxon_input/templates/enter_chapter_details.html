@@ -3,19 +3,32 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
+    <style>
+        .hidden {
+            display: none;
+        }
+        .unhidden {
+            display: inline-block;
+        }
+    </style>
 <body>
 
 <div id="myDiv">Choose book: </div><br><br>
 <input id="chapter" type="text" placeholder="Chapter" name="chapter"><br><br>
 <input id="num_lesson_probs" type="text" placeholder="Number of Lesson Problems" name="lesson"><br><br>
 <input id="num_mixed_probs" type="text" placeholder="Number of Mixed Problems" name="mixed"><br><br>
-<button id="button"/>Submit</button>
+<button id="button"/>Submit</button><br><br>
+<button id="button_delete" class="hidden"/>Undo Submit</button>
 
 <script>
-    var myDiv = document.getElementById("myDiv");
+    var book
+    var chapter
+    var num_lesson_probs
+    var num_mixed_probs
 
-    var books = ['Math 5/4', 'Math 6/5', 'Math 7/6', 'Math 8/7', 'Algebra 1/2', 'Algebra 1', 'Algebra 2', 'Advanced Math', 'Calculus']
-    var selected_book = '{{ book }}';
+
+    var myDiv = document.getElementById("myDiv");
+    var books = ['choose book', 'Math 5/4', 'Math 6/5', 'Math 7/6', 'Math 8/7', 'Algebra 1/2', 'Algebra 1', 'Algebra 2', 'Advanced Math', 'Calculus']
 
     //Create and append select list
     var selectList = document.createElement("select");
@@ -28,38 +41,77 @@
         option.setAttribute("value", books[i]);
         option.text = books[i];
 
-        if (books[i] === selected_book) {
+        if (books[i] === 'choose book') {
             option.selected = true
         }
 
         selectList.appendChild(option);
     }
 
+    document.getElementById('mySelect').focus();
+
     document.addEventListener('DOMContentLoaded', init, false);
     function init() {
         function submit() {
             var e = document.getElementById("mySelect")
-            var book = e.options[e.selectedIndex].text;
+            book = e.options[e.selectedIndex].text;
+            chapter = parseInt(document.getElementById('chapter').value)
+            num_lesson_probs = document.getElementById('num_lesson_probs').value
+            num_mixed_probs = document.getElementById('num_mixed_probs').value
 
-            var request = new XMLHttpRequest();
-            request.open("POST", "/mongo_call", true);
-            request.send(JSON.stringify(
-                {
-                    "book": book,
-                    "chapter": document.getElementById('chapter').value,
-                    "num_lesson_probs": document.getElementById('num_lesson_probs').value,
-                    "num_mixed_probs": document.getElementById('num_mixed_probs').value,
-                }
-                )
-            );
+            if ((book == 'choose book') || (isNaN(chapter)) || (num_lesson_probs == '') || (num_mixed_probs == '')){
+                alert('Fill in all fields, dummy.')
+            }
+            else {
+                var request = new XMLHttpRequest();
+                request.open("POST", "/add_document", true);
+                request.send(JSON.stringify(
+                    {
+                        "book": book,
+                        "chapter": chapter,
+                        "num_lesson_probs": num_lesson_probs,
+                        "num_mixed_probs": num_mixed_probs,
+                    }
+                    )
+                );
 
-            document.getElementById('chapter').value = ''
-            document.getElementById('num_lesson_probs').value = ''
-            document.getElementById('num_mixed_probs').value = ''
-            document.getElementById('chapter').focus();
+                document.getElementById('chapter').value = chapter + 1
+                document.getElementById('num_lesson_probs').value = ''
+                document.getElementById('num_lesson_probs').focus();
+                document.getElementById('button_delete').className = "unhidden"
+            }
         }
-        var button_push = document.getElementById('button');
-        button_push.addEventListener('click', submit, true);
+        var button_submit = document.getElementById('button');
+        button_submit.addEventListener('click', submit, true);
+
+
+
+        function delete_previous() {
+            if (chapter == null){
+                alert('There is no previous entry to remove.')
+            }
+            else {
+                var request = new XMLHttpRequest();
+                request.open("POST", "/remove_document", true);
+                request.send(JSON.stringify(
+                    {
+                        "book": book,
+                        "chapter": chapter,
+                        "num_lesson_probs": num_lesson_probs,
+                        "num_mixed_probs": num_mixed_probs
+                    }
+                    )
+                );
+                alert('The previous entry (book: ' + book + ', chapter: ' + chapter + ', num_lesson_probs: ' + num_lesson_probs + ', num_mixed_probs: ' + num_mixed_probs + ') was succesfully deleted.')
+                chapter = chapter
+                document.getElementById('chapter').value = chapter
+                document.getElementById('num_lesson_probs').focus();
+                document.getElementById('button_delete').className = "hidden"
+            }
+        }
+        var button_delete = document.getElementById('button_delete');
+        button_delete.addEventListener('click', delete_previous, true);
+
 
     }
 
@@ -70,6 +122,5 @@
 </body>
 </html>
 
-
-
-<!--todo: autofill using what I just used except for the chapter which should be auto incremented-->
+<!--todo: page to delete an entry by chapter-->
+<!--todo: page to modify an entry by chapter-->
