@@ -160,8 +160,12 @@ np.repeat()
 ```
 
 #### split array
+The latter raises an exception if an equal division cannot be made.
 ```python
 np.array_split
+```
+```python
+np.split
 ```
 
 Reshape a one dimensional array into a two dimensional array
@@ -572,3 +576,40 @@ torch.Tensor(y).long()
 ```python
 torch.cat((1 - output, output), 1)
 ```
+
+
+
+## PyMongo
+####connect to mongo
+```python
+from pymongo import MongoClient
+client = MongoClient()
+```
+
+####create or connect to database
+```python
+db = client['math_book_info']
+```
+
+####delete database
+```python
+client.drop_database('math_book_info')
+```
+
+####create a colleciton
+```python
+collection = db['book_one']
+```
+
+####insert document into collection
+```python
+y = collection.insert_one(json_obj)
+```
+
+####print all of the documents in a collection
+```python
+cursor = collection.find()
+for record in cursor:
+    print(record)
+```
+
