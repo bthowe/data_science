@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<div id="myDiv">Choose book: </div><br><br>
+<input id="chapter" type="text" placeholder="Chapter" name="chapter"><br><br>
+<input id="num_lesson_probs" type="text" placeholder="Number of Lesson Problems" name="lesson"><br><br>
+<input id="num_mixed_probs" type="text" placeholder="Number of Mixed Problems" name="mixed"><br><br>
+<button id="button"/>Submit</button>
+
+<script>
+    var myDiv = document.getElementById("myDiv");
+
+    var books = ['Math 5/4', 'Math 6/5', 'Math 7/6', 'Math 8/7', 'Algebra 1/2', 'Algebra 1', 'Algebra 2', 'Advanced Math', 'Calculus']
+    var selected_book = '{{ book }}';
+
+    //Create and append select list
+    var selectList = document.createElement("select");
+    selectList.setAttribute("id", "mySelect");
+    myDiv.appendChild(selectList);
+
+    //Create and append the options
+    for (var i = 0; i < books.length; i++) {
+        var option = document.createElement("option");
+        option.setAttribute("value", books[i]);
+        option.text = books[i];
+
+        if (books[i] === selected_book) {
+            option.selected = true
+        }
+
+        selectList.appendChild(option);
+    }
+
+    document.addEventListener('DOMContentLoaded', init, false);
+    function init() {
+        function submit() {
+            var e = document.getElementById("mySelect")
+            var book = e.options[e.selectedIndex].text;
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "book": book,
+                    "chapter": document.getElementById('chapter').value,
+                    "num_lesson_probs": document.getElementById('num_lesson_probs').value,
+                    "num_mixed_probs": document.getElementById('num_mixed_probs').value,
+                }
+                )
+            );
+
+            document.getElementById('chapter').value = ''
+            document.getElementById('num_lesson_probs').value = ''
+            document.getElementById('num_mixed_probs').value = ''
+            document.getElementById('chapter').focus();
+        }
+        var button_push = document.getElementById('button');
+        button_push.addEventListener('click', submit, true);
+
+    }
+
+
+</script>
+
+
+</body>
+</html>
+
+
+
+<!--todo: autofill using what I just used except for the chapter which should be auto incremented-->
