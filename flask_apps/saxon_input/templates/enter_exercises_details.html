@@ -37,41 +37,100 @@
 <button id="button" class="unhidden"/>Submit</button>
 
 
-
-<!--<p>Click the questions that were answered incorrectly</p>-->
-
-
-<!--https://www.w3schools.com/js/js_ajax_http.asp-->
-<!--XMLHttpRequest-->
-
-
 <script>
-    var alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    var kid;
+    var book;
+    var chapter;
+    var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    var miss_list = [];
 
     document.getElementById('choose_kid').focus();
 
-    function createProblems(num)
+    function createProblems(str)
 	{
-	   for(var i=1; i<=num; i++)
+	    var num;
+	    var h_tag;
+	    var t_tag;
+	    var nextChar;
+	    if (typeof str === "string"){
+            h_tag = document.createElement("H1");
+            t_tag = document.createTextNode("Lesson Practice");
+            h_tag.appendChild(t_tag);
+            document.body.appendChild(h_tag);
+    	    num = str.length - 1
+        }
+        else {
+            h_tag = document.createElement("H1");
+            t_tag = document.createTextNode("Mixed Practice");
+            h_tag.appendChild(t_tag);
+            document.body.appendChild(h_tag);
+	        num = parseInt(str) - 1
+        }
+	   for(var i=0; i<=num; i++)
 	   {
-//	    var nextChar = str.charAt(i);
-	    var btn = document.createElement("BUTTON");
-	    btn.id = 'btn' + toString(i);
-    	btn.setAttribute('style',"font-size:24px; background-color: #4CAF50");
-    	btn.innerHTML = i;
-    	btn.value = toString(i);
-    	document.body.appendChild(btn);
+	       if (typeof str === "string"){
+	           nextChar = str.charAt(i);
+           }
+           else {
+	           nextChar = i + 1;
+           }
+           var btn = document.createElement("BUTTON");
+           btn.id = 'btn' + toString(nextChar);
+           btn.setAttribute('style',"font-size:24px; background: green");
+           btn.innerHTML = nextChar;
+           btn.value = toString(nextChar);
+           document.body.appendChild(btn);
+           btn.addEventListener('click', function(event){
+               if (event.target.style.background === "red"){
+                   event.target.style.background = "green";
+                   var index = miss_list.indexOf(event.target.innerHTML);
+                   if (index > -1) {
+                       miss_list.splice(index, 1);
+                   }
+               }
+               else {
+                   event.target.style.background = "red";
+                   miss_list.push(event.target.innerHTML)
+               }
+           });
     	}
     };
 
+    function createButton() {
+        var div = document.createElement("div");
+        document.body.appendChild(div);
+
+        var btn = document.createElement("BUTTON");
+        btn.id = 'button_record';
+        btn.innerHTML = 'Record';
+        div.appendChild(btn);
+//        document.body.appendChild(btn);
+        btn.addEventListener('click', function (event) {
+            var request = new XMLHttpRequest();
+            request.responseType = 'json';
+            request.open("POST", "/missed_problems", true);
+            request.send(JSON.stringify(
+                {
+                    "kid": kid,
+                    "book": book,
+                    "chapter": chapter,
+                    "miss_list": miss_list
+                }
+                )
+            );
+            window.location.href = '/';
+        });
+    }
+    ;
+
     document.addEventListener('DOMContentLoaded', init, false);
     function init() {
-        function submit(callback) {
-            var kid_e = document.getElementById("choose_book")
-            var kid = kid_e.options[kid_e.selectedIndex].text;
+        function submit() {
+            var kid_e = document.getElementById("choose_kid")
+            kid = kid_e.options[kid_e.selectedIndex].text;
             var book_e = document.getElementById("choose_book")
-            var book = book_e.options[book_e.selectedIndex].value;
-            var chapter = parseInt(document.getElementById('chapter').value)
+            book = book_e.options[book_e.selectedIndex].value;
+            chapter = parseInt(document.getElementById('chapter').value)
 
             if ((kid == 'choose kid') || (book == 'choose book') || (isNaN(chapter))){
                 alert('Fill in all fields, dummy.')
@@ -82,13 +141,11 @@
                 request.open("POST", "/query_chapter", true);
                 request.onload = function() {
                     var chapter_details = JSON.parse(JSON.stringify(request.response))
-                    createProblems(chapter_details['num_mixed_probs'])
+                    createProblems(alphabet.substr(0, alphabet.indexOf(chapter_details['num_lesson_probs']) + 1))
+                    createProblems(parseInt(chapter_details['num_mixed_probs']))
+                    createButton()
 
-//                    todo: here
-                    alert(alphabet.substr(0, alphabet.indexOf(chapter_details['num_lesson_probs']) + 1))
-//                    alert(alphabet.substr(0, chapter_details['num_lesson_probs']))
-//                    num_lesson_probs
-                }
+                };
                 request.send(JSON.stringify(
                     {
                         "book": book,
@@ -98,13 +155,9 @@
                 );
             }
             document.getElementById('button').className = "hidden"
-
-
-
         }
         var button_submit = document.getElementById('button');
         button_submit.addEventListener('click', submit, true);
-
     }
 
 
@@ -115,7 +168,8 @@
 </html>
 
 
-<!--todo: put lesson review and mixed review headers above buttons-->
+<!--todo; remove the most recent entry-->
 
+<!--todo: css the div housing the record button-->
 
 <!--todo: I'm going to want to make it so all I have to do is enter a new child into the database and it populates this list, or somethign.-->

@@ -25,7 +25,7 @@ text-align: center;
 color: #777;
 }
 
-.login-form {
+.register-form {
 text-align: center;
 }
 .control-group {
@@ -33,7 +33,7 @@ margin-bottom: 10px;
 }
 
 input {
-text-align: center;
+text-align: left;
 background-color: #ECF0F1;
 border: 2px solid transparent;
 border-radius: 3px;

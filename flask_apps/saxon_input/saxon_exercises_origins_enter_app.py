@@ -8,14 +8,16 @@ app = Flask(__name__)
 
 client = MongoClient()
 db = client['math_book_info']
-db_record = client['math_performance']
+db_origins = client['math_exercise_origins']
+
 
 @app.route("/")
 def enter_chapter_details():
-    return render_template('enter_exercises_details.html')
+    return render_template('enter_exercises_origins.html')
+
 
 @app.route('/query_chapter', methods=['POST', 'GET'])
-def add_document():
+def query_chapter():
     js = json.loads(request.data.decode('utf-8'))
     print(js)
 
@@ -28,24 +30,12 @@ def add_document():
     return jsonify(chapter_details)
 
 
-@app.route('/remove_document', methods=['POST'])
-def remove_document():
-    js = json.loads(request.data.decode('utf-8'))
-
-    collection = db[js['book'].replace(' ', '_').replace('/', '_')]
-    y = collection.delete_one(js)
-    print(y)
-
-    print('data deleted: {}'.format(js))
-    return ''
-
-
-@app.route('/missed_problems', methods=['POST'])
-def missed_problems():
+@app.route('/enter_origin_list', methods=['POST'])
+def enter_origin_list():
     js = json.loads(request.data.decode('utf-8'))
     print(js)
 
-    collection = db_record[js['book']]
+    collection = db_origins[js['book']]
     y = collection.insert_one(js)
     print(y)
 

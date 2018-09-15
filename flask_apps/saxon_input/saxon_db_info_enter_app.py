@@ -7,8 +7,6 @@ from flask import Flask, request, render_template
 app = Flask(__name__)
 
 client = MongoClient()
-# client.drop_database('math_book_info')
-# sys.exit()
 db = client['math_book_info']
 
 @app.route("/")
