@@ -23,6 +23,7 @@ def query_chapter():
 
     book = js['book']
 
+    chapter_details = None
     for record in db[book].find({'chapter': js['chapter']}):
         chapter_details = {'num_lesson_probs': record['num_lesson_probs'], 'num_mixed_probs': record['num_mixed_probs']}
     print(chapter_details)

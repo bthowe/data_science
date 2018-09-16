@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+    <style>
+        .hidden {
+            display: none;
+        }
+        .unhidden {
+            display: inline-block;
+        }
+    </style>
+<body>
+
+<!--<button id="button_info"/>Number</button><br><br>-->
+<!--<button id="button_origin"/>Origin</button><br><br>-->
+<!--<button id="button_performace"/>Performance</button>-->
+
+<input type="button_number" onclick="location.href='/enter_problem_number';" value="enter number" />
+<input type="button_origin" onclick="location.href='/enter_problem_origin';" value="enter origins" />
+<input type="button_performance" onclick="location.href='/enter_performance';" value="enter performance" />
+<script>
+    var book
+    var chapter
+    var num_lesson_probs
+    var num_mixed_probs
+
+
+    var myDiv = document.getElementById("myDiv");
+    var books = ['choose book', 'Math 5/4', 'Math 6/5', 'Math 7/6', 'Math 8/7', 'Algebra 1/2', 'Algebra 1', 'Algebra 2', 'Advanced Math', 'Calculus']
+
+    //Create and append select list
+    var selectList = document.createElement("select");
+    selectList.setAttribute("id", "mySelect");
+    myDiv.appendChild(selectList);
+
+    //Create and append the options
+    for (var i = 0; i < books.length; i++) {
+        var option = document.createElement("option");
+        option.setAttribute("value", books[i]);
+        option.text = books[i];
+
+        if (books[i] === 'choose book') {
+            option.selected = true
+        }
+
+        selectList.appendChild(option);
+    }
+
+    document.getElementById('mySelect').focus();
+
+    document.addEventListener('DOMContentLoaded', init, false);
+    function init() {
+        function submit() {
+            var e = document.getElementById("mySelect")
+            book = e.options[e.selectedIndex].text;
+            chapter = parseInt(document.getElementById('chapter').value)
+            num_lesson_probs = document.getElementById('num_lesson_probs').value
+            num_mixed_probs = document.getElementById('num_mixed_probs').value
+
+            if ((book == 'choose book') || (isNaN(chapter)) || (num_lesson_probs == '') || (num_mixed_probs == '')){
+                alert('Fill in all fields, dummy.')
+            }
+            else {
+                var request = new XMLHttpRequest();
+                request.open("POST", "/add_document", true);
+                request.send(JSON.stringify(
+                    {
+                        "book": book,
+                        "chapter": chapter,
+                        "num_lesson_probs": num_lesson_probs,
+                        "num_mixed_probs": num_mixed_probs,
+                    }
+                    )
+                );
+
+                document.getElementById('chapter').value = chapter + 1
+                document.getElementById('num_lesson_probs').value = ''
+                document.getElementById('num_lesson_probs').focus();
+                document.getElementById('button_delete').className = "unhidden"
+            }
+        }
+        var button_submit = document.getElementById('button_info');
+        button_submit.addEventListener('click', info, true);
+
+
+    }
+
+
+</script>
+
+
+</body>
+</html>
+
+<!--todo: page to delete an entry by chapter-->
+<!--todo: page to modify an entry by chapter-->

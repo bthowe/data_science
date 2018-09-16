@@ -108,7 +108,7 @@
         btn.addEventListener('click', function (event) {
             var request = new XMLHttpRequest();
             request.responseType = 'json';
-            request.open("POST", "/missed_problems", true);
+            request.open("POST", "/add_missed_problems", true);
             request.send(JSON.stringify(
                 {
                     "kid": kid,
