@@ -9,12 +9,12 @@ today = datetime.date.today()
 dates = [str(today + datetime.timedelta(days)) for days in range(1, 7)]
 
 discussion_questions = [
-    "Alma 1:24. Why do people leave the Church?",
-    "What is an investment? Should your occupation influence your optimal ivestment decisions?",
-    "Why would sellers put other ingredients in bottles of honey or olive oil? What other ingredients?",
-    "Why is it difficult to learn how to do things like rollerskating and skate-boarding? (Calvin)",
-    "Why do cars use gas? (Kay)",
-    "How have cars changed how people live their lives? (Samuel)"
+    "What is water made from? Would being able to make water change the world? (Seth)",
+    "How do lakes and ponds get and keep their water? (Kay)",
+    "How do countries get their names? (Calvin)",
+    "What is the rule of law and why is or isn't it significant?",
+    "What is illegal fishing, why is it a problem, and how can technology help?",
+    "How would a \$2 ventilator affect medicine?"
 ]
 
 header = r'''
@@ -61,12 +61,12 @@ Writing & & & & & & & & & & & &\\\\[70pt]
 Vocabulary & & & & & & & & & & & &\\\\[70pt]
 \\hline
 Discussion & 
-\\multicolumn{{2}}{{|p{{3cm}}|}}{{Alma 1:24. Why do people leave the Church?}} & 
-\\multicolumn{{2}}{{p{{3cm}}|}}{{What is an investment? Should your occupation influence your optimal ivestment decisions?}} & 
-\\multicolumn{{2}}{{p{{3cm}}|}}{{Why would sellers put other ingredients in bottles of honey or olive oil? What other ingredients?}} & 
-\\multicolumn{{2}}{{p{{3cm}}|}}{{Why is it difficult to learn how to do things like rollerskating and skate-boarding? (Calvin)}} & 
-\\multicolumn{{2}}{{p{{3cm}}|}}{{Why do cars use gas? (Kay)}} & 
-\\multicolumn{{2}}{{p{{3cm}}|}}{{How have cars changed how people live their lives? (Samuel)}} 
+\\multicolumn{{2}}{{|p{{3cm}}|}}{{{6}}} &
+\\multicolumn{{2}}{{p{{3cm}}|}}{{{7}}} &
+\\multicolumn{{2}}{{p{{3cm}}|}}{{{8}}} &
+\\multicolumn{{2}}{{p{{3cm}}|}}{{{9}}} &
+\\multicolumn{{2}}{{p{{3cm}}|}}{{{10}}} &
+\\multicolumn{{2}}{{p{{3cm}}|}}{{{11}}}
 \\\\[70pt]
 \\hline
 \\end{{tabular}}
@@ -144,7 +144,8 @@ content = header + main + footer
 with open('weekly_time_sheet.tex','w') as f:
      f.write(content)
 
-commandLine = subprocess.Popen(['pdflatex', 'weekly_time_sheet.tex'])
+commandLine = subprocess.Popen(['/Library/TeX/Root/bin/x86_64-darwin/pdflatex', 'weekly_time_sheet.tex'])
+# commandLine = subprocess.Popen(['pdflatex', 'weekly_time_sheet.tex'])
 commandLine.communicate()
 
 os.unlink('weekly_time_sheet.aux')
