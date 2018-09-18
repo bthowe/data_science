@@ -53,12 +53,48 @@ def query_chapter():
 
     book = js['book']
 
-    chapter_details = None
-    for record in db_number[book].find({'chapter': js['chapter']}):
-        chapter_details = {'num_lesson_probs': record['num_lesson_probs'], 'num_mixed_probs': record['num_mixed_probs']}
-    print(chapter_details)
+    start_chapter_details = list(db_number[book].find({'chapter': js['start_chapter']}))[0]
+    print(start_chapter_details['num_lesson_probs'])
+    print(start_chapter_details['num_mixed_probs'])
+    end_chapter_details = list(db_number[book].find({'chapter': js['end_chapter']}))[0]
+    print(end_chapter_details['num_lesson_probs'])
+    print(end_chapter_details['num_mixed_probs'])
 
-    return jsonify(chapter_details)
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    problems_dic = {}
+    # problems for beginning chapter
+    if str(js['start_problem']).isalpha():
+        problems_dic[js['start_chapter']] = [letter for letter in alphabet if letter >= str(js['start_problem']) and letter <= start_chapter_details['num_lesson_probs']] + \
+                                            list(map(str, range(1, int(start_chapter_details['num_mixed_probs']) + 1)))
+    else:
+        problems_dic[js['start_chapter']] = [str(number) for number in range(1, int(start_chapter_details['num_mixed_probs']) + 1) if number >= int(js['start_problem'])]
+
+    # problems for middling chapters
+    if int(js['end_chapter']) - int(js['start_chapter']) > 1:
+        for chapter in range(int(js['start_chapter']) + 1, int(js['end_chapter'])):
+            mid_chapter_details = list(db_number[book].find({'chapter': chapter}))[0]
+            problems_dic[chapter] = [letter for letter in alphabet if letter <= mid_chapter_details['num_lesson_probs']] + list(range(1, int(mid_chapter_details['num_mixed_probs']) + 1))
+
+    # problems for end chapter
+    if str(js['end_problem']).isalpha():
+        problems_dic[js['end_chapter']] = [letter for letter in alphabet if letter <= str(js['end_problem'])]
+    else:
+        problems_dic[js['end_chapter']] = [letter for letter in alphabet if letter <= str(end_chapter_details['num_lesson_probs'])] +\
+            [str(number) for number in range(1, int(end_chapter_details['num_mixed_probs']) + 1) if number <= int(js['end_problem'])]
+
+
+    for chapter in range(js['start_chapter'], js['end_chapter'] + 1):
+        problems_dic[chapter] = str(problems_dic[chapter])
+
+    print(problems_dic)
+
+
+    # return ''
+    # return jsonify(items=[problems_dic])
+    return jsonify(problems_dic)
+
+
+# todo: I need to add date and start and end times to the post
 
 
 @app.route('/add_problem_origin', methods=['POST'])
@@ -96,5 +132,4 @@ if __name__ == '__main__':
     app.secret_key = os.urandom(12)
     app.run(host='0.0.0.0', port=8001, debug=True)
 
-# todo: put a main menu button in each of the three pages
-# todo: css the main page
+# todo: style the pages

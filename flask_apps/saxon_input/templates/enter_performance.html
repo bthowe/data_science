@@ -32,70 +32,75 @@
     <option value="Calculus">Calculus</option>
 </select><br><br>
 
-<input id="chapter" type="text" placeholder="Chapter" name="chapter"><br><br>
+<input id="start_chapter" type="text" placeholder="Start Chapter" name="start_chapter"><br><br>
+<input id="start_problem" type="text" placeholder="Start Problem" name="start_problem"><br><br>
+<input id="end_chapter" type="text" placeholder="End Chapter" name="end_chapter"><br><br>
+<input id="end_problem" type="text" placeholder="End Problem" name="end_problem"><br><br>
+<!--<input id="chapter" type="text" placeholder="Chapter" name="chapter"><br><br>-->
 
-<button id="button" class="unhidden"/>Submit</button>
-
+<button id="button" class="unhidden"/>Submit</button><br><br>
+<input type="button_number" onclick="location.href='/';" value="main menu" />
 
 <script>
     var kid;
     var book;
-    var chapter;
+    var start_chapter;
+    var start_problem;
+    var end_chapter;
+    var end_problem;
     var alphabet = 'abcdefghijklmnopqrstuvwxyz';
     var miss_list = [];
 
     document.getElementById('choose_kid').focus();
 
-    function createProblems(str)
-	{
-	    var num;
-	    var h_tag;
-	    var t_tag;
-	    var nextChar;
-	    if (typeof str === "string"){
-            h_tag = document.createElement("H1");
-            t_tag = document.createTextNode("Lesson Practice");
-            h_tag.appendChild(t_tag);
-            document.body.appendChild(h_tag);
-    	    num = str.length - 1
+    function createProblems(chap, probs) {
+        var num;
+        var h_tag;
+        var t_tag;
+        var count = 0;
+        h_tag = document.createElement("H1");
+        t_tag = document.createTextNode("Lesson " + chap);
+        h_tag.appendChild(t_tag);
+        document.body.appendChild(h_tag);
+        for (var i = 0; i < probs.length; i++) {
+            if ((probs[i].match(/[a-z]/i) != null) & (count == 0)) {
+                h_tag = document.createElement("H3");
+                t_tag = document.createTextNode("Lesson Practice");
+                h_tag.appendChild(t_tag);
+                document.body.appendChild(h_tag);
+                count++;
+            }
+            else if ((probs[i].match(/[a-z]/i) == null) & (count == 1)) {
+                h_tag = document.createElement("H3");
+                t_tag = document.createTextNode("Mixed Practice");
+                h_tag.appendChild(t_tag);
+                document.body.appendChild(h_tag);
+                count++;
+            }
+            var btn = document.createElement("BUTTON");
+            btn.id = 'btn' + toString(probs[i]);
+            btn.setAttribute('style', "font-size:24px; background: green");
+            btn.innerHTML = probs[i];
+            btn.value = toString(probs[i]);
+            document.body.appendChild(btn);
+            btn.addEventListener('click', function (event) {
+                if (event.target.style.background === "red") {
+                    event.target.style.background = "green";
+                    var index = miss_list.indexOf(event.target.innerHTML);
+                    if (index > -1) {
+                        miss_list.splice(index, 1);
+                    }
+                }
+                else {
+                    event.target.style.background = "red";
+                    miss_list.push(event.target.innerHTML)
+                }
+            });
         }
-        else {
-            h_tag = document.createElement("H1");
-            t_tag = document.createTextNode("Mixed Practice");
-            h_tag.appendChild(t_tag);
-            document.body.appendChild(h_tag);
-	        num = parseInt(str) - 1
-        }
-	   for(var i=0; i<=num; i++)
-	   {
-	       if (typeof str === "string"){
-	           nextChar = str.charAt(i);
-           }
-           else {
-	           nextChar = i + 1;
-           }
-           var btn = document.createElement("BUTTON");
-           btn.id = 'btn' + toString(nextChar);
-           btn.setAttribute('style',"font-size:24px; background: green");
-           btn.innerHTML = nextChar;
-           btn.value = toString(nextChar);
-           document.body.appendChild(btn);
-           btn.addEventListener('click', function(event){
-               if (event.target.style.background === "red"){
-                   event.target.style.background = "green";
-                   var index = miss_list.indexOf(event.target.innerHTML);
-                   if (index > -1) {
-                       miss_list.splice(index, 1);
-                   }
-               }
-               else {
-                   event.target.style.background = "red";
-                   miss_list.push(event.target.innerHTML)
-               }
-           });
-    	}
     };
 
+
+//    todo: start here with getting the miss list correct
     function createButton() {
         var div = document.createElement("div");
         document.body.appendChild(div);
@@ -130,9 +135,12 @@
             kid = kid_e.options[kid_e.selectedIndex].text;
             var book_e = document.getElementById("choose_book")
             book = book_e.options[book_e.selectedIndex].value;
-            chapter = parseInt(document.getElementById('chapter').value)
+            start_chapter = parseInt(document.getElementById('start_chapter').value)
+            start_problem = document.getElementById('start_problem').value
+            end_chapter = parseInt(document.getElementById('end_chapter').value)
+            end_problem = document.getElementById('end_problem').value
 
-            if ((kid == 'choose kid') || (book == 'choose book') || (isNaN(chapter))){
+            if ((kid == 'choose kid') || (book == 'choose book') || (isNaN(start_chapter)) || (start_problem == "") || (isNaN(end_chapter)) || (end_problem == "")){
                 alert('Fill in all fields, dummy.')
             }
             else {
@@ -141,15 +149,44 @@
                 request.open("POST", "/query_chapter", true);
                 request.onload = function() {
                     var chapter_details = JSON.parse(JSON.stringify(request.response))
-                    createProblems(alphabet.substr(0, alphabet.indexOf(chapter_details['num_lesson_probs']) + 1))
-                    createProblems(parseInt(chapter_details['num_mixed_probs']))
+//                    alert(typeof Object.keys(chapter_details))
+//                    alert(Object.values(chapter_details))
+
+                    for (var key in chapter_details) {
+                       if (chapter_details.hasOwnProperty(key)) {
+//                           alert(chapter_details[key].split(', '))
+                           createProblems(key, chapter_details[key].replace(/'/g, '').replace('[', '').replace(']', '').split(', '))
+//                           for (var i=0; i < chapter_details[key].length; i++) {
+//                               alert(key + " -> " + chapter_details[key][i])
+//                           }
+//                        alert(key + " -> " + chapter_details[key]);
+                        }
+                    }
+
+////                    for (var val in Object.keys(chapter_details)) {
+//                    for (var i=0; i < 2; i++){
+//                        alert(Object.key(chapter_details))
+//                        alert(Object.key(chapter_details)[i])
+//                    }
+//                    alert(Object.values(chapter_details))
+//                    var chapter_details = JSON.parse(request.response)
+//                    var chapter_details = JSON.stringify(request.response)
+//                    var chapter_details = JSON.parse(JSON.stringify(request.response))
+//                    alert(JSON.stringify(chapter_details))
+//                    alert(Object.keys(JSON.parse(JSON.stringify(chapter_details))))
+//                    for (var k in chapter_details) alert(k);
+//                    createProblems(alphabet.substr(0, alphabet.indexOf(chapter_details['num_lesson_probs']) + 1))
+//                    createProblems(parseInt(chapter_details['num_mixed_probs']))
                     createButton()
 
                 };
                 request.send(JSON.stringify(
                     {
                         "book": book,
-                        "chapter": chapter
+                        "start_chapter": start_chapter,
+                        "start_problem": start_problem,
+                        "end_chapter": end_chapter,
+                        "end_problem": end_problem
                     }
                     )
                 );
@@ -166,6 +203,10 @@
 
 </body>
 </html>
+
+
+<!--todo: the submit button became hidden after pushing submit and all of the fields were not filled in-->
+
 
 
 <!--todo; remove the most recent entry-->
