@@ -2,6 +2,7 @@ import os
 import sys
 import json
 from pymongo import MongoClient
+from collections import defaultdict
 from flask import Flask, request, render_template, jsonify
 
 app = Flask(__name__)
@@ -119,6 +120,19 @@ def enter_performance():
 def add_missed_problems():
     js = json.loads(request.data.decode('utf-8'))
     print(js)
+
+    miss_lst = defaultdict(list)
+    for prob in js['add_miss_list']:
+        miss_lst[prob['chapter']].append(prob['problem'])
+    for prob in js['rem_miss_list']:
+        miss_lst[prob['chapter']].remove(prob['problem'])
+    k_to_del = [k for k, v in miss_lst.items() if not miss_lst[k]]
+    for k in k_to_del:
+        del miss_lst[k]
+    js['miss_lst'] = dict(miss_lst)
+
+    del js['add_miss_list']
+    del js['rem_miss_list']
 
     collection = db_performance[js['book']]
     y = collection.insert_one(js)

@@ -36,6 +36,8 @@
 <input id="start_problem" type="text" placeholder="Start Problem" name="start_problem"><br><br>
 <input id="end_chapter" type="text" placeholder="End Chapter" name="end_chapter"><br><br>
 <input id="end_problem" type="text" placeholder="End Problem" name="end_problem"><br><br>
+<input id="start_time" type="text" placeholder="Start Time" name="start_time"><br><br>
+<input id="end_time" type="text" placeholder="End Time" name="end_time"><br><br>
 <!--<input id="chapter" type="text" placeholder="Chapter" name="chapter"><br><br>-->
 
 <button id="button" class="unhidden"/>Submit</button><br><br>
@@ -48,8 +50,12 @@
     var start_problem;
     var end_chapter;
     var end_problem;
+    var start_time;
+    var end_time;
     var alphabet = 'abcdefghijklmnopqrstuvwxyz';
     var miss_list = [];
+    var add_miss_list = [];
+    var rem_miss_list = [];
 
     document.getElementById('choose_kid').focus();
 
@@ -81,26 +87,29 @@
             btn.id = 'btn' + toString(probs[i]);
             btn.setAttribute('style', "font-size:24px; background: green");
             btn.innerHTML = probs[i];
-            btn.value = toString(probs[i]);
+            btn.value = chap + '_' + probs[i];
             document.body.appendChild(btn);
             btn.addEventListener('click', function (event) {
                 if (event.target.style.background === "red") {
                     event.target.style.background = "green";
-                    var index = miss_list.indexOf(event.target.innerHTML);
-                    if (index > -1) {
-                        miss_list.splice(index, 1);
-                    }
+//                    miss_list = miss_list.filter(function(el){ return ((el.chapter != event.target.value.split('_')[0].toString()) && (el.problem != event.target.value.split('_')[1].toString())); });
+                    var jsonData_miss = {}
+                    jsonData_miss['chapter'] = event.target.value.split('_')[0].toString()
+                    jsonData_miss['problem'] = event.target.value.split('_')[1].toString()
+                    rem_miss_list.push(jsonData_miss)
                 }
                 else {
                     event.target.style.background = "red";
-                    miss_list.push(event.target.innerHTML)
+
+                    var jsonData = {}
+                    jsonData['chapter'] = event.target.value.split('_')[0].toString()
+                    jsonData['problem'] = event.target.value.split('_')[1].toString()
+                    add_miss_list.push(jsonData)
                 }
             });
         }
     };
 
-
-//    todo: start here with getting the miss list correct
     function createButton() {
         var div = document.createElement("div");
         document.body.appendChild(div);
@@ -109,7 +118,6 @@
         btn.id = 'button_record';
         btn.innerHTML = 'Record';
         div.appendChild(btn);
-//        document.body.appendChild(btn);
         btn.addEventListener('click', function (event) {
             var request = new XMLHttpRequest();
             request.responseType = 'json';
@@ -118,15 +126,20 @@
                 {
                     "kid": kid,
                     "book": book,
-                    "chapter": chapter,
-                    "miss_list": miss_list
+                    "start_chapter": start_chapter,
+                    "start_problem": start_problem,
+                    "end_chapter": end_chapter,
+                    "end_problem": end_problem,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "add_miss_list": add_miss_list,
+                    "rem_miss_list": rem_miss_list
                 }
                 )
             );
-            window.location.href = '/';
+            window.location.href = '/enter_performance';
         });
-    }
-    ;
+    };
 
     document.addEventListener('DOMContentLoaded', init, false);
     function init() {
@@ -139,6 +152,8 @@
             start_problem = document.getElementById('start_problem').value
             end_chapter = parseInt(document.getElementById('end_chapter').value)
             end_problem = document.getElementById('end_problem').value
+            start_time = document.getElementById('start_time').value
+            end_time = document.getElementById('end_time').value
 
             if ((kid == 'choose kid') || (book == 'choose book') || (isNaN(start_chapter)) || (start_problem == "") || (isNaN(end_chapter)) || (end_problem == "")){
                 alert('Fill in all fields, dummy.')
@@ -149,36 +164,12 @@
                 request.open("POST", "/query_chapter", true);
                 request.onload = function() {
                     var chapter_details = JSON.parse(JSON.stringify(request.response))
-//                    alert(typeof Object.keys(chapter_details))
-//                    alert(Object.values(chapter_details))
-
                     for (var key in chapter_details) {
                        if (chapter_details.hasOwnProperty(key)) {
-//                           alert(chapter_details[key].split(', '))
                            createProblems(key, chapter_details[key].replace(/'/g, '').replace('[', '').replace(']', '').split(', '))
-//                           for (var i=0; i < chapter_details[key].length; i++) {
-//                               alert(key + " -> " + chapter_details[key][i])
-//                           }
-//                        alert(key + " -> " + chapter_details[key]);
                         }
                     }
-
-////                    for (var val in Object.keys(chapter_details)) {
-//                    for (var i=0; i < 2; i++){
-//                        alert(Object.key(chapter_details))
-//                        alert(Object.key(chapter_details)[i])
-//                    }
-//                    alert(Object.values(chapter_details))
-//                    var chapter_details = JSON.parse(request.response)
-//                    var chapter_details = JSON.stringify(request.response)
-//                    var chapter_details = JSON.parse(JSON.stringify(request.response))
-//                    alert(JSON.stringify(chapter_details))
-//                    alert(Object.keys(JSON.parse(JSON.stringify(chapter_details))))
-//                    for (var k in chapter_details) alert(k);
-//                    createProblems(alphabet.substr(0, alphabet.indexOf(chapter_details['num_lesson_probs']) + 1))
-//                    createProblems(parseInt(chapter_details['num_mixed_probs']))
                     createButton()
-
                 };
                 request.send(JSON.stringify(
                     {
