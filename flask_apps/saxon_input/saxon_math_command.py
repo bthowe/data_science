@@ -1,9 +1,10 @@
 import os
 import sys
 import json
+import webbrowser
 from pymongo import MongoClient
 from collections import defaultdict
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, redirect
 
 app = Flask(__name__)
 
@@ -14,11 +15,56 @@ db_performance = client['math_performance']
 
 @app.route("/")
 def main_menu():
-    return render_template('main_menu.html')
+    return render_template('main_menu2.html')
+
+# @app.route("/")
+# def main_menu():
+#     return render_template('main_menu.html')
+#
+
 
 @app.route("/enter_problem_number")
 def enter_chapter_details():
     return render_template('enter_problem_number.html')
+
+
+def problem_list_create(first, last, less_num):
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    if str(first).isalpha():
+        if str(last).isalpha():
+            return [letter for letter in alphabet if (letter >= str(first) and letter <= str(last))]
+        else:
+            return [letter for letter in alphabet if (letter >= str(first) and letter <= less_num)] + list(map(str, range(1, int(last) + 1)))
+    else:
+        return list(map(str, range(int(first), int(last) + 1)))
+
+@app.route('/query_chapter', methods=['POST', 'GET'])
+def query_chapter():
+    js = json.loads(request.data.decode('utf-8'))
+    print(js)
+
+    book = js['book']
+
+    start_chapter_details = list(db_number[book].find({'chapter': js['start_chapter']}))[0]
+    end_chapter_details = list(db_number[book].find({'chapter': js['end_chapter']}))[0]
+
+    problems_dic = {}
+    if int(js['end_chapter']) - int(js['start_chapter']) == 0:  # if start and end is the same chapter
+        problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], js['end_problem'], start_chapter_details['num_lesson_probs']))
+    elif int(js['end_chapter']) - int(js['start_chapter']) == 1:  # if start and end is one chapter apart
+        problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs']))
+        problems_dic[js['end_chapter']] = str(problem_list_create('a', js['end_problem'], end_chapter_details['num_lesson_probs']))
+    else:  # if start and end is multiple chapters apart
+        problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs']))
+        problems_dic[js['end_chapter']] = str(problem_list_create('a', js['end_problem'], end_chapter_details['num_lesson_probs']))
+        for chapter in range(int(js['start_chapter']) + 1, int(js['end_chapter'])):
+            mid_chapter_details = list(db_number[book].find({'chapter': chapter}))[0]
+            problems_dic[chapter] = str(problem_list_create('a', mid_chapter_details['num_mixed_probs'], mid_chapter_details['num_lesson_probs']))
+
+    print(problems_dic)
+
+    return jsonify(problems_dic)
+
 
 @app.route('/add_problem_number', methods=['POST'])
 def add_problem_number():
@@ -47,55 +93,17 @@ def enter_problem_origin():
     return render_template('enter_problem_origins.html')
 
 
-@app.route('/query_chapter', methods=['POST', 'GET'])
-def query_chapter():
+@app.route('/query_chapter2', methods=['POST', 'GET'])
+def query_chapter2():
     js = json.loads(request.data.decode('utf-8'))
     print(js)
 
     book = js['book']
 
-    start_chapter_details = list(db_number[book].find({'chapter': js['start_chapter']}))[0]
-    print(start_chapter_details['num_lesson_probs'])
-    print(start_chapter_details['num_mixed_probs'])
-    end_chapter_details = list(db_number[book].find({'chapter': js['end_chapter']}))[0]
-    print(end_chapter_details['num_lesson_probs'])
-    print(end_chapter_details['num_mixed_probs'])
-
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    problems_dic = {}
-    # problems for beginning chapter
-    if str(js['start_problem']).isalpha():
-        problems_dic[js['start_chapter']] = [letter for letter in alphabet if letter >= str(js['start_problem']) and letter <= start_chapter_details['num_lesson_probs']] + \
-                                            list(map(str, range(1, int(start_chapter_details['num_mixed_probs']) + 1)))
-    else:
-        problems_dic[js['start_chapter']] = [str(number) for number in range(1, int(start_chapter_details['num_mixed_probs']) + 1) if number >= int(js['start_problem'])]
-
-    # problems for middling chapters
-    if int(js['end_chapter']) - int(js['start_chapter']) > 1:
-        for chapter in range(int(js['start_chapter']) + 1, int(js['end_chapter'])):
-            mid_chapter_details = list(db_number[book].find({'chapter': chapter}))[0]
-            problems_dic[chapter] = [letter for letter in alphabet if letter <= mid_chapter_details['num_lesson_probs']] + list(range(1, int(mid_chapter_details['num_mixed_probs']) + 1))
-
-    # problems for end chapter
-    if str(js['end_problem']).isalpha():
-        problems_dic[js['end_chapter']] = [letter for letter in alphabet if letter <= str(js['end_problem'])]
-    else:
-        problems_dic[js['end_chapter']] = [letter for letter in alphabet if letter <= str(end_chapter_details['num_lesson_probs'])] +\
-            [str(number) for number in range(1, int(end_chapter_details['num_mixed_probs']) + 1) if number <= int(js['end_problem'])]
-
-
-    for chapter in range(js['start_chapter'], js['end_chapter'] + 1):
-        problems_dic[chapter] = str(problems_dic[chapter])
-
-    print(problems_dic)
-
-
-    # return ''
-    # return jsonify(items=[problems_dic])
+    output = list(db_number[book].find({'chapter': js['chapter']}))[0]
+    print(output)
+    problems_dic = {'num_lesson_probs': output['num_lesson_probs'], 'num_mixed_probs': output['num_mixed_probs']}
     return jsonify(problems_dic)
-
-
-# todo: I need to add date and start and end times to the post
 
 
 @app.route('/add_problem_origin', methods=['POST'])
@@ -142,8 +150,32 @@ def add_missed_problems():
     return ''
 
 
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+@app.route('/quit')
+def quit():
+    shutdown_server()
+    return ''
+
 if __name__ == '__main__':
-    app.secret_key = os.urandom(12)
     app.run(host='0.0.0.0', port=8001, debug=True)
 
-# todo: style the pages
+
+# todo: in performance page, maybe don't make submit button hidden after click
+# todo: standardize date field in form
+
+# todo: form styling for the three pages
+# todo: complete the .sh bash file
+    # -back up the database
+    # -send the backup to git
+    # -shutdown database and server
+
+
+# todo: page to delete an entry by chapter
+# todo: page to modify an entry by chapter
+
+# todo: make a boilerplate for their math assignments
