@@ -109,9 +109,17 @@
             nextChar = i;
             var input = document.createElement("INPUT");
             input.id = 'input' + nextChar;
-            input.placeholder = 'Exercise ' + nextChar;
+//            input.placeholder = '123';
+//            input.placeholder = 'Exercise ' + nextChar;
 //            input.value = 1;
+
+            var label = document.createElement("Label");
+            label.htmlFor = 'input' + nextChar;
+            label.innerHTML = 'Exercise ' + nextChar;
+            label.className = "col-sm-1 col-form-label";
+
             document.body.appendChild(input);
+            document.body.insertBefore(label, input);
 
             var br = document.createElement("br");
             br.id = 'br' + nextChar
@@ -123,12 +131,14 @@
 
     function createButton() {
         var div = document.createElement("div");
-        div.id = 'div'
+        div.id = 'div';
+        div.className = "col-xs-12 col-sm-12";
         document.body.appendChild(div);
 
         var btn = document.createElement("BUTTON");
         btn.id = 'button_record';
         btn.innerHTML = 'Record';
+        btn.className = 'btn btn-primary';
         div.appendChild(btn);
         btn.addEventListener('click', function (event) {
             for (var i = 1; i <= num_mixed_probs; i++) {
