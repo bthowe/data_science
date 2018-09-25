@@ -78,6 +78,16 @@
                 </select>
             </div>
         </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-auto">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="testCheck">
+                    <label class="form-check-label" for="testCheck">Test</label>
+                </div>
+            </div>
+        </div>
+
         <div class="form-row">
             <div class="form-group col-md-2">
                 <label for="start_chapter">Start Chapter</label>
@@ -116,42 +126,7 @@
     </form>
 </div>
 
-
-<!--<select id="choose_kid">-->
-    <!--<option value="" selected>choose kid</option>-->
-    <!--<option value="calvin">Calvin</option>-->
-    <!--<option value="samuel">Samuel</option>-->
-    <!--<option value="kay">Kay</option>-->
-<!--</select><br><br>-->
-<!--<select id="choose_book">-->
-    <!--<option value="" selected>choose book</option>-->
-    <!--<option value="Math_5_4">Math 5/4</option>-->
-    <!--<option value="Math_6_5">Math 6/5</option>-->
-    <!--<option value="Math_7_6">Math 7/6</option>-->
-    <!--<option value="Math_8_7">Math 8/7</option>-->
-    <!--<option value="Algebra_1_2">Algebra 1/2</option>-->
-    <!--<option value="Algebra_1">Algebra 1</option>-->
-    <!--<option value="Algebra_2">Algebra 2</option>-->
-    <!--<option value="Advanced_math">Advanced Math</option>-->
-    <!--<option value="Calculus">Calculus</option>-->
-<!--</select><br><br>-->
-
-<!--<input id="start_chapter" type="text" placeholder="Start Chapter" name="start_chapter"><br><br>-->
-<!--<input id="start_problem" type="text" placeholder="Start Problem" name="start_problem"><br><br>-->
-<!--<input id="end_chapter" type="text" placeholder="End Chapter" name="end_chapter"><br><br>-->
-<!--<input id="end_problem" type="text" placeholder="End Problem" name="end_problem"><br><br>-->
-<!--<input id="date" type="text" placeholder="Date (yyyy-mm-dd)" name="date"><br><br>-->
-<!--<input id="start_time" type="text" placeholder="Start Time" name="start_time"><br><br>-->
-<!--<input id="end_time" type="text" placeholder="End Time" name="end_time"><br><br>-->
-
-<!--<button id="button" class="unhidden"/>Submit</button><br><br>-->
-
 <script>
-//    src="{{url_for('static', filename='js/bootstrap.min.js')}}"
-//    src="{{url_for('static', filename='js/bootstrap.js')}}"
-//    src="{{url_for('static', filename='js/bootstrap.bundle.js')}}"
-//    src="{{url_for('static', filename='js/bootstrap.bundle.min.js')}}"
-
     var kid;
     var book;
     var start_chapter;
@@ -165,6 +140,7 @@
     var miss_list = [];
     var add_miss_list = [];
     var rem_miss_list = [];
+    var test;
 
     document.getElementById('choose_kid').focus();
 
@@ -174,7 +150,12 @@
         var t_tag;
         var count = 0;
         h_tag = document.createElement("H1");
-        t_tag = document.createTextNode("Lesson " + chap);
+        if (test) {
+            t_tag = document.createTextNode("Test " + chap);
+        }
+        else {
+            t_tag = document.createTextNode("Lesson " + chap);
+        }
         h_tag.appendChild(t_tag);
         document.body.appendChild(h_tag);
         for (var i = 0; i < probs.length; i++) {
@@ -203,6 +184,7 @@
                     event.target.style.background = "green";
 //                    miss_list = miss_list.filter(function(el){ return ((el.chapter != event.target.value.split('_')[0].toString()) && (el.problem != event.target.value.split('_')[1].toString())); });
                     var jsonData_miss = {}
+
                     jsonData_miss['chapter'] = event.target.value.split('_')[0].toString()
                     jsonData_miss['problem'] = event.target.value.split('_')[1].toString()
                     rem_miss_list.push(jsonData_miss)
@@ -243,7 +225,8 @@
                     "start_time": start_time,
                     "end_time": end_time,
                     "add_miss_list": add_miss_list,
-                    "rem_miss_list": rem_miss_list
+                    "rem_miss_list": rem_miss_list,
+                    "test": test
                 }
                 )
             );
@@ -265,6 +248,7 @@
             date = document.getElementById('date').value
             start_time = document.getElementById('start_time').value
             end_time = document.getElementById('end_time').value
+            test = document.getElementById('testCheck').checked;
 
             if ((kid == 'choose kid') || (book == 'choose book') || (isNaN(start_chapter)) || (start_problem == "") || (isNaN(end_chapter)) || (end_problem == "")){
                 alert('Fill in all fields, dummy.')
@@ -288,7 +272,8 @@
                         "start_chapter": start_chapter,
                         "start_problem": start_problem,
                         "end_chapter": end_chapter,
-                        "end_problem": end_problem
+                        "end_problem": end_problem,
+                        "test": test
                     }
                     )
                 );
@@ -307,9 +292,6 @@
 
 </body>
 </html>
-
-
-
 
 <!--todo: the submit button became hidden after pushing submit and all of the fields were not filled in-->
 <!--todo: form validation more generally-->

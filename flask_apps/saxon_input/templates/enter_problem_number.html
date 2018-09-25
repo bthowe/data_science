@@ -5,32 +5,30 @@
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel=stylesheet>
 
 </head>
-    <style>
-        .hidden {
-            display: none;
-        }
-        .unhidden {
-            display: inline-block;
-        }
-    </style>
+<style>
+    .hidden {
+        display: none;
+    }
+
+    .unhidden {
+        display: inline-block;
+    }
+</style>
 <body>
 
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Number of Problems</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/quit">Quit</a>
-      </li>
-    </ul>
-  </div>
+    <a class="navbar-brand" href="#">Number of Problems</a>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/quit">Quit</a>
+            </li>
+        </ul>
+    </div>
 </nav>
 
 
@@ -69,6 +67,14 @@
         </div>
         <div class="form-row">
             <div class="form-group col-md-auto">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="testCheck">
+                    <label class="form-check-label" for="testCheck">Test</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-auto">
                 <button id="button" type="submit" class="btn btn-primary">Submit</button>
             </div>
             <div class="form-group col-md-auto">
@@ -76,54 +82,34 @@
             </div>
         </div>
         <!--<div class="form-row">-->
-            <!--<div class="form-group col-md-2">-->
-                <!--<button id="button_delete" type="submit" class="btn btn-primary hidden">Undo Submit</button>-->
-            <!--</div>-->
+        <!--<div class="form-group col-md-2">-->
+        <!--<button id="button_delete" type="submit" class="btn btn-primary hidden">Undo Submit</button>-->
+        <!--</div>-->
         <!--</div>-->
     </form>
 </div>
 
 
-    <!--<input id="chapter" type="text" placeholder="Chapter" name="chapter"><br><br>-->
-    <!--<input id="num_lesson_probs" type="text" placeholder="Number of Lesson Problems" name="lesson"><br><br>-->
-    <!--<input id="num_mixed_probs" type="text" placeholder="Number of Mixed Problems" name="mixed"><br><br>-->
-    <!--<button id="button" type="submit" class="btn btn-primary">Submit</button>-->
-    <!--<button id="button_delete" class="hidden"/>Undo Submit</button><br><br>-->
+<!--<input id="chapter" type="text" placeholder="Chapter" name="chapter"><br><br>-->
+<!--<input id="num_lesson_probs" type="text" placeholder="Number of Lesson Problems" name="lesson"><br><br>-->
+<!--<input id="num_mixed_probs" type="text" placeholder="Number of Mixed Problems" name="mixed"><br><br>-->
+<!--<button id="button" type="submit" class="btn btn-primary">Submit</button>-->
+<!--<button id="button_delete" class="hidden"/>Undo Submit</button><br><br>-->
 </div>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
 <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
 
 
 <script>
-    var book
-    var chapter
-    var num_lesson_probs
-    var num_mixed_probs
+    var book;
+    var test;
+    var chapter;
+    var num_lesson_probs;
+    var num_mixed_probs;
 
     document.getElementById('choose_book').focus();
-
-//    var myDiv = document.getElementById("myDiv");
-//    var books = ['choose book', 'Math 5/4', 'Math 6/5', 'Math 7/6', 'Math 8/7', 'Algebra 1/2', 'Algebra 1', 'Algebra 2', 'Advanced Math', 'Calculus']
-//
-//    //Create and append select list
-//    var selectList = document.createElement("select");
-//    selectList.setAttribute("id", "mySelect");
-//    myDiv.appendChild(selectList);
-//
-//    //Create and append the options
-//    for (var i = 0; i < books.length; i++) {
-//        var option = document.createElement("option");
-//        option.setAttribute("value", books[i]);
-//        option.text = books[i];
-//
-//        if (books[i] === 'choose book') {
-//            option.selected = true
-//        }
-//
-//        selectList.appendChild(option);
-//    }
-
-//    document.getElementById('mySelect').focus();
 
     document.addEventListener('DOMContentLoaded', init, false);
     function init() {
@@ -133,17 +119,26 @@
             chapter = parseInt(document.getElementById('chapter').value)
             num_lesson_probs = document.getElementById('num_lesson_probs').value
             num_mixed_probs = document.getElementById('num_mixed_probs').value
+            test = document.getElementById('testCheck').checked;
 
-            if ((book == 'choose book') || (isNaN(chapter)) || (num_lesson_probs == '') || (num_mixed_probs == '')){
+            if ((book == 'choose book') || (isNaN(chapter)) || (num_lesson_probs == '') || (num_mixed_probs == '')) {
                 alert('Fill in all fields, dummy.')
             }
             else {
+                var new_chapter
+                if (test == true) {
+                    new_chapter = 'test ' + chapter;
+                }
+                else {
+                    new_chapter = chapter;
+                }
+
                 var request = new XMLHttpRequest();
                 request.open("POST", "/add_problem_number", true);
                 request.send(JSON.stringify(
                     {
                         "book": book,
-                        "chapter": chapter,
+                        "chapter": new_chapter,
                         "num_lesson_probs": num_lesson_probs,
                         "num_mixed_probs": num_mixed_probs,
                     }
@@ -156,13 +151,13 @@
                 document.getElementById('button_delete').className = "btn btn-primary unhidden"
             }
         }
+
         var button_submit = document.getElementById('button');
         button_submit.addEventListener('click', submit, true);
 
 
-
         function delete_previous() {
-            if (chapter == null){
+            if (chapter == null) {
                 alert('There is no previous entry to remove.')
             }
             else {
@@ -184,6 +179,7 @@
                 document.getElementById('button_delete').className = "btn btn-primary hidden"
             }
         }
+
         var button_delete = document.getElementById('button_delete');
         button_delete.addEventListener('click', delete_previous, true);
 
@@ -196,6 +192,7 @@
 
 </body>
 </html>
+
 
 <!--todo: page to delete an entry by chapter-->
 <!--todo: page to modify an entry by chapter-->

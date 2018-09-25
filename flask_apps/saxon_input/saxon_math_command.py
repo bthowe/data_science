@@ -1,10 +1,20 @@
 import os
 import sys
 import json
+import datetime
 import webbrowser
+import pandas as pd
 from pymongo import MongoClient
 from collections import defaultdict
 from flask import Flask, request, render_template, jsonify, redirect
+
+pd.set_option('max_columns', 1000)
+pd.set_option('max_info_columns', 1000)
+pd.set_option('expand_frame_repr', False)
+pd.set_option('display.max_rows', 30000)
+pd.set_option('max_colwidth', 4000)
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+
 
 app = Flask(__name__)
 
@@ -21,6 +31,56 @@ def main_menu():
 # def main_menu():
 #     return render_template('main_menu.html')
 #
+
+
+@app.route("/dashboards")
+def dashboards():
+    return render_template('dashboards.html')
+
+
+def problem_list_count(first, last, less_num):
+    return len(problem_list_create(first, last, less_num))
+
+
+@app.route("/query_periods_data", methods=['POST'])
+def query_periods_data():
+    js = json.loads(request.data.decode('utf-8'))
+    print(js)
+
+    df_performance_details = pd.DataFrame(list(db_performance[js['book']].find({'kid': js['kid']}))).\
+        query('date == date').\
+        drop(['chapter', 'miss_list'], 1). \
+        sort_values(['date', 'start_chapter', 'start_problem'])
+    df_performance_details['date'] = pd.to_datetime(df_performance_details['date'])
+
+    df_book_details = pd.DataFrame(list(db_number[js['book']].find())).drop(['_id', 'book'], 1)
+
+    threshold_date = (df_performance_details['date'] - pd.to_timedelta(int(js['periods']), unit='D')).max()
+    df_merged = df_performance_details.\
+        query('date > "{}"'.format(threshold_date)).\
+        merge(df_book_details, how='left', left_on='start_chapter', right_on='chapter')
+
+    # todo: here
+    # todo: calculate number of question
+    df_merged['problem_count'] = df_merged.apply(lambda x: problem_list_count(x['start_problem'], x['end_problem'], 'num_lesson_probs'))
+
+
+
+
+
+
+
+
+    return jsonify({"hey": "there"})
+
+# todo: how should I deal with tests? Should I just throw them out for now? Count them as normal?
+# todo: break down into lesson problems and mixed problems
+
+# find latest date
+# find the x most recent dates
+
+
+
 
 
 @app.route("/enter_problem_number")
@@ -45,21 +105,26 @@ def query_chapter():
 
     book = js['book']
 
-    start_chapter_details = list(db_number[book].find({'chapter': js['start_chapter']}))[0]
-    end_chapter_details = list(db_number[book].find({'chapter': js['end_chapter']}))[0]
 
     problems_dic = {}
-    if int(js['end_chapter']) - int(js['start_chapter']) == 0:  # if start and end is the same chapter
-        problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], js['end_problem'], start_chapter_details['num_lesson_probs']))
-    elif int(js['end_chapter']) - int(js['start_chapter']) == 1:  # if start and end is one chapter apart
-        problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs']))
-        problems_dic[js['end_chapter']] = str(problem_list_create('a', js['end_problem'], end_chapter_details['num_lesson_probs']))
-    else:  # if start and end is multiple chapters apart
-        problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs']))
-        problems_dic[js['end_chapter']] = str(problem_list_create('a', js['end_problem'], end_chapter_details['num_lesson_probs']))
-        for chapter in range(int(js['start_chapter']) + 1, int(js['end_chapter'])):
-            mid_chapter_details = list(db_number[book].find({'chapter': chapter}))[0]
-            problems_dic[chapter] = str(problem_list_create('a', mid_chapter_details['num_mixed_probs'], mid_chapter_details['num_lesson_probs']))
+
+    if js['test']:
+        problems_dic[js['start_chapter']] = str(list(map(str, range(1, 21))))
+    else:
+        start_chapter_details = list(db_number[book].find({'chapter': js['start_chapter']}))[0]
+        end_chapter_details = list(db_number[book].find({'chapter': js['end_chapter']}))[0]
+
+        if int(js['end_chapter']) - int(js['start_chapter']) == 0:  # if start and end is the same chapter
+            problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], js['end_problem'], start_chapter_details['num_lesson_probs']))
+        elif int(js['end_chapter']) - int(js['start_chapter']) == 1:  # if start and end is one chapter apart
+            problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs']))
+            problems_dic[js['end_chapter']] = str(problem_list_create('a', js['end_problem'], end_chapter_details['num_lesson_probs']))
+        else:  # if start and end is multiple chapters apart
+            problems_dic[js['start_chapter']] = str(problem_list_create(js['start_problem'], start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs']))
+            problems_dic[js['end_chapter']] = str(problem_list_create('a', js['end_problem'], end_chapter_details['num_lesson_probs']))
+            for chapter in range(int(js['start_chapter']) + 1, int(js['end_chapter'])):
+                mid_chapter_details = list(db_number[book].find({'chapter': chapter}))[0]
+                problems_dic[chapter] = str(problem_list_create('a', mid_chapter_details['num_mixed_probs'], mid_chapter_details['num_lesson_probs']))
 
     print(problems_dic)
 
@@ -130,17 +195,30 @@ def add_missed_problems():
     print(js)
 
     miss_lst = defaultdict(list)
+
+
     for prob in js['add_miss_list']:
-        miss_lst[prob['chapter']].append(prob['problem'])
+        if js['test']:
+            miss_lst['test {}'.format(prob['chapter'])].append(prob['problem'])
+        else:
+            miss_lst[prob['chapter']].append(prob['problem'])
     for prob in js['rem_miss_list']:
-        miss_lst[prob['chapter']].remove(prob['problem'])
+        if js['test']:
+            miss_lst['test {}'.format(prob['chapter'])].remove(prob['problem'])
+        else:
+            miss_lst[prob['chapter']].remove(prob['problem'])
     k_to_del = [k for k, v in miss_lst.items() if not miss_lst[k]]
     for k in k_to_del:
         del miss_lst[k]
     js['miss_lst'] = dict(miss_lst)
 
+    if js['test']:
+        js['start_chapter'] = 'test {}'.format(js['start_chapter'])
+        js['end_chapter'] = 'test {}'.format(js['end_chapter'])
+
     del js['add_miss_list']
     del js['rem_miss_list']
+    del js['test']
 
     collection = db_performance[js['book']]
     y = collection.insert_one(js)
@@ -165,7 +243,10 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8001, debug=True)
 
 
-# todo: in performance page, maybe don't make submit button hidden after click
+# todo: in performance, think of a solution to test
+
+
+# todo: in performance page, maybe don't make submit button hidden after click, and make it so it refreshes if I push it again.
 # todo: standardize date field in form
 
 # todo: form styling for the three pages
@@ -178,4 +259,3 @@ if __name__ == '__main__':
 # todo: page to delete an entry by chapter
 # todo: page to modify an entry by chapter
 
-# todo: make a boilerplate for their math assignments

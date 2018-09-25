@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form onsubmit="return false;">
+        <input type="text" id="periods">
+        <button id="button" type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <script>
+        var periods = 15;
+        var data = [
+            {value1: .92, position1: 0, value2: .85, position2: 1},
+            {value1: .85, position1: 1, value2: .82, position2: 2},
+            {value1: .82, position1: 2, value2: .80, position2: 3},
+            {value1: .80, position1: 3, value2: .83, position2: 4},
+            {value1: .83, position1: 4, value2: .78, position2: 5},
+            {value1: .78, position1: 5, value2: .88, position2: 6},
+            {value1: .88, position1: 6, value2: .90, position2: 7},
+            {value1: .90, position1: 7, value2: .64, position2: 8},
+            {value1: .64, position1: 8, value2: .72, position2: 9},
+            {value1: .72, position1: 9, value2: .93, position2: 10},
+            {value1: .93, position1: 10, value2: .54, position2: 11},
+            {value1: .54, position1: 11, value2: .54, position2: 12},
+            {value1: .54, position1: 12, value2: .58, position2: 13},
+            {value1: .58, position1: 13, value2: .64, position2: 14},
+            {value1: .64, position1: 14, value2: .59, position2: 15}
+        ]
+        var scoreData;
+
+        var body = d3.select("body")
+        var svg = body.append("svg")
+            .attr("width", "500px")
+            .attr("height", "500px")
+        var lineGroup = svg.append("g")
+            .attr("transform", "translate(100, 100)")
+
+        document.getElementById('periods').focus();
+
+        document.addEventListener('DOMContentLoaded', init, false);
+        function init() {
+            function submit() {
+                periods = document.getElementById('periods').value
+
+                scoreData = data.filter(function (d) {
+                    return d.position2 > (data.length - periods)
+                });
+
+                lineGroup.selectAll("*").remove();
+
+                lineGroup.selectAll("circle")
+                    .data(scoreData)
+                    .enter().append("circle")
+                    .attr("cx", function (d) {
+                        return d.position1 * 10
+                    })
+                    .attr("cy", function (d) {
+                        return 500 * (1 - d.value1)
+                    })
+                    .attr("r", "2")
+
+                lineGroup.selectAll("line")
+                    .data(scoreData)
+                    .enter().append("line")
+                    .attr("x1", function (d) {
+                        return d.position1 * 10
+                    })
+                    .attr("y1", function (d) {
+                        return 500 * (1 - d.value1)
+                    })
+                    .attr("x2", function (d) {
+                        return d.position2 * 10
+                    })
+                    .attr("y2", function (d) {
+                        return 500 * (1 - d.value2)
+                    })
+                    .attr("stroke", "black")
+
+            }
+            var button_submit = document.getElementById('button');
+            button_submit.addEventListener('click', submit, true);
+        }
+    </script>
+
+</body>
+</html>
+
