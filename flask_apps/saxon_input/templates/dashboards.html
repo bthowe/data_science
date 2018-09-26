@@ -3,6 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+
+    <style>
+        body {
+            font-family: Helvetica;
+        }
+
+        svg {
+            width: 500px;
+            height: 500px;
+        }
+        .line {
+            fill: DarkSlateBlue;
+        }
+        .bottom-label {
+            font-size: 13px;
+            font-style: italic;
+            text-transform: uppercase;
+            float: left;
+        }
+        .perc-label {
+            text-align: right;
+            font-weight: bold;
+            width: 90px;
+            padding-right: 10px;
+        }
+        .point-label {
+            text-anchor: end;
+        }
+        .axis-label {
+            text-anchor: middle;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
     <form onsubmit="return false;">
@@ -34,37 +67,130 @@
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
     <script>
+        document.getElementById('periods').focus();
+
         var kid;
         var book;
-        var periods = 15;
+        var periods;
 
-        var data = [
-            {value1: .92, position1: 0, value2: .85, position2: 1},
-            {value1: .85, position1: 1, value2: .82, position2: 2},
-            {value1: .82, position1: 2, value2: .80, position2: 3},
-            {value1: .80, position1: 3, value2: .83, position2: 4},
-            {value1: .83, position1: 4, value2: .78, position2: 5},
-            {value1: .78, position1: 5, value2: .88, position2: 6},
-            {value1: .88, position1: 6, value2: .90, position2: 7},
-            {value1: .90, position1: 7, value2: .64, position2: 8},
-            {value1: .64, position1: 8, value2: .72, position2: 9},
-            {value1: .72, position1: 9, value2: .93, position2: 10},
-            {value1: .93, position1: 10, value2: .54, position2: 11},
-            {value1: .54, position1: 11, value2: .54, position2: 12},
-            {value1: .54, position1: 12, value2: .58, position2: 13},
-            {value1: .58, position1: 13, value2: .64, position2: 14},
-            {value1: .64, position1: 14, value2: .59, position2: 15}
-        ]
+        var plotInfo = [
+            {value1: 0, position1: 0},
+            {value1: .10, position1: 1},
+            {value1: .20, position1: 2},
+            {value1: .30, position1: 3},
+            {value1: .40, position1: 4},
+            {value1: .50, position1: 5},
+            {value1: .60, position1: 6},
+            {value1: .70, position1: 7},
+            {value1: .80, position1: 8},
+            {value1: .90, position1: 9},
+            {value1: 1, position1: 10}
+        ];
         var scoreData;
 
-        var body = d3.select("body")
-        var svg = body.append("svg")
-            .attr("width", "500px")
-            .attr("height", "500px")
-        var lineGroup = svg.append("g")
-            .attr("transform", "translate(100, 100)")
+        var width = 400,
+            leftMargin = 100,
+            topMargin = 10,
+            bottomMargin = 30,
+            height = 500 - topMargin - bottomMargin,
+            barHeight = 20,
+            barGap = 5,
+            tickGap = 5,
+            tickHeight = 10,
+            barSpacing = barHeight + barGap,
+            translateText = "translate(" + leftMargin + "," + topMargin + ")",
+            scaleFactor,
+            scaleText;
 
-        document.getElementById('periods').focus();
+        var body = d3.select("body");
+        var h2 = body.append("h2");
+//        body.append("div")
+//            .attr("class", "bottom-label perc-label")
+//            .append("p")
+//            .text()
+//        body.append("div")
+//            .attr("class", "clearfix")
+        var svg = body.append("svg");
+        var lineGroup
+        var pointLabelGroup = svg.append("g")
+            .attr("transform", translateText)
+            .attr("class", "point-label");
+        var axisTickGroup = svg.append("g")
+            .attr("transform", translateText);
+        var axisLabelGroup = svg.append("g")
+            .attr("transform", translateText)
+            .attr("class", "axis-label");
+
+        function renderPlot(scoreData) {
+            scaleFactor = width / periods;
+            scaleText = "scale(" + scaleFactor + ",1)";
+            h2.text(kid + "'s scores for the last " + periods + " days")
+            lineGroup = svg.append("g")
+                .attr("transform", translateText)
+                .attr("class", "line");
+
+            lineGroup.selectAll("*").remove();
+
+            lineGroup.selectAll("circle")
+                .data(scoreData)
+                .enter().append("circle")
+                .attr("cx", function (d) {return d.position1 * scaleFactor})
+                .attr("cy", function (d) {return height * (1 - d.value1)})
+                .attr("r", "2")
+            lineGroup.append("circle")
+                .attr("cx", scoreData[scoreData.length - 1].position2 * scaleFactor)
+                .attr("cy", height * (1 - scoreData[scoreData.length - 1].value2))
+                .attr("r", "2")
+
+            lineGroup.selectAll("line")
+                .data(scoreData)
+                .enter().append("line")
+                .attr("x1", function (d) {
+                    return d.position1 * scaleFactor
+                })
+                .attr("y1", function (d) {
+                    return height * (1 - d.value1)
+                })
+                .attr("x2", function (d) {
+                    return d.position2 * scaleFactor
+                })
+                .attr("y2", function (d) {
+                    return height * (1 - d.value2)
+                })
+                .attr("stroke", "DarkSlateBlue")
+
+            pointLabelGroup.selectAll("text")
+                .data(plotInfo)
+              .enter().append("text")
+                .attr("x", -10)
+                .attr("y", function(d) {return height * (1 - d.value1)})
+                .text(function(d) {return d.value1});
+//                .attr("y", function(d) {return 500 - (d.position1 * 40)})
+//                .attr("y", function(d) {return 500 - (1 - d.position1 / 10)})
+//                .attr("y", function(d) {return 500 - (1 - d.value1)})
+
+            axisTickGroup.selectAll("line")
+                .data(scoreData)
+                .enter().append("line")
+                .attr("x1", function(d) {return d.position1 * scaleFactor})
+                .attr("x2", function(d) {return d.position1 * scaleFactor})
+                .attr("y1", 490)
+                .attr("y2", 500)
+                .attr("stroke", "black")
+            axisTickGroup.append("line")
+                .attr("x1", scoreData[scoreData.length - 1].position2 * scaleFactor)
+                .attr("x2", scoreData[scoreData.length - 1].position2 * scaleFactor)
+                .attr("y1", 490)
+                .attr("y2", 510)
+                .attr("stroke", "black")
+            axisLabelGroup.selectAll("text")
+                .data(scoreData)
+                .enter().append("text")
+                .attr("x", function(d) {return d.position1 * 10 + 100})
+                .attr("y", 400)
+                .text(function(d) {return d.date})
+        }
+
 
         document.addEventListener('DOMContentLoaded', init, false);
         function init() {
@@ -82,12 +208,6 @@
                     var chapter_details = JSON.parse(JSON.stringify(request.response));
                     scoreData = chapter_details;
                     renderPlot(scoreData)
-//                    for (var key in chapter_details) {
-//                       if (chapter_details.hasOwnProperty(key)) {
-//                           createProblems(key, chapter_details[key].replace(/'/g, '').replace('[', '').replace(']', '').split(', '))
-//                        }
-//                    }
-//                    createButton()
                 };
                 request.send(JSON.stringify(
                     {
@@ -97,157 +217,17 @@
                     }
                     )
                 );
-
-
-//                scoreData = data.filter(function (d) {
-//                    return d.position2 > (data.length - periods)
-//                });
-//
-//                lineGroup.selectAll("*").remove();
-//
-//                lineGroup.selectAll("circle")
-//                    .data(scoreData)
-//                    .enter().append("circle")
-//                    .attr("cx", function (d) {
-//                        return d.position1 * 10
-//                    })
-//                    .attr("cy", function (d) {
-//                        return 500 * (1 - d.value1)
-//                    })
-//                    .attr("r", "2")
-//
-//                lineGroup.selectAll("line")
-//                    .data(scoreData)
-//                    .enter().append("line")
-//                    .attr("x1", function (d) {
-//                        return d.position1 * 10
-//                    })
-//                    .attr("y1", function (d) {
-//                        return 500 * (1 - d.value1)
-//                    })
-//                    .attr("x2", function (d) {
-//                        return d.position2 * 10
-//                    })
-//                    .attr("y2", function (d) {
-//                        return 500 * (1 - d.value2)
-//                    })
-//                    .attr("stroke", "black")
-
-
             }
             var button_submit = document.getElementById('button');
             button_submit.addEventListener('click', submit, true);
         }
 
 
-        function renderPlot(scoreData) {
-            lineGroup.selectAll("*").remove();
-
-            lineGroup.selectAll("circle")
-                .data(scoreData)
-                .enter().append("circle")
-                .attr("cx", function (d) {
-                    return d.position1 * 10
-                })
-                .attr("cy", function (d) {
-                    return 500 * (1 - d.value1)
-                })
-                .attr("r", "2")
-
-            lineGroup.append("circle")
-                .attr("cx", scoreData[scoreData.length - 1].position2 * 10)
-                .attr("cy", 500 * (1 - scoreData[scoreData.length - 1].value2))
-                .attr("r", "2")
-
-            lineGroup.selectAll("line")
-                .data(scoreData)
-                .enter().append("line")
-                .attr("x1", function (d) {
-                    return d.position1 * 10
-                })
-                .attr("y1", function (d) {
-                    return 500 * (1 - d.value1)
-                })
-                .attr("x2", function (d) {
-                    return d.position2 * 10
-                })
-                .attr("y2", function (d) {
-                    return 500 * (1 - d.value2)
-                })
-                .attr("stroke", "black")
 
 
-
-        }
-
-
-//        var scoreData = data.filter(function(d) {return d.position2 > (data.length - periods)});
-//        lineGroup.selectAll("circle")
-//            .data(scoreData)
-//            .enter().append("circle")
-//            .attr("cx", function(d) {return d.position1 * 10})
-//            .attr("cy", function(d) {return 500 * (1 - d.value1)})
-//            .attr("r", "2")
-//
-//        lineGroup.selectAll("line")
-//            .data(scoreData)
-//            .enter().append("line")
-//            .attr("x1", function(d) {return d.position1 * 10})
-//            .attr("y1", function(d) {return 500 * (1 - d.value1)})
-//            .attr("x2", function(d) {return d.position2 * 10})
-//            .attr("y2", function(d) {return 500 * (1 - d.value2)})
-//            .attr("stroke", "black")
-
-
-
-
-
-        //        for (var i = 0; i < scoreData.length; i++) {
-//            lineGroup.append("line")
-//                .attr("x1", 10 * i)
-//                .attr("y1", 500 * (1 - scoreData[i]))
-//                .attr("x2", 10 * (i + 1))
-//                .attr("y2", 500 * (1 - scoreData[i + 1]))
-//                .attr("stroke", "black")
-//            lineGroup.append("circle")
-//                .attr("cx", 10 * (i + 1))
-//                .attr("cy", 500 * (1 - scoreData[i + 1]))
-//                .attr("r", "2")
-//        }
+//        todo: keep moving things around
 
     </script>
-
-
-    <!--<script>-->
-    <!--var scoreData = [.92, .85, .82, .80, .83, .78, .88, .90, .64, .72, .93, .54, .54, .58, .64, .59]-->
-
-        <!--var body = d3.select("body")-->
-        <!--var svg = body.append("svg")-->
-            <!--.attr("width", "500px")-->
-            <!--.attr("height", "500px")-->
-
-        <!--var lineGroup = svg.append("g")-->
-            <!--.attr("transform", "translate(100, 100)")-->
-
-        <!--lineGroup.append("circle")-->
-            <!--.attr("cx", "0")-->
-            <!--.attr("cy", 500 * (1 - scoreData[0]))-->
-            <!--.attr("r", "2")-->
-        <!--for (var i = 0; i < scoreData.length; i++) {-->
-            <!--lineGroup.append("line")-->
-                <!--.attr("x1", 10 * i)-->
-                <!--.attr("y1", 500 * (1 - scoreData[i]))-->
-                <!--.attr("x2", 10 * (i + 1))-->
-                <!--.attr("y2", 500 * (1 - scoreData[i + 1]))-->
-                <!--.attr("stroke", "black")-->
-            <!--lineGroup.append("circle")-->
-                <!--.attr("cx", 10 * (i + 1))-->
-                <!--.attr("cy", 500 * (1 - scoreData[i + 1]))-->
-                <!--.attr("r", "2")-->
-        <!--}-->
-
-    <!--</script>-->
-
 
 </body>
 </html>
