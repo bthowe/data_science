@@ -38,14 +38,46 @@ def dashboards():
     return render_template('dashboards.html')
 
 
-def problem_list_count(first, last, less_num):
-    return len(problem_list_create(first, last, less_num))
+def problem_list_count(book, start_chapter, start_problem, end_chapter, end_problem):
+    prob_num = 0
+    for k, v in problems(book, start_chapter, start_problem, end_chapter, end_problem).items():
+        prob_num += len(v)
+    return prob_num
+
+def problems(book, start_chapter, start_problem, end_chapter, end_problem):
+    """return a dictionary with chapters and lists of problems completed"""
+
+    problems_dic = {}
+
+    if 'test' in str(start_chapter):
+        # problems_dic['start_chapter'] = list(range(1, 20))
+        return {start_chapter: list(range(1, 21))}
+    else:
+        start_chapter_details = list(db_number[book].find({'chapter': start_chapter}))[0]
+        end_chapter_details = list(db_number[book].find({'chapter': end_chapter}))[0]
+
+        if int(end_chapter) - int(start_chapter) == 0:  # if start and end is the same chapter
+            problems_dic[start_chapter] = problem_list_create(start_problem, end_problem, start_chapter_details['num_lesson_probs'])
+
+        elif int(end_chapter) - int(start_chapter) == 1:  # if start and end is one chapter apart
+            problems_dic[start_chapter] = problem_list_create(start_problem, start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs'])
+            problems_dic[end_chapter] = problem_list_create('a', end_problem, end_chapter_details['num_lesson_probs'])
+
+        else:  # if start and end is multiple chapters apart
+            problems_dic[start_chapter] = problem_list_create(start_problem, start_chapter_details['num_mixed_probs'], start_chapter_details['num_lesson_probs'])
+            problems_dic[end_chapter] = problem_list_create('a', end_problem, end_chapter_details['num_lesson_probs'])
+            for chapter in range(int(start_chapter) + 1, int(end_chapter)):
+                mid_chapter_details = list(db_number[book].find({'chapter': chapter}))[0]
+                problems_dic[chapter] = problem_list_create('a', mid_chapter_details['num_mixed_probs'], mid_chapter_details['num_lesson_probs'])
+
+        return problems_dic
+
 
 
 @app.route("/query_periods_data", methods=['POST'])
 def query_periods_data():
     js = json.loads(request.data.decode('utf-8'))
-    print(js)
+    print(js)  # kid, book, periods
 
     df_performance_details = pd.DataFrame(list(db_performance[js['book']].find({'kid': js['kid']}))).\
         query('date == date').\
@@ -60,25 +92,28 @@ def query_periods_data():
         query('date > "{}"'.format(threshold_date)).\
         merge(df_book_details, how='left', left_on='start_chapter', right_on='chapter')
 
-    # todo: here
-    # todo: calculate number of question
-    df_merged['problem_count'] = df_merged.apply(lambda x: problem_list_count(x['start_problem'], x['end_problem'], 'num_lesson_probs'))
+    df_merged['problem_count'] = df_merged.apply(lambda x: problem_list_count(x['book'], x['start_chapter'], x['start_problem'], x['end_chapter'], x['end_problem']), axis=1)
+    df_merged['missed_count'] = df_merged['miss_lst'].apply(lambda x: len(list(x.values())[0]))
+    df_merged['perc_correct'] = df_merged.apply(lambda x: (x['problem_count'] - x['missed_count']) / x['problem_count'], axis=1)
 
+    df_merged['date'] = df_merged['date'].astype(str)
 
+    df_merged['position1'] = range(len(df_merged))
+    df_merged['value1'] = df_merged['perc_correct']
+    df_merged['position2'] = df_merged['position1'].shift(-1)
+    df_merged['value2'] = df_merged['value1'].shift(-1)
+    df_merged = df_merged.iloc[:-1]
+    df_merged['position2'] = df_merged['position2'].astype(int)
 
-
-
-
-
-
-    return jsonify({"hey": "there"})
+    print(df_merged[['value1', 'position1', 'value2', 'position2']].to_dict('records'))
+    return jsonify(df_merged[['value1', 'position1', 'value2', 'position2']].to_dict('records'))
 
 # todo: how should I deal with tests? Should I just throw them out for now? Count them as normal?
 # todo: break down into lesson problems and mixed problems
-
-# find latest date
-# find the x most recent dates
-
+# todo: break down into lessons and tests
+# todo: percent correct on (1) tests, (2) lessons, (3) lesson problems, (4) mixed problems
+# todo: maybe something by chapter and not just by day
+# todo: two panels: (1) last two weeks (make the window variable) and (2) everything from the beginning of time, the parts not featured in (1) more opaque
 
 
 
@@ -104,7 +139,6 @@ def query_chapter():
     print(js)
 
     book = js['book']
-
 
     problems_dic = {}
 

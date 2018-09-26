@@ -79,8 +79,9 @@
                 request.responseType = 'json';
                 request.open("POST", "/query_periods_data", true);
                 request.onload = function() {
-                    var chapter_details = JSON.parse(JSON.stringify(request.response))
-//                    alert(chapter_details)
+                    var chapter_details = JSON.parse(JSON.stringify(request.response));
+                    scoreData = chapter_details;
+                    renderPlot(scoreData)
 //                    for (var key in chapter_details) {
 //                       if (chapter_details.hasOwnProperty(key)) {
 //                           createProblems(key, chapter_details[key].replace(/'/g, '').replace('[', '').replace(']', '').split(', '))
@@ -98,40 +99,40 @@
                 );
 
 
+//                scoreData = data.filter(function (d) {
+//                    return d.position2 > (data.length - periods)
+//                });
+//
+//                lineGroup.selectAll("*").remove();
+//
+//                lineGroup.selectAll("circle")
+//                    .data(scoreData)
+//                    .enter().append("circle")
+//                    .attr("cx", function (d) {
+//                        return d.position1 * 10
+//                    })
+//                    .attr("cy", function (d) {
+//                        return 500 * (1 - d.value1)
+//                    })
+//                    .attr("r", "2")
+//
+//                lineGroup.selectAll("line")
+//                    .data(scoreData)
+//                    .enter().append("line")
+//                    .attr("x1", function (d) {
+//                        return d.position1 * 10
+//                    })
+//                    .attr("y1", function (d) {
+//                        return 500 * (1 - d.value1)
+//                    })
+//                    .attr("x2", function (d) {
+//                        return d.position2 * 10
+//                    })
+//                    .attr("y2", function (d) {
+//                        return 500 * (1 - d.value2)
+//                    })
+//                    .attr("stroke", "black")
 
-                scoreData = data.filter(function (d) {
-                    return d.position2 > (data.length - periods)
-                });
-
-                lineGroup.selectAll("*").remove();
-
-                lineGroup.selectAll("circle")
-                    .data(scoreData)
-                    .enter().append("circle")
-                    .attr("cx", function (d) {
-                        return d.position1 * 10
-                    })
-                    .attr("cy", function (d) {
-                        return 500 * (1 - d.value1)
-                    })
-                    .attr("r", "2")
-
-                lineGroup.selectAll("line")
-                    .data(scoreData)
-                    .enter().append("line")
-                    .attr("x1", function (d) {
-                        return d.position1 * 10
-                    })
-                    .attr("y1", function (d) {
-                        return 500 * (1 - d.value1)
-                    })
-                    .attr("x2", function (d) {
-                        return d.position2 * 10
-                    })
-                    .attr("y2", function (d) {
-                        return 500 * (1 - d.value2)
-                    })
-                    .attr("stroke", "black")
 
             }
             var button_submit = document.getElementById('button');
@@ -139,7 +140,45 @@
         }
 
 
+        function renderPlot(scoreData) {
+            lineGroup.selectAll("*").remove();
 
+            lineGroup.selectAll("circle")
+                .data(scoreData)
+                .enter().append("circle")
+                .attr("cx", function (d) {
+                    return d.position1 * 10
+                })
+                .attr("cy", function (d) {
+                    return 500 * (1 - d.value1)
+                })
+                .attr("r", "2")
+
+            lineGroup.append("circle")
+                .attr("cx", scoreData[scoreData.length - 1].position2 * 10)
+                .attr("cy", 500 * (1 - scoreData[scoreData.length - 1].value2))
+                .attr("r", "2")
+
+            lineGroup.selectAll("line")
+                .data(scoreData)
+                .enter().append("line")
+                .attr("x1", function (d) {
+                    return d.position1 * 10
+                })
+                .attr("y1", function (d) {
+                    return 500 * (1 - d.value1)
+                })
+                .attr("x2", function (d) {
+                    return d.position2 * 10
+                })
+                .attr("y2", function (d) {
+                    return 500 * (1 - d.value2)
+                })
+                .attr("stroke", "black")
+
+
+
+        }
 
 
 //        var scoreData = data.filter(function(d) {return d.position2 > (data.length - periods)});
@@ -214,4 +253,3 @@
 </html>
 
 
-<!--todo: two panels: (1) last two weeks (make the window variable) and (2) everything from the beginning of time, the parts not featured in (1) more opaque-->
