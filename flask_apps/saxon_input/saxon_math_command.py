@@ -84,29 +84,43 @@ def query_periods_data():
         drop(['chapter', 'miss_list'], 1). \
         sort_values(['date', 'start_chapter', 'start_problem'])
     df_performance_details['date'] = pd.to_datetime(df_performance_details['date'])
+    # print(df_performance_details)
 
     df_book_details = pd.DataFrame(list(db_number[js['book']].find())).drop(['_id', 'book'], 1)
 
     threshold_date = (df_performance_details['date'] - pd.to_timedelta(int(js['periods']), unit='D')).max()
     df_merged = df_performance_details.\
-        query('date > "{}"'.format(threshold_date)).\
+        iloc[-int(js['periods']):].\
         merge(df_book_details, how='left', left_on='start_chapter', right_on='chapter')
+    # df_merged = df_performance_details.\
+    #     query('date > "{}"'.format(threshold_date)).\
+    #     merge(df_book_details, how='left', left_on='start_chapter', right_on='chapter')
 
     df_merged['problem_count'] = df_merged.apply(lambda x: problem_list_count(x['book'], x['start_chapter'], x['start_problem'], x['end_chapter'], x['end_problem']), axis=1)
     df_merged['missed_count'] = df_merged['miss_lst'].apply(lambda x: len(list(x.values())[0]))
     df_merged['perc_correct'] = df_merged.apply(lambda x: (x['problem_count'] - x['missed_count']) / x['problem_count'], axis=1)
 
-    df_merged['date'] = df_merged['date'].astype(str)
+    def str_mod(x):
+        x_lst = x.split('-')
+        x_return = ''
+        if int(x_lst[1]) < 10:
+            x_return += x_lst[1][1] + '-'
+        else:
+            x_return += x_lst[1] + '-'
+        x_return += x_lst[2]
+        return x_return
 
+    df_merged['date1'] = df_merged['date'].astype(str).apply(str_mod)
     df_merged['position1'] = range(len(df_merged))
     df_merged['value1'] = df_merged['perc_correct']
+    df_merged['date2'] = df_merged['date1'].shift(-1)
     df_merged['position2'] = df_merged['position1'].shift(-1)
     df_merged['value2'] = df_merged['value1'].shift(-1)
     df_merged = df_merged.iloc[:-1]
     df_merged['position2'] = df_merged['position2'].astype(int)
 
-    print(df_merged[['value1', 'position1', 'value2', 'position2']].to_dict('records'))
-    return jsonify(df_merged[['value1', 'position1', 'value2', 'position2']].to_dict('records'))
+    print(df_merged[['value1', 'position1', 'value2', 'position2', 'date1', 'date2']].to_dict('records'))
+    return jsonify(df_merged[['value1', 'position1', 'value2', 'position2', 'date1', 'date2']].to_dict('records'))
 
 # todo: how should I deal with tests? Should I just throw them out for now? Count them as normal?
 # todo: break down into lesson problems and mixed problems

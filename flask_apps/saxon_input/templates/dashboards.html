@@ -13,6 +13,9 @@
             width: 500px;
             height: 500px;
         }
+        /*h2 {*/
+            /*text-align: center;*/
+        /*}*/
         .line {
             fill: DarkSlateBlue;
         }
@@ -34,6 +37,17 @@
         .axis-label {
             text-anchor: middle;
             font-size: 13px;
+        }
+
+        .axis text {
+            font: 10px sans-serif;
+        }
+
+        .axis line,
+        .axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
         }
     </style>
 </head>
@@ -65,6 +79,7 @@
         <button id="button" type="submit" class="btn btn-primary">Submit</button>
     </form>
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="//d3js.org/d3.v3.min.js"></script>
 
     <script>
         document.getElementById('periods').focus();
@@ -88,46 +103,44 @@
         ];
         var scoreData;
 
-        var width = 400,
-            leftMargin = 100,
+        var leftMargin = 35,
+            rightMargin = 35,
+            width = 500 - leftMargin - rightMargin,
             topMargin = 10,
-            bottomMargin = 30,
+            bottomMargin = 60,
             height = 500 - topMargin - bottomMargin,
-            barHeight = 20,
-            barGap = 5,
-            tickGap = 5,
-            tickHeight = 10,
-            barSpacing = barHeight + barGap,
-            translateText = "translate(" + leftMargin + "," + topMargin + ")",
+            axisGap = 15,
+            translateText = "translate(" + (leftMargin + axisGap) + "," + topMargin + ")",
             scaleFactor,
             scaleText;
 
         var body = d3.select("body");
         var h2 = body.append("h2");
-//        body.append("div")
-//            .attr("class", "bottom-label perc-label")
-//            .append("p")
-//            .text()
-//        body.append("div")
-//            .attr("class", "clearfix")
         var svg = body.append("svg");
-        var lineGroup
-        var pointLabelGroup = svg.append("g")
-            .attr("transform", translateText)
-            .attr("class", "point-label");
-        var axisTickGroup = svg.append("g")
-            .attr("transform", translateText);
-        var axisLabelGroup = svg.append("g")
-            .attr("transform", translateText)
-            .attr("class", "axis-label");
+
+        var lineGroup;
+        var xAxisGroup = svg.append("g")
+            .attr("transform", "translate(" + leftMargin + "," + (height + topMargin) + ")")
+            .attr("class", "axis");
+        var yAxisGroup = svg.append("g")
+            .attr("transform", "translate(" + leftMargin + "," + topMargin + ")")
+            .attr("class", "axis");
+
+        var x = d3.scale.ordinal();
+        var xAxis = d3.svg.axis();
+        var y = d3.scale.linear();
+        var yAxis = d3.svg.axis();
 
         function renderPlot(scoreData) {
-            scaleFactor = width / periods;
+            const data_periods = scoreData.length + 1
+
+            scaleFactor = width / (data_periods - 1);
             scaleText = "scale(" + scaleFactor + ",1)";
-            h2.text(kid + "'s scores for the last " + periods + " days")
+            h2.text(kid + "'s scores for the last " + data_periods + " school days")
             lineGroup = svg.append("g")
                 .attr("transform", translateText)
                 .attr("class", "line");
+
 
             lineGroup.selectAll("*").remove();
 
@@ -159,38 +172,40 @@
                 })
                 .attr("stroke", "DarkSlateBlue")
 
-            pointLabelGroup.selectAll("text")
-                .data(plotInfo)
-              .enter().append("text")
-                .attr("x", -10)
-                .attr("y", function(d) {return height * (1 - d.value1)})
-                .text(function(d) {return d.value1});
-//                .attr("y", function(d) {return 500 - (d.position1 * 40)})
-//                .attr("y", function(d) {return 500 - (1 - d.position1 / 10)})
-//                .attr("y", function(d) {return 500 - (1 - d.value1)})
+            y.domain([0, 1])
+                .range([height - axisGap, 0]);
+            yAxis
+                .orient("left")
+                .scale(y);
+            yAxisGroup
+                .call(yAxis);
 
-            axisTickGroup.selectAll("line")
-                .data(scoreData)
-                .enter().append("line")
-                .attr("x1", function(d) {return d.position1 * scaleFactor})
-                .attr("x2", function(d) {return d.position1 * scaleFactor})
-                .attr("y1", 490)
-                .attr("y2", 500)
-                .attr("stroke", "black")
-            axisTickGroup.append("line")
-                .attr("x1", scoreData[scoreData.length - 1].position2 * scaleFactor)
-                .attr("x2", scoreData[scoreData.length - 1].position2 * scaleFactor)
-                .attr("y1", 490)
-                .attr("y2", 510)
-                .attr("stroke", "black")
-            axisLabelGroup.selectAll("text")
-                .data(scoreData)
-                .enter().append("text")
-                .attr("x", function(d) {return d.position1 * 10 + 100})
-                .attr("y", 400)
-                .text(function(d) {return d.date})
+            var date_array = scoreData.map(function(d) {return d.date1})
+            date_array.push(scoreData[scoreData.length - 1].date2)
+            x.domain(date_array)
+                .rangePoints([axisGap, width]);
+            xAxis
+                .scale(x)
+                .orient("bottom");
+
+            xAxisGroup
+                .call(xAxis)
+                .selectAll("text")
+                    .attr("y", 15)
+                    .attr("x", 0)
+                    .attr("dy", ".35em")
+                    .attr("transform", "rotate(0)")
+                    .style("text-anchor", "middle");
+
         }
 
+//todo: how is this going to fit into the dashboard as a whole?
+//todo:
+
+
+//todo: can I just send the entire dataset in with an empty position2 in the last row in?...I couldn't make this work.
+
+// + " rotate(90)"
 
         document.addEventListener('DOMContentLoaded', init, false);
         function init() {
