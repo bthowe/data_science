@@ -32,10 +32,62 @@ def main_menu():
 #     return render_template('main_menu.html')
 #
 
-
+# @app.route("/dashboards")
+# def dashboards():
+#     return render_template('dashboards.html')
 @app.route("/dashboards")
 def dashboards():
-    return render_template('dashboards.html')
+    date_thresh = '2018-09-17'
+    # date_thresh = str(datetime.date.today() - datetime.timedelta(days=14))
+
+    df = pd.DataFrame()
+    for book, kid in zip(['Algebra_1_2', 'Math_7_6'], ['Calvin', 'Samuel']):
+        df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid}))). \
+                query('date == date'). \
+                drop(['chapter', 'miss_list'], 1). \
+                sort_values(['date', 'start_chapter', 'start_problem'])
+        df_performance_details['date'] = pd.to_datetime(df_performance_details['date'])
+        df_book_details = pd.DataFrame(list(db_number[book].find())).drop(['_id', 'book'], 1)
+
+        df_merged = df_performance_details.\
+            merge(df_book_details, how='left', left_on='start_chapter', right_on='chapter')
+
+        df_merged.query('date >= "{}"'.format(date_thresh), inplace=True)
+
+        df_merged['problem_count'] = df_merged.apply(lambda x: problem_list_count(x['book'], x['start_chapter'], x['start_problem'], x['end_chapter'], x['end_problem']), axis=1)
+        df_merged['missed_count'] = df_merged['miss_lst'].apply(lambda x: len(list(x.values())[0]))
+
+        df_grouped = df_merged[['problem_count', 'missed_count']].groupby([df_merged['book'], df_merged['kid'], df_merged['date']]).sum().reset_index(drop=False)
+        df_grouped['perc_correct'] = df_grouped.apply(lambda x: (x['problem_count'] - x['missed_count']) / x['problem_count'], axis=1)
+        df_grouped.drop(['problem_count', 'missed_count'], 1, inplace=True)
+
+        # def str_mod(x):
+        #     x_lst = x.split('-')
+        #     x_return = ''
+        #     if int(x_lst[1]) < 10:
+        #         x_return += x_lst[1][1] + '-'
+        #     else:
+        #         x_return += x_lst[1] + '-'
+        #     x_return += x_lst[2]
+        #     return x_return
+        # df_grouped['date1'] = df_grouped['date'].astype(str).apply(str_mod)
+        df_grouped['date1'] = df_grouped['date'].astype(str)
+        df_grouped['position1'] = range(len(df_grouped))
+        df_grouped.rename(columns={'perc_correct': 'value1'}, inplace=True)
+        df_grouped['date2'] = df_grouped['date1'].shift(-1)
+        df_grouped['position2'] = df_grouped['position1'].shift(-1)
+        df_grouped['value2'] = df_grouped['value1'].shift(-1)
+
+        df_grouped.drop('date', 1, inplace=True)
+        df_grouped = df_grouped.iloc[:-1]
+        df_grouped['position2'] = df_grouped['position2'].astype(int)
+
+        df = df.append(df_grouped)
+        # print(df)
+        print(df.query('kid == "Calvin"')['value1'].sum() + df.query('kid == "Calvin"').iloc[-1]['value2'].sum())
+
+    return render_template("dashboards_buttons.html", score_data=df.to_dict('records'))
+    # return render_template("dashboards_buttons.html", score_data=jsonify(df.to_dict('records')))
 
 
 def problem_list_count(book, start_chapter, start_problem, end_chapter, end_problem):
@@ -128,8 +180,6 @@ def query_periods_data():
 # todo: percent correct on (1) tests, (2) lessons, (3) lesson problems, (4) mixed problems
 # todo: maybe something by chapter and not just by day
 # todo: two panels: (1) last two weeks (make the window variable) and (2) everything from the beginning of time, the parts not featured in (1) more opaque
-
-
 
 
 @app.route("/enter_problem_number")
