@@ -10,11 +10,13 @@
         }
 
         svg {
-            width: 500px;
+            width: 100%;
             height: 500px;
         }
-        h2 {
-            text-align: center;
+        .title {
+            text-align: left;
+            font: 30px sans-serif;
+            /*.style("text-decoration", "underline")*/
         }
         .line {
             fill: DarkSlateBlue;
@@ -52,8 +54,8 @@
         div.tooltip {
             position: absolute;
             text-align: center;
-            width: 160px;
-            height: 28px;
+            width: 140px;
+            height: 20px;
             padding: 2px;
             font: 12px sans-serif;
             background: lightsteelblue;
@@ -66,40 +68,63 @@
             margin-bottom: 25px;
         }
     </style>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel=stylesheet>
+
 </head>
 <body>
-    <!--<form onsubmit="return false;">-->
-        <!--<label for="choose_kid">Name</label>-->
-        <!--<select id="choose_kid" class="form-control">-->
-            <!--<option>Choose...</option>-->
-            <!--<option selected>Calvin</option>-->
-            <!--<option>Samuel</option>-->
-            <!--<option>Kay</option>-->
-        <!--</select>-->
-        <!--<label for="choose_book">Book</label>-->
-        <!--<select id="choose_book" class="form-control">-->
-            <!--<option >Choose...</option>-->
-            <!--<option value="Math_5_4">Math 5/4</option>-->
-            <!--<option value="Math_6_5">Math 6/5</option>-->
-            <!--<option value="Math_7_6">Math 7/6</option>-->
-            <!--<option value="Math_8_7">Math 8/7</option>-->
-            <!--<option value="Algebra_1_2" selected>Algebra 1/2</option>-->
-            <!--<option value="Algebra_1">Algebra 1</option>-->
-            <!--<option value="Algebra_2">Algebra 2</option>-->
-            <!--<option value="Advanced_math">Advanced Math</option>-->
-            <!--<option value="Calculus">Calculus</option>-->
-        <!--</select>-->
-
-
-        <!--<input type="text" id="periods">-->
-        <!--<button id="button" type="submit" class="btn btn-primary">Submit</button>-->
-    <!--</form>-->
-    <!--todo: resolve this-->
+<!--todo: resolve this-->
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="//d3js.org/d3.v3.min.js"></script>
 
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="dropdown show">
+      <!--<a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+        <!--Dashboard-->
+      <!--</a>-->
+    <a class="navbar-brand btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Dashboard</a>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        <a class="dropdown-item" href="#" id="Calvin">Calvin</a>
+        <a class="dropdown-item" href="#" id="Samuel">Samuel</a>
+      </div>
+    </div>
+
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/quit">Quit</a>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <p id="name">Calvin</p>
+    </div>
+</nav>
+
+
+
     <script>
+        document.getElementById('dropdownMenuLink').focus();
+
         scoreData = {{ score_data | tojson}}
+
+        function parse(str) {
+            var y = str.substr(0, 4),
+                m = str.substr(5, 2),
+                d = str.substr(8, 2);
+            return new Date(y, m, d).toString().split(' ').slice(0, 4).join(' ')
+        }
+        for (i = 0; i < scoreData.length; i++) {
+            scoreData[i].date1 = parse(scoreData[i].date1)
+            scoreData[i].date2 = parse(scoreData[i].date2)
+        }
 
         var plotInfo = [
             {value1: 0, position1: 0},
@@ -115,11 +140,11 @@
             {value1: 1, position1: 10}
         ];
 
-        var leftMargin = 35,
-            rightMargin = 35,
-            width = 500 - leftMargin - rightMargin,
-            topMargin = 20,
-            bottomMargin = 60,
+        var leftMargin = 50,
+            rightMargin = 50,
+            width = window.innerWidth - leftMargin - rightMargin,
+            topMargin = 30,
+            bottomMargin = 100,
             height = 500 - topMargin - bottomMargin,
             axisGap = 15,
             translateText = "translate(" + (leftMargin + axisGap) + "," + topMargin + ")",
@@ -127,14 +152,11 @@
             scaleText;
 
         var body = d3.select("body");
-//        var h2 = body.append("h2");
         var div = d3.select("body").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
 
         var svg = body.append("svg");
-        var h2 = svg.append("text");
-//            .attr("class", "h2");
 
         var lineGroup = svg.append("g")
             .attr("transform", translateText)
@@ -151,29 +173,26 @@
         var y = d3.scale.linear();
         var yAxis = d3.svg.axis();
 
-        var buttonKids = ["Calvin", "Samuel"];
-        var buttons = body.append("div")
-            .attr("class", "buttons-container")
-            .selectAll("div").data(buttonKids)
-            .enter().append("div")
-            .text(function (d) {
-                return d;
-            });
-//            .attr("class", function (d) {
-//                if (d.kid == kid)
-//                    return "button selected";
-//                else
-//                    return "button";
-//            });
-
         var kid = "Calvin"
         renderPlot(scoreData.filter(function (d) {return d.kid == kid}), kid);
 
-        buttons.on("click", function (kid) {
-            var scoreDataKid = scoreData.filter(function (d) {return d.kid == kid});
-            renderPlot(scoreDataKid, kid);
-        });
+        function calvin_click() {
+            renderPlot(scoreData.filter(function (d) {
+                return d.kid == "Calvin"
+            }), "Calvin");
+            document.getElementById('dropdownMenuLink').focus();
+        }
+        var calvin_submit = document.getElementById('Calvin');
+        calvin_submit.addEventListener('click', calvin_click, true);
 
+        function samuel_click() {
+            renderPlot(scoreData.filter(function (d) {
+                return d.kid == "Samuel"
+            }), "Samuel");
+            document.getElementById('dropdownMenuLink').focus();
+        }
+        var samuel_submit = document.getElementById('Samuel');
+        samuel_submit.addEventListener('click', samuel_click, true);
 
         function renderPlot(scoreData, name) {
             lineGroup.selectAll("*").remove();
@@ -181,19 +200,12 @@
             scaleFactor = width / (data_periods - 1);
             scaleText = "scale(" + scaleFactor + ",1)";
 
-            h2.attr("x", (width / 2))
-                .attr("y", topMargin)
-                .attr("text-anchor", "middle")
-                .style("font-size", "16px")
-                .style("text-decoration", "underline")
-                .text(name + "'s")
-
             lineGroup.selectAll("circle")
                 .data(scoreData)
                 .enter().append("circle")
                 .attr("cx", function (d) {return d.position1 * scaleFactor})
                 .attr("cy", function (d) {return height * (1 - d.value1)})
-                .attr("r", "2")
+                .attr("r", "2.5")
                 .on("mouseover", function (d) {
                     div.transition()
                         .duration(200)
@@ -207,12 +219,23 @@
                         .duration(500)
                         .style("opacity", 0);
                 })
-
-
             lineGroup.append("circle")
                 .attr("cx", scoreData[scoreData.length - 1].position2 * scaleFactor)
                 .attr("cy", height * (1 - scoreData[scoreData.length - 1].value2))
-                .attr("r", "2")
+                .attr("r", "2.5")
+                .on("mouseover", function (d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div.html(scoreData[scoreData.length - 1].date2 + ": " + scoreData[scoreData.length - 1].value2)
+                        .style("left", (d3.event.pageX - 140) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function (d) {
+                    div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                })
 
             lineGroup.selectAll("line")
                 .data(scoreData)
@@ -243,14 +266,36 @@
                 .attr("y1", height * (1 - (mean / data_periods)))
                 .attr("x2", width)
                 .attr("y2", height * (1 - mean / data_periods))
-                .attr("stroke", "Crimson")
+                .attr("stroke", "Maroon")
+                .style("opacity", .3)
+                .on("mouseover", function (d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div.html("Average score: " + (mean / data_periods).toFixed(2))
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function (d) {
+                    div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                })
+
             lineGroup.append("line")
                 .attr("x1", 0)
                 .attr("y1", height * .1)
                 .attr("x2", width)
                 .attr("y2", height * .1)
                 .attr("stroke", "DarkSalmon")
+                .style("opacity", .3)
 
+
+            date_array = []
+            for (i = 0; i < scoreData.length; i++) {
+                date_array.push(scoreData[i].date1)
+            }
+            date_array.push(scoreData[scoreData.length - 1].date2)
 
             y.domain([0, 1])
                 .range([height - axisGap, 0]);
@@ -260,8 +305,6 @@
             yAxisGroup
                 .call(yAxis);
 
-            var date_array = scoreData.map(function(d) {return d.date1})
-            date_array.push(scoreData[scoreData.length - 1].date2)
             x.domain(date_array)
                 .rangePoints([axisGap, width]);
             xAxis
@@ -271,65 +314,24 @@
             xAxisGroup
                 .call(xAxis)
                 .selectAll("text")
-                    .attr("y", 15)
-                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("x", 50)
                     .attr("dy", ".35em")
-                    .attr("transform", "rotate(0)")
+                    .attr("transform", "rotate(90)")
                     .style("text-anchor", "middle");
 
+            document.getElementById('name').innerHTML = name + ' (Mean: ' + (mean / data_periods).toFixed(2) + ')';
+
         }
 
-//        format date
-//        get tooltip box correct
-//        make circles a bit bigger.
-//        legend
+//todo: add other plot for the chapters they are missing.
+//        -how would this one looK
 
 
 
+//todo: a box somewhere that lists the mean and standard deviation
+//todo: be able to click and then get the stats only for that segment.
 
-//todo: how is this going to fit into the dashboard as a whole?
-//todo: make a plot with everything but can zoom in and out.
-//        todo: button for adding Samuel too.
-
-
-//todo: can I just send the entire dataset in with an empty position2 in the last row in?...I couldn't make this work.
-
-/*
-        document.addEventListener('DOMContentLoaded', init, false);
-        function init() {
-            function submit() {
-                var kid_e = document.getElementById("choose_kid")
-                kid = kid_e.options[kid_e.selectedIndex].text;
-                var book_e = document.getElementById("choose_book")
-                book = book_e.options[book_e.selectedIndex].value;
-                periods = document.getElementById('periods').value
-
-                var request = new XMLHttpRequest();
-                request.responseType = 'json';
-                request.open("POST", "/query_periods_data", true);
-                request.onload = function() {
-                    var chapter_details = JSON.parse(JSON.stringify(request.response));
-                    scoreData = chapter_details;
-                    renderPlot(scoreData)
-                };
-                request.send(JSON.stringify(
-                    {
-                        "kid": kid,
-                        "book": book,
-                        "periods": periods
-                    }
-                    )
-                );
-            }
-            var button_submit = document.getElementById('button');
-            button_submit.addEventListener('click', submit, true);
-        }
-*/
-
-
-
-
-//        todo: keep moving things around
 
     </script>
 
