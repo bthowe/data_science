@@ -3,6 +3,7 @@ import sys
 import json
 import datetime
 import webbrowser
+import numpy as np
 import pandas as pd
 from pymongo import MongoClient
 from collections import defaultdict
@@ -32,16 +33,13 @@ def main_menu():
 #     return render_template('main_menu.html')
 #
 
-# @app.route("/dashboards")
-# def dashboards():
-#     return render_template('dashboards.html')
 @app.route("/dashboards")
 def dashboards():
     date_thresh = '2018-09-17'
     # date_thresh = str(datetime.date.today() - datetime.timedelta(days=14))
 
     df = pd.DataFrame()
-    for book, kid in zip(['Algebra_1_2', 'Math_7_6'], ['Calvin', 'Samuel']):
+    for book, kid in zip(['Algebra_1_2', 'Math_7_6'], ['Calvin', 'Samuel']):  # todo: this needs to be generalized
         df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid}))). \
                 query('date == date'). \
                 drop(['chapter', 'miss_list'], 1). \
@@ -55,23 +53,19 @@ def dashboards():
         df_merged.query('date >= "{}"'.format(date_thresh), inplace=True)
 
         df_merged['problem_count'] = df_merged.apply(lambda x: problem_list_count(x['book'], x['start_chapter'], x['start_problem'], x['end_chapter'], x['end_problem']), axis=1)
-        df_merged['missed_count'] = df_merged['miss_lst'].apply(lambda x: len(list(x.values())[0]))
+        df_merged['missed_count'] = df_merged['miss_lst'].apply(lambda x: len([item for sublist in x.values() for item in sublist]) if list(x.values()) else 0)
 
         df_grouped = df_merged[['problem_count', 'missed_count']].groupby([df_merged['book'], df_merged['kid'], df_merged['date']]).sum().reset_index(drop=False)
-        df_grouped['perc_correct'] = df_grouped.apply(lambda x: (x['problem_count'] - x['missed_count']) / x['problem_count'], axis=1)
+        df_grouped['perc_correct'] = df_grouped.apply(lambda x: np.round_((x['problem_count'] - x['missed_count']) / x['problem_count'], 2), axis=1)
         df_grouped.drop(['problem_count', 'missed_count'], 1, inplace=True)
 
-        # def str_mod(x):
-        #     x_lst = x.split('-')
-        #     x_return = ''
-        #     if int(x_lst[1]) < 10:
-        #         x_return += x_lst[1][1] + '-'
-        #     else:
-        #         x_return += x_lst[1] + '-'
-        #     x_return += x_lst[2]
-        #     return x_return
-        # df_grouped['date1'] = df_grouped['date'].astype(str).apply(str_mod)
-        df_grouped['date1'] = df_grouped['date'].astype(str)
+        def js_month(x):
+            x_lst = x.split('-')
+            x_lst[1] = str(int(x_lst[1]) - 1)
+            if len(x_lst[1]) == 1:
+                x_lst[1] = '0' + x_lst[1]
+            return '-'.join(x_lst)
+        df_grouped['date1'] = df_grouped['date'].astype(str).apply(js_month)  # this zero indexes the month for js's benefit.
         df_grouped['position1'] = range(len(df_grouped))
         df_grouped.rename(columns={'perc_correct': 'value1'}, inplace=True)
         df_grouped['date2'] = df_grouped['date1'].shift(-1)
@@ -83,11 +77,22 @@ def dashboards():
         df_grouped['position2'] = df_grouped['position2'].astype(int)
 
         df = df.append(df_grouped)
-        # print(df)
-        print(df.query('kid == "Calvin"')['value1'].sum() + df.query('kid == "Calvin"').iloc[-1]['value2'].sum())
+    print(df)
 
     return render_template("dashboards_buttons.html", score_data=df.to_dict('records'))
-    # return render_template("dashboards_buttons.html", score_data=jsonify(df.to_dict('records')))
+
+
+# @app.route("/origin_perc_right")
+# def origin_perc_right():
+#     book = 'Algebra_1_2'
+#     kid = 'Calvin'
+#
+#     df_book_details = pd.DataFrame(list(db_number[book].find()))  #.drop(['_id', 'book'], 1)
+#     df_origin_details = pd.DataFrame(list(db_origin[book].find()))  #.drop(['_id', 'book'], 1)
+#     df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid})))  #.drop(['_id', 'book'], 1)
+#     print(df_book_details)
+#     print(df_origin_details)
+#     print(df_performance_details)
 
 
 def problem_list_count(book, start_chapter, start_problem, end_chapter, end_problem):
@@ -338,6 +343,46 @@ def quit():
     return ''
 
 if __name__ == '__main__':
+    book = 'Algebra_1_2'
+    kid = 'Calvin'
+
+    df_book_details = pd.DataFrame(list(db_number[book].find())).drop(['_id', 'book'], 1)
+    df_origin_details = pd.DataFrame(list(db_origin[book].find()))  #.drop(['_id', 'book'], 1)
+    df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid})))  #.drop(['_id', 'book'], 1)
+
+    df_o = pd.DataFrame()
+    for index, row in df_origin_details.iterrows():
+        df_temp = pd.DataFrame(list(row['origin_list']), columns=['origin'])
+        df_temp['problem'] = range(1, df_temp.shape[0] + 1)
+        df_temp['book'] = book
+        df_temp['chapter'] = row['chapter']
+        df_temp['correct'] = 1
+        df_o = df_o.append(df_temp[['book', 'chapter', 'problem', 'origin', 'correct']])
+
+    performance = list(db_performance[book].find({'kid': kid}))[2:]
+    for row in performance:
+        for key in row['miss_lst'].keys():
+            if 'test' not in key:
+                for val in row['miss_lst'][key]:
+                    if val.isdigit():
+                        df_o.loc[(df_o['chapter'] == int(key)) & (df_o['problem'] == int(val)), 'correct'] = 0
+
+    df_o['origin_lst'] = df_o['origin'].str.split(',')
+    df_o['len_origin_lst'] = df_o['origin_lst'].map(len)
+    df1 = df_o.query('len_origin_lst == 1')
+    df2 = df_o.query('len_origin_lst == 2')
+    df = df1. \
+        append(
+        df2.assign(origin=df2['origin_lst'].map(lambda x: x[0])).append(
+            df2.assign(origin=df2['origin_lst'].map(lambda x: x[1])))
+    )
+    df['origin'] = df['origin'].astype(int)
+    df = df.sort_values(['chapter', 'problem', 'origin']).reset_index(drop=True)
+    print(df.iloc[44:][['origin', 'correct']]['correct'].groupby(df['origin']).agg(['mean', 'count', 'std']))
+
+    sys.exit()
+
+
     app.run(host='0.0.0.0', port=8001, debug=True)
 
 
