@@ -1,3 +1,5 @@
+import io
+import sys
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -11,6 +13,34 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 
 def main():
+    '''If output is in csv format'''
+    start_month = '9'
+    start_day = '1'
+    end_month = '9'
+    end_day = '8'
+
+    login_data = {'un': 'USERNAME', 'pw': 'PASSWORD'}
+    df = pd.DataFrame()
+    for year in map(str, range(2010, 2018)):
+        print('Pulling data for {0} from {1}/{2} to {3}/{4}...'.format(year, start_month, start_day, end_month, end_day))
+        form_data = 'INSPECT (make sure .csv is selected), NETWORK, CLICK ON FILE, FORM DATA IN HEADERS, VIEW SOURCE, REPLACE RELEVANT DATA FIELD'
+
+
+        with requests.session() as s:
+            s.get('https://na51.salesforce.com', params=login_data)
+            data = requests.post(
+                'https://na51.salesforce.com/REPORT NUMBER',
+                headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                cookies=s.cookies,
+                data=form_data).content
+        df = df.append(pd.read_csv(io.StringIO(data.decode('utf-8'))))
+    return df.\
+        dropna(subset=['Lead: System ID']).\
+        reset_index(drop=True)
+
+
+def main2():
+    '''Otherwise'''
     start_month = '9'
     start_day = '1'
     end_month = '9'
