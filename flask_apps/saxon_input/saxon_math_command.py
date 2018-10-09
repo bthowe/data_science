@@ -33,8 +33,8 @@ def main_menu():
 #     return render_template('main_menu.html')
 #
 
-@app.route("/dashboards")
-def dashboards():
+@app.route("/dashboards_time")
+def dashboards_time():
     date_thresh = '2018-09-17'
     # date_thresh = str(datetime.date.today() - datetime.timedelta(days=14))
 
@@ -79,21 +79,142 @@ def dashboards():
         df = df.append(df_grouped)
     print(df)
 
-    return render_template("dashboards_buttons.html", score_data=df.to_dict('records'))
+    return render_template("dashboards_time.html", score_data=df.to_dict('records'))
 
 
-# @app.route("/origin_perc_right")
-# def origin_perc_right():
-#     book = 'Algebra_1_2'
-#     kid = 'Calvin'
-#
-#     df_book_details = pd.DataFrame(list(db_number[book].find()))  #.drop(['_id', 'book'], 1)
-#     df_origin_details = pd.DataFrame(list(db_origin[book].find()))  #.drop(['_id', 'book'], 1)
-#     df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid})))  #.drop(['_id', 'book'], 1)
-#     print(df_book_details)
-#     print(df_origin_details)
-#     print(df_performance_details)
+@app.route("/dashboards_chapter")
+def dashboards_chapter():
+    book = 'Algebra_1_2'
+    kid = 'Calvin'
 
+    df_book_details = pd.DataFrame(list(db_number[book].find())).drop(['_id', 'book'], 1)
+    df_origin_details = pd.DataFrame(list(db_origin[book].find()))  #.drop(['_id', 'book'], 1)
+    df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid})))  #.drop(['_id', 'book'], 1)
+
+    df_o = pd.DataFrame()
+    for index, row in df_origin_details.iterrows():
+        df_temp = pd.DataFrame(list(row['origin_list']), columns=['origin'])
+        df_temp['problem'] = range(1, df_temp.shape[0] + 1)
+        df_temp['book'] = book
+        df_temp['chapter'] = row['chapter']
+        df_temp['correct'] = 1
+        df_o = df_o.append(df_temp[['book', 'chapter', 'problem', 'origin', 'correct']])
+
+    performance = list(db_performance[book].find({'kid': kid}))[2:]
+    for row in performance:
+        for key in row['miss_lst'].keys():
+            if 'test' not in key:
+                for val in row['miss_lst'][key]:
+                    if val.isdigit():
+                        df_o.loc[(df_o['chapter'] == int(key)) & (df_o['problem'] == int(val)), 'correct'] = 0
+
+    df_o['origin_lst'] = df_o['origin'].str.split(',')
+    df_o['len_origin_lst'] = df_o['origin_lst'].map(len)
+    df1 = df_o.query('len_origin_lst == 1')
+    df2 = df_o.query('len_origin_lst == 2')
+    df = df1. \
+        append(
+        df2.assign(origin=df2['origin_lst'].map(lambda x: x[0])).append(
+            df2.assign(origin=df2['origin_lst'].map(lambda x: x[1])))
+    )
+    df['origin'] = df['origin'].astype(int)
+    df = df.sort_values(['chapter', 'problem', 'origin']).reset_index(drop=True)
+    # print(df.iloc[44:][['origin', 'correct']]['correct'].groupby(df['origin']).agg(['mean', 'count', 'std']))
+    print(df.iloc[44:][['origin', 'correct']]['correct'].groupby(df['origin']).agg(['mean', 'count']).reset_index(drop=False))
+
+
+
+    probs = []
+    for origin in df['origin'].unique():
+        problem_origin = {}
+
+        # print(origin)
+        # print('\n')
+        df_temp = df.query('origin == {}'.format(origin))
+        problem_outcomes = []
+        for chapter in df_temp['chapter'].unique():
+            # print('{0}: {1}'.format(chapter, df_temp.query('chapter == {}'.format(chapter))['correct'].values.tolist()))
+            problem_outcomes.append({'prob_chapter': str(chapter), 'correct': df_temp.query('chapter == {}'.format(chapter))['correct'].values.tolist()})
+        problem_origin['chapter'] = int(origin)
+        problem_origin['problems'] = problem_outcomes
+        probs.append(problem_origin)
+    print(probs)
+    print(df.iloc[44:][['origin', 'correct']]['correct'].groupby(df['origin']).agg(['mean', 'count']).reset_index(drop=False).to_dict('records'))
+
+    return render_template("dashboards_chapter.html", score_data=df.iloc[44:][['origin', 'correct']]['correct'].groupby(df['origin']).agg(['mean', 'count']).reset_index(drop=False).to_dict('records'), prob_data=probs)
+
+
+@app.route("/dashboards_chapter_sup")
+def dashboards_chapter_sup():
+    book = 'Algebra_1_2'
+    kid = 'Calvin'
+
+    df_book_details = pd.DataFrame(list(db_number[book].find())).drop(['_id', 'book'], 1)
+    df_origin_details = pd.DataFrame(list(db_origin[book].find()))  #.drop(['_id', 'book'], 1)
+    df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid})))  #.drop(['_id', 'book'], 1)
+
+    df_o = pd.DataFrame()
+    for index, row in df_origin_details.iterrows():
+        df_temp = pd.DataFrame(list(row['origin_list']), columns=['origin'])
+        df_temp['problem'] = range(1, df_temp.shape[0] + 1)
+        df_temp['book'] = book
+        df_temp['chapter'] = row['chapter']
+        df_temp['correct'] = 1
+        df_o = df_o.append(df_temp[['book', 'chapter', 'problem', 'origin', 'correct']])
+
+    performance = list(db_performance[book].find({'kid': kid}))[2:]
+    for row in performance:
+        for key in row['miss_lst'].keys():
+            if 'test' not in key:
+                for val in row['miss_lst'][key]:
+                    if val.isdigit():
+                        df_o.loc[(df_o['chapter'] == int(key)) & (df_o['problem'] == int(val)), 'correct'] = 0
+
+    df_o['origin_lst'] = df_o['origin'].str.split(',')
+    df_o['len_origin_lst'] = df_o['origin_lst'].map(len)
+    df1 = df_o.query('len_origin_lst == 1')
+    df2 = df_o.query('len_origin_lst == 2')
+    df = df1. \
+        append(
+        df2.assign(origin=df2['origin_lst'].map(lambda x: x[0])).append(
+            df2.assign(origin=df2['origin_lst'].map(lambda x: x[1])))
+    )
+    df['origin'] = df['origin'].astype(int)
+    df = df.sort_values(['chapter', 'problem', 'origin']).reset_index(drop=True)
+
+    print(df.head(10))
+    probs = []
+    for origin in df['origin'].unique():
+        problem_origin = {}
+
+        # print(origin)
+        # print('\n')
+        df_temp = df.query('origin == {}'.format(origin))
+        problem_outcomes = []
+        for chapter in df_temp['chapter'].unique():
+            lst = df_temp.query('chapter == {}'.format(chapter))['correct'].values.tolist()
+            problem_outcomes.append(
+                {
+                    'prob_chapter': str(chapter),
+                    'correct': [{"position": ind, "flag": l} for ind, l in enumerate(lst)]
+                }
+            # 'correct': [{} for dict(zip(range(len(lst)), lst))
+
+            )
+        problem_origin['chapter'] = int(origin)
+        problem_origin['problems'] = problem_outcomes
+        probs.append(problem_origin)
+    print(probs)
+
+
+    # todo: restructure this so that it's flat...: {chapter: 90, prob_chapter: 96, position: 0, flag: 1}, {chapter: 90, prob_chapter: 96, position: 1, flag: 1}, etc.
+
+    # todo: create position
+    ['origin']
+
+    # return render_template("dashboards_chapter_sup.html", prob_data=probs)
+    print(df.to_dict('records'))
+    return render_template("dashboards_chapter.html", score_data=df.iloc[44:][['origin', 'correct']]['correct'].groupby(df['origin']).agg(['mean', 'count']).reset_index(drop=False).to_dict('records'))
 
 def problem_list_count(book, start_chapter, start_problem, end_chapter, end_problem):
     prob_num = 0
@@ -343,46 +464,6 @@ def quit():
     return ''
 
 if __name__ == '__main__':
-    book = 'Algebra_1_2'
-    kid = 'Calvin'
-
-    df_book_details = pd.DataFrame(list(db_number[book].find())).drop(['_id', 'book'], 1)
-    df_origin_details = pd.DataFrame(list(db_origin[book].find()))  #.drop(['_id', 'book'], 1)
-    df_performance_details = pd.DataFrame(list(db_performance[book].find({'kid': kid})))  #.drop(['_id', 'book'], 1)
-
-    df_o = pd.DataFrame()
-    for index, row in df_origin_details.iterrows():
-        df_temp = pd.DataFrame(list(row['origin_list']), columns=['origin'])
-        df_temp['problem'] = range(1, df_temp.shape[0] + 1)
-        df_temp['book'] = book
-        df_temp['chapter'] = row['chapter']
-        df_temp['correct'] = 1
-        df_o = df_o.append(df_temp[['book', 'chapter', 'problem', 'origin', 'correct']])
-
-    performance = list(db_performance[book].find({'kid': kid}))[2:]
-    for row in performance:
-        for key in row['miss_lst'].keys():
-            if 'test' not in key:
-                for val in row['miss_lst'][key]:
-                    if val.isdigit():
-                        df_o.loc[(df_o['chapter'] == int(key)) & (df_o['problem'] == int(val)), 'correct'] = 0
-
-    df_o['origin_lst'] = df_o['origin'].str.split(',')
-    df_o['len_origin_lst'] = df_o['origin_lst'].map(len)
-    df1 = df_o.query('len_origin_lst == 1')
-    df2 = df_o.query('len_origin_lst == 2')
-    df = df1. \
-        append(
-        df2.assign(origin=df2['origin_lst'].map(lambda x: x[0])).append(
-            df2.assign(origin=df2['origin_lst'].map(lambda x: x[1])))
-    )
-    df['origin'] = df['origin'].astype(int)
-    df = df.sort_values(['chapter', 'problem', 'origin']).reset_index(drop=True)
-    print(df.iloc[44:][['origin', 'correct']]['correct'].groupby(df['origin']).agg(['mean', 'count', 'std']))
-
-    sys.exit()
-
-
     app.run(host='0.0.0.0', port=8001, debug=True)
 
 
