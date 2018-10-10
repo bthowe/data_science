@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Mixed Problem Performance by Origin</title>
     <meta charset="utf-8">
     <style>
         body {
@@ -88,6 +89,20 @@
         .y.axis text {
             font-size: 13px;
         }
+
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 140px;
+            height: 20px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body>
@@ -97,9 +112,15 @@
 
 <script>
     scoreData = {{ score_data | tojson}}
+    probData = {{ prob_data | tojson}}
+
+    scoreData = scoreData.filter(function (d) {return d.kid == "Calvin"});
+    probData = probData.filter(function (d) {return d.kid == "Calvin"});
+
+    var max_chapter = Math.max.apply(Math, probData.map(function(d) { return d.chapter }))
 
     var total_margin = {top: 10, right: 10, bottom: 10, left: 10},
-        plot_margin = {top: 50, right: 50, bottom: 50, left: 50},
+        plot_margin = {top: 50, right: 100, bottom: 50, left: 50},
         total_width = 600,
         plot_width = total_width - total_margin.right - total_margin.left,
         total_height = (scoreData.length * 20) + total_margin.top + plot_margin.top + total_margin.bottom + plot_margin.bottom,
@@ -124,24 +145,30 @@
     }
 
     var svg = body.append("svg")
+        .attr("width", 1500)
+        .attr("height", 1500)
+
+
+    var svg_main = svg
+        .append("g")
         .attr("width", plot_width)
         .attr("height", plot_height)
         .attr("transform", "translate(" + total_margin.left + "," + total_margin.top + ")");
 
-    svg.append("g")
+    svg_main.append("g")
         .attr("class", "label")
         .attr("transform", "translate(" + (plot_margin.left + plot_width / 3) + ", 0)")
         .append("text")
         .attr("x", 0)
         .attr("y", 15)
         .text("Percent Correct");
-    svg.append("g")
+    svg_main.append("g")
         .attr("class", "label")
         .attr("transform", "rotate(270)")
         .append("text")
         .attr("x", -plot_height / 2)
         .attr("y", 15)
-        .text("Chapter");
+        .text("Lesson Number");
 
     percentData = [
         {"position": 0, "value": .2},
@@ -150,76 +177,245 @@
         {"position": 3, "value": .8},
         {"position": 4, "value": 1}
     ];
-    svg.append("g")
+    svg_main.append("g")
         .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")")
         .selectAll("line")
         .data(percentData)
         .enter().append("line")
-        .attr("x1", function(d) { return x(d.value)})
-        .attr("x2", function(d) { return x(d.value)})
+        .attr("x1", function(d) { return x(d.value + .01)})
+        .attr("x2", function(d) { return x(d.value + .01)})
         .attr("y1", 0)
         .attr("y2", plot_height - plot_margin.top)
         .attr("stroke", "SlateGrey")
         .attr("opacity", ".3")
 
 
-    var barGroup = svg.append("g")
+    var barGroup = svg_main.append("g")
         .attr("class", "bar")
         .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")");
-    var countGroup = svg.append("g")
-        .attr("class", "count")
+
+
+    var total_margin_sup = {top: 10, right: 10, bottom: 10, left: 10},
+        plot_margin_sup = {top: 25, right: 20, bottom: 25, left: 20},
+        total_width_sup = 600,
+        plot_width_sup = total_width_sup - total_margin_sup.right - total_margin_sup.left,
+        total_height_sup = (50) + total_margin_sup.top + plot_margin_sup.top + total_margin_sup.bottom + plot_margin_sup.bottom,
+        plot_height_sup = total_height_sup - total_margin_sup.top - total_margin_sup.bottom,
+        gap = 5,
+        left_shift_sup = 600;
+
+    var svg_sup = svg
+        .append("g")
+        .attr("width", plot_width_sup)
+        .attr("height", plot_height_sup);
+
+    var x_sup = d3.scale.linear()
+        .range([0, plot_width_sup - plot_margin_sup.left - plot_margin_sup.right]);
+    var y_sup = d3.scale.ordinal()
+        .rangeBands([0, plot_height_sup - plot_margin_sup.top - plot_margin_sup.bottom], 0.2, 0);
+    var xAxis_sup = d3.svg.axis()
+        .scale(x_sup)
+        .orient("bottom")
+        .tickFormat(d3.format("d"));
+    var yAxis_sup = d3.svg.axis()
+        .scale(y_sup)
+        .orient("left");
+
+
+
+    x.domain([0, d3.max(scoreData, function (element) {
+        return element.mean
+    })]);
+    y.domain(scoreData.map(function (element) {
+        return element.origin
+    }));
+
+    svg_main.append("g")
+        .call(xAxis)
+        .attr("class", "x axis")
+        .attr("transform", "translate(" + (plot_margin.left + x(.01)) + "," + plot_margin.top + ")");
+
+    svg_main.append("g")
+        .call(yAxis)
+        .attr("class", "y axis")
         .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")");
 
+    barGroup.selectAll("rect")
+        .data(scoreData, keys)
+        .enter().append("rect")
+        .attr("x", 0)
+        .attr("y", function (d) {
+            return y(d.origin)
+        })
+        .attr("width", function (d) {
+            return x(d.mean + .01)
+        })
+        .attr("height", y.rangeBand())
+        .attr("fill", function (d) {
+            const z = (1 - d.mean) / Math.sqrt(d.mean * (1 - d.mean) * (1 / d.count))
+            if (z > 2.326) {
+                return "CornflowerBlue"
+            }
+            else if (z > 1.645) {
+                return "Blue"
+            }
+            else {
+                return "DarkSlateBlue"
+            }
+        })
+        .on("mouseover", function (d) {
+            svg.append("line")
+                .attr("class", "line")
+                .attr("x1", x(d.mean) + total_margin.left + plot_margin.left)
+                .attr("y1", y(d.origin) + total_margin.top + plot_margin.top + (y.rangeBand() / 2))
+                .attr("x2", (left_shift_sup + total_margin.left))
+                .attr("y2", y(d.origin) + total_margin.top + plot_margin.top + (y.rangeBand() / 2))
+                .style("stroke", "darkslateblue");
 
-    var kid = "Calvin"
-    renderPlot(scoreData, kid)
+            svg_sup.attr("transform", "translate(" + (left_shift_sup + total_margin.left) + "," + (total_margin.top + y(d.origin))+ ")");
 
-    function renderPlot(sData, name) {
-        x.domain([0, d3.max(sData, function (element) {
-            return element.mean
-        })]);
-        y.domain(sData.map(function (element) {
-            return element.origin
-        }));
+            svg_sup.append("text")
+                .attr("y", 0)
+                .attr("x", 0)
+                .attr("class", "hover")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "12px")
+                .style("fill", "SlateGrey")
+                .style("opacity", ".5")
+                .text("Chapter " + d.origin + " (mean: " + d.mean.toFixed(2) + ", n: " + d.count + ")");
 
-        svg.append("g")
-            .call(xAxis)
-            .attr("class", "x axis")
-            .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")");
+            probStuff = probData.filter(function (d_sup) {return d_sup.origin == d.origin})
 
-        svg.append("g")
-            .call(yAxis)
-            .attr("class", "y axis")
-            .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")");
+            chapters = [];
+            for (i = 0; i < probStuff.length; i++) {
+                chapters.push(probStuff[i].chapter)
+            }
+            chapters = [...new Set(chapters)];
+            xAxis_sup.ticks(max_chapter - d.origin);
 
-        barGroup.selectAll("rect")
-            .data(sData, keys)
-            .enter().append("rect")
-            .attr("x", 0)
-            .attr("y", function (d) {
-                return y(d.origin)
-            })
-            .attr("width", function (d) {
-                return x(d.mean)
-            })
-            .attr("height", y.rangeBand());
-        countGroup.selectAll("text")
-            .data(sData, keys)
-            .enter().append("text")
-            .attr("x", function (d) {return x(d.mean) + 5})
-            .attr("y", function (d) {return y(d.origin) + 12})
-            .text(function (d) {return d.count})
-    };
+
+            x_sup.domain([d.origin, max_chapter]);
+            y_sup.domain([4, 3, 2, 1]);
+
+            svg_sup.append("rect")
+                .attr("x", 0)
+                .attr("y", gap)
+                .attr("width", plot_width_sup)
+                .attr("height", plot_height_sup)
+                .style("stroke", "darkslateblue")
+                .style("fill", "white")
+                .style("stroke-width", 1);
+
+            svg_sup.append("g")
+                .call(xAxis_sup)
+                .attr("class", "x axis")
+                .attr("transform", "translate(" + (plot_margin_sup.left + gap) + "," + (plot_height_sup - plot_margin_sup.bottom) + ")");
+
+            var perfGroup = svg_sup.append("g")
+                .attr("class", "bar")
+                .attr("transform", "translate(" + plot_margin_sup.left + "," + (plot_margin_sup.top - gap) + ")");
+
+            perfGroup.selectAll("rect")
+                .data(probStuff)
+                .enter().append("rect")
+                .attr("x", function (d_sup) {
+                    return x_sup(d_sup.chapter)
+                })
+                .attr("y", function (d_sup) {
+                    return y_sup(d_sup.position)
+                })
+                .attr("width", 10)
+                .attr("height", 10)
+                .attr("fill", function (d_sup) {
+                    if (d_sup.correct == 0) {
+                        return "cornflowerblue"
+                    }
+                    else {
+                        return "darkblueslate"
+                    }
+                })
+        })
+        .on("mouseout", function (d) {
+            svg.select("line.line").remove();
+            svg_sup.selectAll("*").remove();
+        });
+//        .on("click", function (d) {
+//            svg_sup.selectAll("*").remove();
+//            svg.selectAll("line").remove();
+//
+//            svg.append("line")
+//                .attr("x1", x(d.mean) + total_margin.left + plot_margin.left)
+//                .attr("y1", y(d.origin) + total_margin.top + plot_margin.top + (y.rangeBand() / 2))
+//                .attr("x2", (left_shift_sup + total_margin.left))
+//                .attr("y2", y(d.origin) + total_margin.top + plot_margin.top + (y.rangeBand() / 2))
+//                .style("stroke", "darkslateblue");
+//
+//            svg_sup.attr("transform", "translate(" + (left_shift_sup + total_margin.left) + "," + (total_margin.top + y(d.origin))+ ")");
+//
+//            svg_sup.append("text")
+//                .attr("y", 0)
+//                .attr("x", 0)
+//                .attr("class", "hover")
+//                .attr("font-family", "sans-serif")
+//                .attr("font-size", "12px")
+//                .style("fill", "SlateGrey")
+//                .style("opacity", ".5")
+//                    .text("Chapter " + d.origin + " (mean: " + d.mean.toFixed(2) + ", n: " + d.count + ")");
+//
+//            probStuff = probData.filter(function (d_sup) {return d_sup.origin == d.origin})
+//
+//            chapters = [];
+//            for (i = 0; i < probStuff.length; i++) {
+//                chapters.push(probStuff[i].chapter)
+//            }
+//            chapters = [...new Set(chapters)];
+//            xAxis_sup.ticks(chapters.length);
+//
+//            x_sup.domain([d3.min(chapters), d3.max(chapters)]);
+//            y_sup.domain([4, 3, 2, 1]);
+//
+//            svg_sup.append("rect")
+//                .attr("x", 0)
+//                .attr("y", gap)
+//                .attr("width", plot_width_sup)
+//                .attr("height", plot_height_sup)
+//                .style("stroke", "darkslateblue")
+//                .style("fill", "white")
+//                .style("stroke-width", 1);
+//
+//            svg_sup.append("g")
+//                .call(xAxis_sup)
+//                .attr("class", "x axis")
+//                .attr("transform", "translate(" + (plot_margin_sup.left + gap) + "," + (plot_height_sup - plot_margin_sup.bottom) + ")");
+//
+//            var perfGroup = svg_sup.append("g")
+//                .attr("class", "bar")
+//                .attr("transform", "translate(" + plot_margin_sup.left + "," + (plot_margin_sup.top - gap) + ")");
+//
+//            perfGroup.selectAll("rect")
+//                .data(probStuff)
+//                .enter().append("rect")
+//                .attr("x", function (d_sup) {
+//                    return x_sup(d_sup.chapter)
+//                })
+//                .attr("y", function (d_sup) {
+//                    return y_sup(d_sup.position)
+//                })
+//                .attr("width", 10)
+//                .attr("height", 10)
+//                .attr("fill", function (d_sup) {
+//                    if (d_sup.correct == 0) {
+//                        return "cornflowerblue"
+//                    }
+//                    else {
+//                        return "darkblueslate"
+//                    }
+//                })
+//
+//        })
+
+
+
 </script>
 </body>
 </html>
-
-<!--todo: mouseover telling the percentage-->
-<!--todo: mouseover making the rectange bigger-->
-<!--todo: the axis labels need work-->
-<!--todo: the number of problems need some finessing -->
-
-<!--todo: how about a plot of the order of problems and whether they were misses or not-->
-<!--    -maybe this plot appears after the click.-->
-
-<!--todo: include the test performance on this page as well. -->

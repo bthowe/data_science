@@ -93,20 +93,41 @@
 
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="dropdown show">
-      <!--<a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-        <!--Dashboard-->
-      <!--</a>-->
-    <a class="navbar-brand btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Dashboard</a>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-        <a class="dropdown-item" href="#" id="Calvin">Calvin</a>
-        <a class="dropdown-item" href="#" id="Samuel">Samuel</a>
-      </div>
-    </div>
+    <a class="navbar-brand" href="#">Dashboards</a>
+
+
+    <!--<div class="dropdown show">-->
+    <!--<a class="navbar-brand btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+        <!--Dashboard</a>-->
+      <!--<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">-->
+        <!--<a class="dropdown-item" href="#" id="Calvin">Calvin</a>-->
+        <!--<a class="dropdown-item" href="#" id="Samuel">Samuel</a>-->
+      <!--</div>-->
+    <!--</div>-->
+
 
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenuLinkDash" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Choose Dashboard
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLinkDash">
+                    <a class="dropdown-item" href="#" id="time">Over Time</a>
+                    <a class="dropdown-item" href="#" id="mixed">Mixed Problems by Origin</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Choose Child
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    <a class="dropdown-item" href="#" id="Calvin">Calvin</a>
+                    <a class="dropdown-item" href="#" id="Samuel">Samuel</a>
+                </div>
+            </li>
             <li class="nav-item active">
                 <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
             </li>
@@ -231,6 +252,8 @@
         calvin_submit.addEventListener('click', calvin_click, true);
 
         function samuel_click() {
+            alert(document.getElementById('Samuel').innerHTML);
+
             renderPlot(scoreData.filter(function (d) {
                 return d.kid == "Samuel"
             }), "Samuel");
@@ -439,23 +462,6 @@
 //            document.getElementById('name').innerHTML = name + ' (Mean: ' + (mean).toFixed(2) + ')';
 
         }
-
-// todo: report on just tests
-// todo: better color scheme
-//        -also the thickness of the line...it's hard to tell what is what
-// todo: line tooltip for book
-// todo: I could make the margins and so forth cleaner
-// todo: click on book and shows the datapoints, stats, and lines for that book
-
-
-
-//todo: add other plot for the chapters corresponding to problems they miss.
-//        -todo: how would this one looK
-//
-
-
-//todo: be able to click and then get the stats only for that segment.
-
 
     </script>
 
