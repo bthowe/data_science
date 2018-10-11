@@ -200,10 +200,6 @@
         document.getElementById('mixed').addEventListener('click', mixed_click, true);
 
 
-
-//        todo: change the default to something else
-
-
         function renderTimePlot(scoreData, name) {
             bookData = [
                 {"position": 0, "book": "Math_5_4", "color": "RebeccaPurple", "name": "Math 5/4"},
@@ -216,7 +212,7 @@
                 {"position": 7, "book": "Advanced_math", "color": "DarkSlateGrey", "name": "Advanced Math"},
                 {"position": 8, "book": "Calculus", "color": "Sienna", "name": "Calculus"},
                 {"position": 9, "book": "", "color": "White", "name": ""},
-                {"position": 10, "book": "", "color": "Maroon", "name": "Average Score"}
+                {"position": 10, "book": "", "color": "Plum", "name": "Average Score"}
             ];
 
             var leftMargin = 50,
@@ -683,6 +679,11 @@
                 });
 
         }
+
+
+//        BACKEND
+// todo: can I get it to work faster? I'm sure I can combine the data extraction from mongo and the processing to make this go faster.
+// todo: other todos from saxon_math_command.py
 
 //        TIME
 // todo: line tooltip for book
