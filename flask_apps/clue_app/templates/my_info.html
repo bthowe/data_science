@@ -2,9 +2,301 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <title>My Info</title>
+
+
+    <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel=stylesheet>
+
+    <!-- Custom fonts for this template -->
+    <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel=stylesheet>
+    <link href="{{ url_for('static', filename='vendor/simple-line-icons/css/simple-line-icons.css') }}" rel=stylesheet>
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet"
+          type="text/css">
+
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/landing-page.min.css') }}" rel=stylesheet>
+
+    <style>
+        img {
+            width: 50px;
+        }
+    </style>
+
 </head>
 <body>
-$END$
+
+
+<section class="features-icons bg-light text-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                    <!--<a href="/enter_problem_number">-->
+                        <div class="features-icons-icon d-flex">
+                            <img src="/static/images/scarlett.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Scarlett</h5>
+                    <!--<p class="lead mb-0">Specify the number of lesson and mixed problems for a given book and-->
+                        <!--lesson.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                    <!--<a href="/enter_problem_origin">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-layers m-auto text-primary"></i>-->
+                            <img src="/static/images/mustard.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Mustard</h5>
+                    <!--<p class="lead mb-0">For each problem, specify the lesson from which it originates.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/enter_performance">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/white.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>White</h5>
+                    <!--<p class="lead mb-0">Record which problems were missed on a child's daily assignment.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/plum.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Plum</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/green.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Green</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/peacock.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Peacock</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/knife.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Knife</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/revolver.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Revolver</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/rope.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Rope</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/pipe.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Pipe</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/wrench.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Wrench</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/candlestick.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Candlestick</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/ballroom.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Ballroom</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/billiard.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Billiard</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/conservatory.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Conservatory</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/dining.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Dining</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/hall.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Hall</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/kitchen.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Kitchen</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/library.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Library</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/lounge.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Lounge</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                    <!--<a href="/dashboards">-->
+                        <div class="features-icons-icon d-flex">
+                            <!--<i class="icon-check m-auto text-primary"></i>-->
+                            <img src="/static/images/study.png" class="m-auto text-primary">
+                        </div>
+                    </a>
+                    <h5>Study</h5>
+                    <!--<p class="lead mb-0">View performance over time and by concept.</p>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+suspects = ["scarlett", "plum", "peacock", "green", "mustard", "white"];
+weapons = ["candlestick", "dagger", 'pipe', "revolver", "rope", "wrench"];
+rooms = ['kitchen', 'ballroom', 'conservatory', 'dining', 'billiard', 'library', 'study', 'hall', 'lounge'];
+</script>
+
+
+
 </body>
 </html>
