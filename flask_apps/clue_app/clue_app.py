@@ -31,14 +31,14 @@ def main_menu():
 @app.route("/my_info", methods=['POST'])
 def my_info():
     joblib.dump(dict(request.form), 'player_list.pkl')
-
-    # result = request.form
-    # # result = dict(request.form)
-    # print(result)
-    # for k, v in result.items():
-    #     print(k, v)
-
     return render_template('my_info.html')
+
+
+@app.route("/play", methods=['POST'])
+def play():
+    print(dict(request.form))
+    print(joblib.load('player_list.pkl'))
+    return render_template('play.html')
 
 
 
