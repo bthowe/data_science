@@ -107,10 +107,9 @@ def dashboards():
 
         if not last_problem.isdigit():
             last_chapter += -1
-            last_problem = performance.query('end_chapter == last_chapter')['end_problem'].max()
+            last_problem = db_number[book].find({"chapter": int(last_chapter)})[0]['num_mixed_probs']
 
         df_o.query('(chapter < {0}) or ((chapter == {0}) and (problem <= {1}))'.format(last_chapter, last_problem), inplace=True)
-
 
         performance = list(db_performance[book].find({'kid': kid}))[2:]
         for row in performance:
@@ -133,6 +132,7 @@ def dashboards():
         df['origin'] = df['origin']  #.astype(int)  #todo: if a problem comes from the investigations, then...?
         df = df.sort_values(['chapter', 'problem', 'origin']).reset_index(drop=True)
 
+
         # what's Samuel's?
         if kid == 'Calvin':
             df.query('chapter >= 98', inplace=True)
@@ -153,7 +153,7 @@ def dashboards():
 
     # print(df_time_data.head())
     # print(df_score_data.head())
-    print(df_prob_data)
+    # print(df_prob_data)
     return render_template(
         "dashboards.html",
         score_data_time=df_time_data.to_dict('records'),

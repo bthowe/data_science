@@ -149,7 +149,6 @@
         scoreDataMixed = {{ score_data_mixed | tojson}}
         probDataMixed = {{ prob_data | tojson}}
 
-
         var body = d3.select("body");
         var svg = body.append("svg");
 
@@ -460,8 +459,9 @@
         }
 
         function renderMixedPlot(scoreData, probData) {
+            var first_chapter = probData.map(function(el){return el.chapter}).reduce(function(el){return Math.min(el)})
+            var max_chapter = Math.max(...probData.map(function(el){return el.chapter}))
 
-            var max_chapter = Math.max.apply(Math, probData.map(function(d) { return d.chapter }))
 
             var total_margin = {top: 10, right: 10, bottom: 10, left: 10},
                 plot_margin = {top: 50, right: 100, bottom: 50, left: 50},
@@ -535,10 +535,10 @@
 
 
             var total_margin_sup = {top: 10, right: 10, bottom: 10, left: 10},
-                plot_margin_sup = {top: 25, right: 20, bottom: 25, left: 20},
+                plot_margin_sup = {top: 25, right: 30, bottom: 25, left: 30},
                 total_width_sup = 600,
                 plot_width_sup = total_width_sup - total_margin_sup.right - total_margin_sup.left,
-                total_height_sup = (50) + total_margin_sup.top + plot_margin_sup.top + total_margin_sup.bottom + plot_margin_sup.bottom,
+                total_height_sup = (130) + total_margin_sup.top + plot_margin_sup.top + total_margin_sup.bottom + plot_margin_sup.bottom,
                 plot_height_sup = total_height_sup - total_margin_sup.top - total_margin_sup.bottom,
                 gap = 5,
                 left_shift_sup = 600;
@@ -572,6 +572,7 @@
                 .attr("class", "x axis")
                 .attr("transform", "translate(" + (plot_margin.left + x(.01)) + "," + plot_margin.top + ")");
 
+
             svg_main.append("g")
                 .call(yAxis)
                 .attr("class", "y axis")
@@ -603,7 +604,7 @@
                 .on("mouseover", function (d) {
                     svg.append("line")
                         .attr("class", "line")
-                        .attr("x1", x(d.mean) + total_margin.left + plot_margin.left)
+                        .attr("x1", x(d.mean + .01) + total_margin.left + plot_margin.left)
                         .attr("y1", y(d.origin) + total_margin.top + plot_margin.top + (y.rangeBand() / 2))
                         .attr("x2", (left_shift_sup + total_margin.left))
                         .attr("y2", y(d.origin) + total_margin.top + plot_margin.top + (y.rangeBand() / 2))
@@ -630,10 +631,13 @@
                         chapters.push(probStuff[i].chapter)
                     }
                     chapters = [...new Set(chapters)];
-                    xAxis_sup.ticks(max_chapter - d.origin);
+                    xAxis_sup.ticks(5);
 
-                    x_sup.domain([d.origin, max_chapter]);
-                    y_sup.domain([4, 3, 2, 1]);
+                    x_sup.domain([first_chapter, max_chapter]);
+                    y_sup.domain([11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+
+// todo: click to hold supplementary plot and zoom in and out.
+// todo: too many chapters...fix max_chapter
 
                     svg_sup.append("rect")
                         .attr("x", 0)
@@ -646,14 +650,16 @@
 
                     svg_sup.append("g")
                         .call(xAxis_sup)
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(" + (plot_margin_sup.left + gap) + "," + (plot_height_sup - plot_margin_sup.bottom) + ")");
+                        .attr("class", "axis")
+                        .attr("transform", "translate(" + (plot_margin_sup.left) + "," + (plot_height_sup - plot_margin_sup.bottom) + ")");
 
-                    var perfGroup = svg_sup.append("g")
+
+//                    RECTANGLES
+                    var width = (plot_width_sup - plot_margin_sup.left - plot_margin_sup.right - (max_chapter - first_chapter) * gap) / (max_chapter - first_chapter)
+                    svg_sup.append("g")
                         .attr("class", "bar")
-                        .attr("transform", "translate(" + plot_margin_sup.left + "," + (plot_margin_sup.top - gap) + ")");
-
-                    perfGroup.selectAll("rect")
+                        .attr("transform", "translate(" + (plot_margin_sup.left - (width / 2)) + "," + (plot_margin_sup.top - gap) + ")")
+                        .selectAll("rect")
                         .data(probStuff)
                         .enter().append("rect")
                         .attr("x", function (d_sup) {
@@ -662,7 +668,7 @@
                         .attr("y", function (d_sup) {
                             return y_sup(d_sup.position)
                         })
-                        .attr("width", 10)
+                        .attr("width", width)
                         .attr("height", 10)
                         .attr("fill", function (d_sup) {
                             if (d_sup.correct == 0) {
@@ -691,6 +697,9 @@
 // todo: be able to click and then get the stats only for that segment.
 
 //        MIXED
+// todo: I don't know why but for Samuel chapter 2 in chapter 10 there are only 10 listed but should be 11.
+// todo: get the chapter ordered correctly
+// todo: Samuel investigations
 // todo: put a feature in that allows me to order bars by either mean or chapter origin number
 // todo: fix the bottom of the bar graph...it would get cut off after too many more chapters
 // todo: I think I'd like to do something different with the x-axis...maybe start with that chapter and go up to the chapter from which the child worked last.
