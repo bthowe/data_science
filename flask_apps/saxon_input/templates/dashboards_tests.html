@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Performance Dashboards</title>
+
+    <style>
+        body {
+            font-family: Helvetica;
+        }
+
+        /*svg {*/
+            /*width: 500px;*/
+            /*height: 500px;*/
+        /*}*/
+
+        .buttons-container {
+            width: 520px;
+            margin-bottom: 25px;
+        }
+
+        .button {
+            float: left;
+            margin-left: 10px;
+            font-weight: lighter;
+            cursor: pointer;
+        }
+
+        .selected {
+            font-weight: bold;
+        }
+
+        .top-label {
+            font-size: 13px;
+            font-style: italic;
+            text-transform: uppercase;
+            float: left;
+        }
+
+        .age-label {
+            text-align: right;
+            font-weight: bold;
+            width: 90px;
+            padding-right: 10px;
+        }
+
+        .clearfix {
+            clear: both;
+        }
+
+        .bar {
+            fill: DarkSlateBlue;
+        }
+
+        .bar-label {
+            text-anchor: end;
+        }
+
+        .axis-label {
+            text-anchor: middle;
+            font-size: 13px;
+        }
+
+        .x.axis line {
+            fill: none;
+            stroke: #000;
+        }
+
+        .x.axis text {
+            font-size: 13px;
+        }
+
+        .label {
+            font: 15px sans-serif;
+            stroke: SlateGrey;
+        }
+        .count {
+            font: 12px sans-serif;
+            stroke: SlateGrey;
+            opacity: 0.3;
+        }
+
+        .axis path {
+            display: none;
+        }
+
+        .y.axis line {
+            display: none;
+        }
+        .y.axis text {
+            font-size: 13px;
+        }
+
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 140px;
+            height: 20px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    </style>
+    <!--<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel=stylesheet>-->
+
+</head>
+<body>
+<!--todo: resolve this-->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
+
+<!--<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>-->
+<!--<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>-->
+
+
+<script>
+    testData = {{ test_data | tojson }}
+
+    var leftMargin = 30,
+        rightMargin = 20,
+        width = 500 - leftMargin - rightMargin,
+        topMargin = 20,
+        bottomMargin = 20,
+        height = 500 - topMargin - bottomMargin,
+        gap = 5
+    translateText = "translate(" + (leftMargin + gap) + "," + topMargin + ")";
+
+    var body = d3.select("body");
+    var svg = body.append("svg")
+        .attr("width", 1500)
+        .attr("height", 1500);
+
+//    X-AXIS
+    //    todo: make sure data is sorted by test
+    x = d3.scale.ordinal()
+        .domain(testData.map(function(d) { return d.test}))
+        .rangeBands([0, width], .5, 0);
+    xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+        .ticks(testData.length);
+    svg.append("g")
+        .attr("transform", "translate(" + leftMargin + "," + (topMargin + height + bottomMargin - gap) + ")")
+        .call(xAxis)
+        .attr("class", "x axis");
+
+//    Y-AXIS
+    y = d3.scale.linear()
+        .domain([0, 1])
+        .range([height, 0]);
+    yAxis = d3.svg.axis()
+        .orient("left")
+        .scale(y)
+        .ticks(5);
+    svg.append("g")
+        .attr("transform", "translate(" + leftMargin + "," + (topMargin) + ")")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+
+//    RECTANGLES
+    barGroup = svg.append("g")
+        .attr("transform", "translate(" + leftMargin + ", " + rightMargin + ")")
+        .selectAll("rect")
+        .data(testData)
+        .enter().append("rect")
+        .attr("x", function (d) {
+            return x(d.test)
+        })
+        .attr("y", function (d) {
+            return y(1 - d.perc_correct)
+        })
+        .attr("width", x.rangeBand())
+        .attr("height", function (d) {
+            return y(d.perc_correct)
+        })
+        .style("stroke", "crimson")
+        .style("fill", "black")
+
+//todo: axis labels, proper margins, tooltips
+</script>
+
+
+</body>
+</html>
+
+

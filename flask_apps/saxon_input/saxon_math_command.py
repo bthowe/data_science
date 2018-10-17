@@ -28,6 +28,27 @@ db_performance = client['math_performance']
 def main_menu():
     return render_template('main_menu.html')
 
+@app.route("/dashboards_tests")
+def dashboards_tests():
+    book = 'Algebra_1_2'
+    kid = 'Calvin'
+    performance = pd.DataFrame(list(db_performance[book].find({'kid': kid}))[2:])
+    performance = performance.loc[performance['end_chapter'].str.contains('test', na=False)].reset_index(drop=True)
+    performance['test'] = performance['end_chapter'].apply(lambda x: x.split()[1])
+    performance['miss_lst'] = performance['miss_lst'].apply(lambda x: list(x.values())[0])
+    performance['perc_correct'] = performance.apply(lambda x: len(x['miss_lst']) / 20, axis=1)
+    performance['chapters'] = performance['test'].apply(lambda x: '{0}-{1}'.format(int(x) * 4 - 3, int(x) * 4))
+    performance['ind'] = performance.index
+    var_lst = ['ind', 'book', 'kid', 'miss_lst', 'test', 'perc_correct', 'chapters']
+
+    print(performance[var_lst])
+    return render_template(
+        'dashboards_tests.html',
+        test_data=performance[var_lst].to_dict('records')
+    )
+
+
+
 @app.route("/dashboards")
 def dashboards():
     date_thresh = '2018-09-17'
@@ -103,7 +124,7 @@ def dashboards():
 
         performance['end_chapter'] = performance['end_chapter'].astype(int)
         last_chapter = performance['end_chapter'].max()
-        last_problem = performance.query('end_chapter == {0}'.format(last_chapter))['end_problem'].max()
+        last_problem = performance.query('end_chapter == {0}'.format(last_chapter))['end_problem'].values[-1]
 
         if not last_problem.isdigit():
             last_chapter += -1
