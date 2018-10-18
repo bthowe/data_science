@@ -62,8 +62,9 @@
         }
 
         .x.axis line {
-            fill: none;
+            /*fill: none;*/
             stroke: #000;
+            /*stroke-width: 1px;*/
         }
 
         .x.axis text {
@@ -81,7 +82,10 @@
         }
 
         .axis path {
-            display: none;
+            /*display: none;*/
+            stroke:  black;
+            stroke-width: 1;
+            fill: none;
         }
 
         .y.axis line {
@@ -93,9 +97,9 @@
 
         div.tooltip {
             position: absolute;
-            text-align: center;
-            width: 140px;
-            height: 20px;
+            text-align: left;
+            /*width: 120px;*/
+            height: 56px;
             padding: 2px;
             font: 12px sans-serif;
             background: lightsteelblue;
@@ -115,73 +119,131 @@
 <!--<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>-->
 <!--<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>-->
 
-
 <script>
-    testData = {{ test_data | tojson }}
+    scoreData = {{ test_data | tojson }}
 
-    var leftMargin = 30,
-        rightMargin = 20,
-        width = 500 - leftMargin - rightMargin,
-        topMargin = 20,
-        bottomMargin = 20,
-        height = 500 - topMargin - bottomMargin,
-        gap = 5
-    translateText = "translate(" + (leftMargin + gap) + "," + topMargin + ")";
+    var total_margin = {top: 10, right: 10, bottom: 10, left: 10},
+        plot_margin = {top: 50, right: 100, bottom: 50, left: 50},
+        total_width = 600,
+        plot_width = total_width - total_margin.right - total_margin.left,
+        total_height = (scoreData.length * 20) + total_margin.top + plot_margin.top + total_margin.bottom + plot_margin.bottom,
+        plot_height = total_height - total_margin.top - total_margin.bottom;
 
     var body = d3.select("body");
     var svg = body.append("svg")
         .attr("width", 1500)
-        .attr("height", 1500);
+        .attr("height", 1500)
+    var svg_main = svg
+        .append("g")
+        .attr("width", plot_width)
+        .attr("height", plot_height)
+        .attr("transform", "translate(" + total_margin.left + "," + total_margin.top + ")");
 
-//    X-AXIS
-    //    todo: make sure data is sorted by test
-    x = d3.scale.ordinal()
-        .domain(testData.map(function(d) { return d.test}))
-        .rangeBands([0, width], .5, 0);
+
+    //    X-AXIS
+    x = d3.scale.linear()
+        .range([0, plot_width - plot_margin.left - plot_margin.right])
+        .domain([0, 1]);
     xAxis = d3.svg.axis()
         .scale(x)
-        .orient("bottom")
-        .ticks(testData.length);
-    svg.append("g")
-        .attr("transform", "translate(" + leftMargin + "," + (topMargin + height + bottomMargin - gap) + ")")
+        .orient("top")
+        .ticks(5, "%");
+    svg_main.append("g")
         .call(xAxis)
-        .attr("class", "x axis");
+        .attr("class", "x axis")
+        .attr("transform", "translate(" + (plot_margin.left) + "," + plot_margin.top + ")")
+    // axis label
+    svg_main.append("g")
+        .attr("class", "label")
+        .attr("transform", "translate(" + (plot_margin.left + plot_width/4) + ", 0)")
+        .append("text")
+        .attr("x", 0)
+        .attr("y", 15)
+        .text("Percent Correct");
 
-//    Y-AXIS
-    y = d3.scale.linear()
-        .domain([0, 1])
-        .range([height, 0]);
+    //    Y-AXIS
+    y = d3.scale.ordinal()
+        .rangeBands([0, plot_height - plot_margin.top - plot_margin.bottom], 0.2, 0)
+        .domain(scoreData.map(function (d) {return d.test}));
     yAxis = d3.svg.axis()
-        .orient("left")
         .scale(y)
-        .ticks(5);
-    svg.append("g")
-        .attr("transform", "translate(" + leftMargin + "," + (topMargin) + ")")
+        .orient("left");
+    svg_main.append("g")
+        .call(yAxis)
         .attr("class", "y axis")
-        .call(yAxis);
+        .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")");
+    // axis label
+    svg_main.append("g")
+        .attr("class", "label")
+        .attr("transform", "rotate(270)")
+        .append("text")
+        .attr("x", -plot_height)
+        .attr("y", 15)
+        .text("Test Number");
 
 
-//    RECTANGLES
-    barGroup = svg.append("g")
-        .attr("transform", "translate(" + leftMargin + ", " + rightMargin + ")")
+    percentData = [
+        {"position": 0, "value": .2},
+        {"position": 1, "value": .4},
+        {"position": 2, "value": .6},
+        {"position": 3, "value": .8},
+        {"position": 4, "value": 1}
+    ];
+    svg_main.append("g")
+        .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")")
+        .selectAll("line")
+        .data(percentData)
+        .enter().append("line")
+        .attr("x1", function(d) { return x(d.value)})
+        .attr("x2", function(d) { return x(d.value)})
+        .attr("y1", 0)
+        .attr("y2", plot_height - plot_margin.top - plot_margin.bottom)
+        .attr("stroke", "SlateGrey")
+        .attr("opacity", ".3")
+
+
+//    BARS
+    // tooltip container
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    svg_main.append("g")
+        .attr("class", "bar")
+        .attr("transform", "translate(" + plot_margin.left + "," + plot_margin.top + ")")
         .selectAll("rect")
-        .data(testData)
+        .data(scoreData)
         .enter().append("rect")
-        .attr("x", function (d) {
-            return x(d.test)
-        })
+        .attr("x", 0)
         .attr("y", function (d) {
-            return y(1 - d.perc_correct)
+            return y(d.test)
         })
-        .attr("width", x.rangeBand())
-        .attr("height", function (d) {
-            return y(d.perc_correct)
+        .attr("width", function (d) {
+            return x(d.perc_correct)
         })
-        .style("stroke", "crimson")
-        .style("fill", "black")
+        .attr("height", y.rangeBand())
+        .on("mouseover", function(d) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(
+                "Test: " + d.test + "<br/>" +
+                "Score: " + d.perc_correct + "<br/>" +
+                "Chapters: " + d.chapters + "<br/>" +
+                "Missed: " + d.miss_lst.toString()
+            )
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px")
+                .attr("width", this.getComputedTextLength())
+        })
+        .on("mouseout", function (d) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 
-//todo: axis labels, proper margins, tooltips
 </script>
+
 
 
 </body>
