@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Performance Dashboards</title>
+
+    <style>
+        body {
+            font-family: Helvetica;
+        }
+
+/*
+        svg {
+            width: 100%;
+            height: 500px;
+        }
+*/
+        .title {
+            text-align: left;
+            font: 30px sans-serif;
+            /*.style("text-decoration", "underline")*/
+        }
+/*
+        .line {
+            stroke-width: 5;
+        }
+*/
+        .bottom-label {
+            font-size: 13px;
+            font-style: italic;
+            text-transform: uppercase;
+            float: left;
+        }
+        .perc-label {
+            text-align: right;
+            font-weight: bold;
+            width: 90px;
+            padding-right: 10px;
+        }
+        .point-label {
+            text-anchor: end;
+        }
+        .axis-label {
+            text-anchor: middle;
+            font-size: 13px;
+        }
+
+        .axis text {
+            font: 10px sans-serif;
+        }
+
+        .axis line,
+        .axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 140px;
+            height: 20px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        .buttons-container {
+            width: 520px;
+            margin-bottom: 25px;
+        }
+
+        .legend rect {
+            fill: white;
+            stroke: whitesmoke;
+            opacity: 0.8;
+        }
+        .legend text{
+            font: 15px sans-serif;
+        }
+        .legend line {
+            stroke-width: 5;
+        }
+    </style>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel=stylesheet>
+
+</head>
+<body>
+<!--todo: resolve this-->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Dashboards</a>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <!--<li class="nav-item dropdown">-->
+                <!--<a class="nav-link dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown"-->
+                   <!--aria-haspopup="true" aria-expanded="false">-->
+                    <!--Choose Child-->
+                <!--</a>-->
+                <!--<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">-->
+                    <!--<a class="dropdown-item" href="#" id="Calvin">Calvin</a>-->
+                    <!--<a class="dropdown-item" href="#" id="Samuel">Samuel</a>-->
+                <!--</div>-->
+            <!--</li>-->
+            <!--<li class="nav-item dropdown">-->
+                <!--<a class="nav-link dropdown-toggle" href="#" id="dropdownMenuLinkDash" data-toggle="dropdown"-->
+                   <!--aria-haspopup="true" aria-expanded="false">-->
+                    <!--Choose Dashboard-->
+                <!--</a>-->
+                <!--<div class="dropdown-menu" aria-labelledby="dropdownMenuLinkDash">-->
+                    <!--<a class="dropdown-item" href="#" id="time">Performance Over Time</a>-->
+                    <!--<a class="dropdown-item" href="#" id="mixed">Mixed Problems by Origin</a>-->
+                <!--</div>-->
+            <!--</li>-->
+
+            <li class="nav-item dropdown">
+                <select class="bootstrap-select" id="kid">
+                    <option value="1" selected="selected">Calvin</option>
+                    <option value="2">Samuel</option>
+                </select>
+            </li>
+            <li class="nav-item dropdown">
+                <select class="bootstrap-select" id="dashboard">
+                    <option value="1" selected="selected">Performance Over Time</option>
+                    <option value="2">Performance by Problems of Origin</option>
+                </select>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/quit">Quit</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+    <script>
+        document.getElementById('kid').focus();
+        var timeData;
+        var probData;
+        var scoreData;
+
+        var body = d3.select("body");
+        var svg = body.append("svg");
+
+
+        getData("Calvin", "Algebra_1_2")
+
+        function getData(kid, book) {
+            var request = new XMLHttpRequest();
+            request.responseType = 'json';
+            request.open("POST", "/query_performance", true);
+            request.onload = function () {
+                fromDB = JSON.parse(JSON.stringify(request.response))
+                timeData = fromDB[0]['df_time_data']
+                probData = fromDB[1]['df_prob_data']
+                scoreData = fromDB[2]['df_score_data']
+
+                renderTimePlot(timeTransform(timeData))
+            };
+            request.send(JSON.stringify(
+                {
+                    "book": book,
+                    "kid": kid
+                }
+                )
+            );
+        }
+
+        function parse(str) {
+            var y = str.substr(0, 4),
+                m = str.substr(5, 2),
+                d = str.substr(8, 2);
+            return new Date(y, m, d).toString().split(' ').slice(0, 4).join(' ')
+        }
+        function timeTransform(df) {
+            for (i = 0; i < df.length; i++) {
+                df[i].date = parse(df[i].date)
+            }
+            return df
+        }
+
+        function renderTimePlot(df) {
+            bookData = [
+                {"position": 0, "book": "Math_5_4", "color": "RebeccaPurple", "name": "Math 5/4"},
+                {"position": 1, "book": "Math_6_5", "color": "Crimson", "name": "Math 6/5"},
+                {"position": 2, "book": "Math_7_6", "color": "DarkOrange", "name": "Math 7/6"},
+                {"position": 3, "book": "Math_8_7", "color": "Gold", "name": "Math 8/7"},
+                {"position": 4, "book": "Algebra_1_2", "color": "ForestGreen", "name": "Algebra 1/2"},
+                {"position": 5, "book": "Algebra_1", "color": "SteelBlue", "name": "Algebra 1"},
+                {"position": 6, "book": "Algebra_2", "color": "SlateGrey", "name": "Algebra 2"},
+                {"position": 7, "book": "Advanced_math", "color": "DarkSlateGrey", "name": "Advanced Math"},
+                {"position": 8, "book": "Calculus", "color": "Sienna", "name": "Calculus"},
+                {"position": 9, "book": "", "color": "White", "name": ""},
+                {"position": 10, "book": "", "color": "Plum", "name": "Average Score"}
+            ];
+
+            var leftMargin = 50,
+                rightMargin = 35,
+                rightPanel = 170,
+                axisGap = 15,
+                width = window.innerWidth - leftMargin - axisGap - rightPanel - rightMargin,
+                topMargin = 15,
+                bottomMargin = 100,
+                height = 500 - topMargin - bottomMargin,
+                translateText = "translate(" + (leftMargin + axisGap) + "," + topMargin + ")",
+                scaleFactor,
+                scaleText;
+
+            svg.selectAll("*").remove();
+            svg.attr("width", "100%").attr("height", "500px");
+
+            var div = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            var lineGroup = svg.append("g")
+                .attr("transform", translateText)
+                .attr("class", "line")
+                .style("stroke-width", 5);
+
+            var xAxisGroup = svg.append("g")
+                .attr("transform", "translate(" + (leftMargin + axisGap) + "," + (height + topMargin) + ")")
+                .attr("class", "axis");
+            var yAxisGroup = svg.append("g")
+                .attr("transform", "translate(" + leftMargin + "," + (topMargin) + ")")
+                .attr("class", "axis");
+
+            //        todo: I think some of these could be combined into one group
+            var legendGroup = svg.append("g")
+                .attr("transform", "translate(" + (leftMargin + width + 2 * axisGap) + "," + (topMargin) + ")")
+                .attr("class", "legend");
+            var legTextGroup = svg.append("g")
+                .attr("transform", "translate(" + (leftMargin + width + 2 * axisGap) + "," + (topMargin) + ")")
+                .attr("class", "legend");
+            var legLineGroup = svg.append("g")
+                .attr("transform", "translate(" + (leftMargin + width + 2 * axisGap) + "," + (topMargin) + ")")
+                .attr("class", "legend");
+            var statsGroup = svg.append("g")
+                .attr("transform", "translate(" + (leftMargin + width + 2 * axisGap) + "," + (topMargin + 231) + ")")
+                .attr("class", "legend");
+            var statsTextGroup = svg.append("g")
+                .attr("transform", "translate(" + (leftMargin + width + 2 * axisGap) + "," + (topMargin + 231) + ")")
+                .attr("class", "legend");
+
+            var x = d3.scale.ordinal();
+            var xAxis = d3.svg.axis();
+            var y = d3.scale.linear();
+            var yAxis = d3.svg.axis();
+
+            var data_periods = df.length + 1;
+            scaleFactor = width / (data_periods - 1);
+            scaleText = "scale(" + scaleFactor + ",1)";
+
+            // LEGEND
+            legTextGroup.selectAll("text")
+                .data(bookData)
+                .enter().append("text")
+                .attr("x", 5)
+                .attr("y", function (d) {
+                    return d.position * 20 + 20
+                })
+                .text(function (d) {
+                    return d.name
+                });
+            legLineGroup.selectAll("line")
+                .data(bookData)
+                .enter().append("line")
+                .attr("x1", 120)
+                .attr("y1", function (d) {
+                    return d.position * 20 + 13
+                })
+                .attr("x2", 160)
+                .attr("y2", function (d) {
+                    return d.position * 20 + 13
+                })
+                .attr("stroke", function (d) {
+                    return d.color
+                });
+            for (i = 0; i < bookData.length; i++) {
+                lineData = df.filter(function (d) {
+                    return d.book == bookData[i]["book"]
+                });
+
+                var lineFunction = d3.svg.line()
+                    .x(function (d) {
+                        return d.position * scaleFactor;
+                    })
+                    .y(function (d) {
+                        return height * (1 - d.correct);
+                    })
+                    .interpolate('linear');
+
+                svg.append("path")
+                    .attr("transform", translateText)
+                    .attr("d", lineFunction(lineData))
+                    .attr("stroke", bookData[i]["color"])
+                    .attr("stroke-width", 2)
+                    .attr("fill", "none");
+            }
+            legendGroup.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", rightPanel)
+                .attr("height", 230)
+
+
+            mean = d3.mean(df, function(d) { return +d.correct })
+            sd = d3.deviation(df, function(d) { return +d.correct })
+            min = d3.min(df, function(d) { return +d.correct })
+            max = d3.max(df, function(d) { return +d.correct })
+
+            statsData = [
+                {"position": 0, "name": "Count", "value": data_periods},
+                {"position": 1, "name": "Mean", "value": mean.toFixed(2)},
+                {"position": 2, "name": "St. Dev.", "value": sd.toFixed(2)},
+                {"position": 3, "name": "Max", "value": max.toFixed(2)},
+                {"position": 4, "name": "Min", "value": min.toFixed(2)}
+            ];
+            statsGroup.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", rightPanel)
+                .attr("height", 105);
+            statsTextGroup.selectAll("text")
+                .data(statsData)
+                .enter().append("text")
+                .attr("x", 5)
+                .attr("y", function (d) {
+                    return d.position * 20 + 20
+                })
+                .text(function (d) {
+                    return d.name + ': ' + d.value
+                });
+
+            // Points
+            lineGroup.selectAll("circle")
+                .data(df)
+                .enter().append("circle")
+                .attr("cx", function (d) {
+                    return d.position * scaleFactor
+                })
+                .attr("cy", function (d) {
+                    return height * (1 - d.correct)
+                })
+                .attr("r", "3")
+                .on("mouseover", function (d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div.html(d.date + ": " + d.correct.toFixed(2))
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function (d) {
+                    div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                })
+
+            // MEAN SCORE LINE
+            lineGroup.append("line")
+                .attr("x1", 0)
+                .attr("y1", height * (1 - mean))
+                .attr("x2", width)
+                .attr("y2", height * (1 - mean))
+                .attr("stroke", "Maroon")
+                .style("opacity", .3)
+                .on("mouseover", function (d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div.html("Average score: " + (mean).toFixed(2))
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function (d) {
+                })
+
+            // GOAL LINE
+            lineGroup.append("line")
+                .attr("x1", 0)
+                .attr("y1", height * .1)
+                .attr("x2", width)
+                .attr("y2", height * .1)
+                .attr("stroke", "DarkSalmon")
+                .style("opacity", .3)
+
+            // AXES
+            date_array = []
+            for (i = 0; i < df.length; i++) {
+                date_array.push(df[i].date)
+            }
+
+            y.domain([0, 1])
+                .range([height, 0]);
+            yAxis
+                .orient("left")
+                .scale(y);
+            yAxisGroup
+                .call(yAxis);
+
+            x.domain(date_array)
+                .rangePoints([0, width]);
+            xAxis
+                .scale(x)
+                .orient("bottom");
+
+            xAxisGroup
+                .call(xAxis)
+                .selectAll("text")
+                .attr("y", 0)
+                .attr("x", 50)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(90)")
+                .style("text-anchor", "middle");
+
+        }
+
+
+
+
+    </script>
+
+</body>
+</html>
+
+

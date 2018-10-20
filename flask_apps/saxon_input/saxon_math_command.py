@@ -49,11 +49,6 @@ def dashboards_tests():
 
 
 def the_big_one(book, df_number, df_origin, df_performance):
-    print(df_number.head())
-    print(df_origin.head())
-    print(df_performance.head())
-
-    # todo: 1 start
     df_performance = df_performance. \
         query('date == date'). \
         drop(['chapter', 'miss_list'], 1). \
@@ -75,7 +70,6 @@ def the_big_one(book, df_number, df_origin, df_performance):
     # end_chapter_ass = 97
     # end_problem_ass = '10'
 
-
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
     df_grande_ass = pd.DataFrame()
     for chapter in range(start_chapter_ass, end_chapter_ass + 1):
@@ -84,9 +78,12 @@ def the_big_one(book, df_number, df_origin, df_performance):
         mixed_probs = int(df_number.query('chapter == {}'.format(chapter)).iloc[0]['num_mixed_probs'])
         origin_probs = df_origin.query('chapter == {}'.format(chapter)).iloc[0]['origin_list']
         missed_probs = []
-        # todo: I don't think this is correct...don't I need the end_chapter check as well?
-        for dic in df_performance_ass.query('start_chapter == {}'.format(chapter))['miss_lst'].values:
-            missed_probs += dic[str(chapter)]
+        for dic in df_performance_ass.query('start_chapter == {}'.format(chapter))['miss_lst'].values.tolist() + df_performance_ass.query('end_chapter == {}'.format(chapter))['miss_lst'].values.tolist():
+            try:
+                missed_probs += dic[str(chapter)]
+            except:
+                pass
+        missed_probs = list(set(missed_probs))
 
         if start_chapter_ass == end_chapter_ass:
             if start_problem_ass.isdigit():
@@ -138,80 +135,117 @@ def the_big_one(book, df_number, df_origin, df_performance):
         df_temp['correct'] = df_temp.apply(lambda x: 0 if str(x['problem']) in missed_probs else 1, axis=1)
 
         df_grande_ass = df_grande_ass.append(df_temp)
+    df_grande_ass.reset_index(drop=True, inplace=True)
+
+    df_grande_ass['date'] = ''
+    df_p_g = df_performance_ass.sort_values('date').iterrows()
+    row_p = next(df_p_g)[1]
+    for ind, row in df_grande_ass.iterrows():
+        df_grande_ass.set_value(ind, 'date', row_p['date'])  # FutureWarning: set_value is deprecated and will be removed in a future release. Please use .at[] or .iat[] accessors instead
+        if (row['chapter'] == row_p['end_chapter']) and (str(row['problem']) == row_p['end_problem']):
+            try:
+                row_p = next(df_p_g)[1]
+            except:
+                pass
 
     # tests
     df_grande_test = pd.DataFrame()
-    for chapter in df_performance_test['end_chapter'].unique():
+    for ind, row in df_performance_test.iterrows():
         df_temp = pd.DataFrame()
         df_temp['problem'] = range(1, 21)
         df_temp['book'] = book
-        df_temp['chapter'] = chapter
+        df_temp['chapter'] = row['end_chapter']
+        df_temp['date'] = row['date']
 
-        missed_probs = []
-        for dic in df_performance_test.query('start_chapter == "{}"'.format(chapter))['miss_lst'].values:
-            missed_probs += dic[str(chapter)]
+        missed_probs = row['miss_lst'][row['end_chapter']]
         df_temp['correct'] = df_temp.apply(lambda x: 0 if str(x['problem']) in missed_probs else 1, axis=1)
 
         df_grande_test = df_grande_test.append(df_temp)
 
     return df_grande_ass, df_grande_test
 
-def performance_over_time(df):
-    df['problem_count'] = df_merged.apply(
-        lambda x: problem_list_count(x['book'], x['start_chapter'], x['start_problem'], x['end_chapter'],
-                                     x['end_problem']), axis=1)
-    df_merged['missed_count'] = df_merged['miss_lst'].apply(
-        lambda x: len([item for sublist in x.values() for item in sublist]) if list(x.values()) else 0)
 
-    df_grouped = df_merged[['problem_count', 'missed_count']].groupby(
-        [df_merged['book'], df_merged['kid'], df_merged['date']]).sum().reset_index(drop=False)
-    df_grouped['perc_correct'] = df_grouped.apply(
-        lambda x: np.round_((x['problem_count'] - x['missed_count']) / x['problem_count'], 2), axis=1)
-    df_grouped.drop(['problem_count', 'missed_count'], 1, inplace=True)
-
+def performance_over_time(df, book, kid):
     def js_month(x):
         x_lst = x.split('-')
         x_lst[1] = str(int(x_lst[1]) - 1)
         if len(x_lst[1]) == 1:
             x_lst[1] = '0' + x_lst[1]
         return '-'.join(x_lst)
+    df['date'] = df['date'].astype(str).apply(js_month)  # this zero indexes the month for js's benefit.
+    print(df.info())
+    print(df.head())
 
-    # todo: maybe instead of doing things this way, try path instead.
-    df_grouped['date1'] = df_grouped['date'].astype(str).apply(
-        js_month)  # this zero indexes the month for js's benefit.
-    df_grouped['position1'] = range(len(df_grouped))
-    df_grouped.rename(columns={'perc_correct': 'value1'}, inplace=True)
-    df_grouped['date2'] = df_grouped['date1'].shift(-1)
-    df_grouped['position2'] = df_grouped['position1'].shift(-1)
-    df_grouped['value2'] = df_grouped['value1'].shift(-1)
+    return df['correct'].\
+        groupby(df['date']).mean().\
+        reset_index(drop=False). \
+        assign(book=book, kid=kid, position=range(0, df['date'].unique().shape[0]))
 
-    df_grouped.drop('date', 1, inplace=True)
-    df_grouped = df_grouped.iloc[:-1]
-    df_grouped['position2'] = df_grouped['position2'].astype(int)
+def origin_lst_expand(df, kid):
+    df = df.loc[df['problem'].astype(str).str.isdigit()].assign(kid=kid)
 
-    df_time_data = df_time_data.append(df_grouped)
+    df['origin_lst'] = df['origin'].str.split(',')
+    df['len_origin_lst'] = df['origin_lst'].map(len)
+    df1 = df.query('len_origin_lst == 1')
+    df2 = df.query('len_origin_lst == 2')
+    return df1. \
+        append(
+        df2.assign(origin=df2['origin_lst'].map(lambda x: x[0])).append(
+            df2.assign(origin=df2['origin_lst'].map(lambda x: x[1])))
+        ). \
+        reset_index(drop=True). \
+        drop(['origin_lst', 'len_origin_lst'], 1)
 
+
+def mixed_problems_correct(df):
+    def counter(x):
+        x['position'] = range(1, len(x) + 1)
+        return x
+    return df.\
+        groupby([df['chapter'], df['origin']]).apply(counter).\
+        sort_values(['chapter', 'problem', 'origin'])
+
+def performance_by_chapter(df):
+    return pd.concat(
+        [
+            df['correct'].groupby(df['origin']).agg(['mean', 'count']),
+            df[['book', 'kid']].groupby(df['origin']).agg(lambda x: x.value_counts().index[0])
+        ],
+        axis=1
+        ). \
+        reset_index(drop=False)
 
 @app.route("/dashboards_new")
 def dashboards_new():
-    book = 'Algebra_1_2'
-    kid = 'Calvin'
-    df_number = pd.DataFrame(list(db_number[book].find()))
-    df_origin = pd.DataFrame(list(db_origin[book].find()))
-    df_performance = pd.DataFrame(list(db_performance[book].find({'kid': kid})))
+    return render_template('dashboards_scratch.html')
 
-    df_grande_ass, df_grande_test = the_big_one(book, df_number, df_origin, df_performance)
-    print(df_grande_ass)
-    print(df_grande_test)
-
-    performance_over_time(df_grande_ass.copy())
+# todo: check and make sure the df_grande are correct.
 
 
-    # todo: I don't think the miss list is correct.
-    # todo: date when completed field
-    #     -maybe loop through the different entries.
-    # todo: now get the four datasets done
-    # todo: check and make sure the df_grande are correct.
+@app.route("/query_performance", methods=['POST'])
+def query_performance():
+    js = json.loads(request.data.decode('utf-8'))
+    print(js)  # kid, book
+
+    df_performance = pd.DataFrame(list(db_performance[js['book']].find({'kid': js['kid']})))
+    df_number = pd.DataFrame(list(db_number[js['book']].find()))
+    df_origin = pd.DataFrame(list(db_origin[js['book']].find()))
+
+    df_grande_ass, df_grande_test = the_big_one(js['book'], df_number, df_origin, df_performance)
+
+    df_time_data = performance_over_time(df_grande_ass.append(df_grande_test), js['book'], js['kid'])
+
+    df_temp = df_grande_ass.pipe(origin_lst_expand, js['kid'])
+    df_prob_data = mixed_problems_correct(df_temp)
+    df_score_data = performance_by_chapter(df_temp)
+
+    return jsonify(
+        [
+            {'df_time_data': df_time_data.to_dict('records')},
+            {'df_prob_data': df_prob_data.to_dict('records')},
+            {'df_score_data': df_score_data.to_dict('records')}
+        ]
+    )
 
 
 @app.route("/dashboards")
@@ -596,7 +630,7 @@ def quit():
     return ''
 
 if __name__ == '__main__':
-    dashboards_new()
+    # dashboards_new()
     app.run(host='0.0.0.0', port=8001, debug=True)
 
 
