@@ -26,6 +26,9 @@ def propensity_score(df):
     return r.predict_proba(X)[:, 1]
 
 def data_create():
+    np.random.seed(42)
+
+
     N = 10
     effect = .1
 
@@ -75,8 +78,6 @@ def weight_matrix(X_t, X_c, type):
 
 
 def inexact_matching_without_replacement(X, covars, propensity):
-    from sklearn.neighbors import DistanceMetric
-
     X['p'] = propensity
     X = X.sort_values('p', ascending=False).reset_index(drop=True)
 
@@ -89,67 +90,35 @@ def inexact_matching_without_replacement(X, covars, propensity):
         get_metric('mahalanobis', V=V).\
         pairwise(X[covars])
 
-
-    # print(X)
     t_ind = list(X_t.index)
     c_ind = list(X_c.index)
-    print(t_ind)
-    print(c_ind)
-    dist2 = dist[t_ind, :][:, c_ind]
-    print(dist2)
-
-    print(np.argmin(dist2, axis=1))
-
-
 
     lst = []
     for t_i in t_ind:
-        m = np.argmin(dist[[t_i], :][:, c_ind], axis=1)[0]
+        m = np.argmin(dist[[t_i], :][:, c_ind], axis=1)[0]  # todo: ValueError: attempt to get argmin of an empty sequence...what is this error?
         lst.append(c_ind[m])
         c_ind.remove(c_ind[m])
-    print(lst)
-
     X_t['matches'] = lst
 
-    print(X_t)
+    # add treatment match indeces to controls
+    X_c['index_c'] = X_c.index
+    X_t['index_t'] = X_t.index
+    X_c_matched = X_c.\
+        merge(X_t[['matches', 'index_t']], how='left', right_on='matches', left_on='index_c').\
+        drop('matches', 1).\
+        rename(columns={'index_t': 'matches'}).\
+        set_index('index_c')
+    # X_c_matched['matches'] = X_c_matched['matches'].astype(int)
+    X_t.drop('index_t', 1, inplace=True)
 
-
-    # todo: check to make sure this is correct
-    # todo: what should the output be?
-    sys.exit()
-
-    from numpy.linalg import inv
-
-    xt = X_t.iloc[0:1].values
-    xc = X_c.iloc[1:2].values
-
-    print(np.sqrt((xt - xc) @ inv(V) @ (xt - xc).T))
-
-
-    sys.exit()
-
-
-
-    from sklearn.neighbors import DistanceMetric
-
-    dist = DistanceMetric.get_metric('mahalanobis', V=np.cov(X_t))
-    dist.pairwise(X_t)
-
-
-    # would be better to score the entire df in at once.
-    match_indeces = []
-    for ind_t, row_t in X_t:
-        d = distance(row_t, X_c)
-        np.argmin(d)
-
-
-
-
+    X_matched = X_c_matched.append(X_t).sort_index()
+    X_matched['treatment'] = X['treatment']
+    return X_matched
 
 if __name__ == '__main__':
     df = data_create()
     covars = ['one', 'two', 'three']
-    inexact_matching_without_replacement(df[['treatment'] + covars], covars, df['propensity_score'])
+    print(inexact_matching_without_replacement(df[['treatment'] + covars], covars, df['propensity_score']))
 
 
 # todo: come up with fake data for which I know the treatment effect
