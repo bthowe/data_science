@@ -132,8 +132,6 @@ def the_big_one(book, df_number, df_origin, df_performance):
             except:
                 print('boom!')
 
-    df_grande_ass['origin'] = df_grande_ass['origin'].str.strip()  # todo: this didn't work for some reason.
-
     # tests
     df_grande_test = pd.DataFrame()
     for ind, row in df_performance_test.iterrows():
@@ -170,7 +168,7 @@ def performance_over_time(df, book, kid):
 def origin_lst_expand(df, kid):
     df = df.loc[df['problem'].astype(str).str.isdigit()].assign(kid=kid)
 
-    df['origin_lst'] = df['origin'].str.split(',')
+    df['origin_lst'] = df['origin'].str.split(', ')
     df['len_origin_lst'] = df['origin_lst'].map(len)
     df1 = df.query('len_origin_lst == 1')
     df2 = df.query('len_origin_lst == 2')
@@ -187,9 +185,10 @@ def mixed_problems_correct(df):
     def counter(x):
         x['position'] = range(1, len(x) + 1)
         return x
-    return df.\
-        groupby([df['chapter'], df['origin']]).apply(counter).\
-        sort_values(['chapter', 'problem', 'origin'])
+    return df. \
+        sort_values(['chapter', 'problem', 'origin']). \
+        groupby([df['chapter'], df['origin']]).apply(counter)
+
 
 def _sorter(x):
     x_i = x.loc[~x['origin'].str.strip().str.isdigit()]
@@ -258,7 +257,6 @@ def query_performance():
     df_origin = pd.DataFrame(list(db_origin[js['book']].find()))
 
     df_grande_ass, df_grande_test = the_big_one(js['book'], df_number, df_origin, df_performance)
-    print(df_grande_ass.query('origin == "17"'))
 
     df_time_data = performance_over_time(df_grande_ass.append(df_grande_test), js['book'], js['kid'])
     df_test_data = performance_on_tests(df_grande_test, js['kid'])
