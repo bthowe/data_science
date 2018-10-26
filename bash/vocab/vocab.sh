@@ -1,6 +1,6 @@
-source ~/PycharmProjects/venv/data_science/bin/activate
+source activate py3
 
-cd ~/Projects/github/data_science/flask_apps/vocab_flashcards
+cd ~/PycharmProjects/data_science/flask_apps/vocab_flashcards
 
 mongod --fork --logpath ../../bash/vocab/mongo_log/mongod.log
 open -a "Google Chrome" http://0.0.0.0:8001/
@@ -14,4 +14,4 @@ git push origin master
 
 killall mongod
 
-deactivate
+source deactivate
