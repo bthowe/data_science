@@ -284,9 +284,24 @@ show dbs
 show collections
 use <database name>
 use <collection name>
-db.collection_name.find()   shows all documents in this collections
+db.collection_name.find()   after "use <database name>", shows all documents in this collection (do not tell it to "use <collection name>" first, or else you won't get anything) 
 db.bofm.find({'book': '2-ne', 'chapter': '20'})
 db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
 db.bofm.stats().count
 db['dc-testament'].stats().count
+db.Math_7_6.update({_id: ObjectId("5ba1bc941036475a96128fc6")}, { $set: { date: "2018-09-17"}})
 ```
+
+
+
+Make bash script executable...
+on first line of the script
+```bash
+#!/bin/sh
+```
+I don't add the .sh suffix. In the command line then type
+```bash
+chmod 755 name_of_script
+```
+Now I can double click and it will execute.
+Alternatively, simply give it a .command suffix (i.e., name_of_script.command)
