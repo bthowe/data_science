@@ -28,25 +28,9 @@ db_performance = client['math_performance']
 def main_menu():
     return render_template('main_menu.html')
 
-@app.route("/dashboards_tests")
-def dashboards_tests():
-    book = 'Algebra_1_2'
-    kid = 'Calvin'
-    performance = pd.DataFrame(list(db_performance[book].find({'kid': kid}))[2:])
-    performance = performance.loc[performance['end_chapter'].str.contains('test', na=False)].reset_index(drop=True)
-    performance['test'] = performance['end_chapter'].apply(lambda x: x.split()[1])
-    performance['miss_lst'] = performance['miss_lst'].apply(lambda x: list(x.values())[0])
-    performance['perc_correct'] = performance.apply(lambda x: 1 - (len(x['miss_lst']) / 20), axis=1)
-    performance['chapters'] = performance['test'].apply(lambda x: '{0}-{1}'.format(int(x) * 4 - 3, int(x) * 4))
-    performance['ind'] = performance.index
-    var_lst = ['ind', 'book', 'kid', 'miss_lst', 'test', 'perc_correct', 'chapters']
-
-    print(performance[var_lst])
-    return render_template(
-        'dashboards_tests.html',
-        test_data=performance[var_lst].to_dict('records')
-    )
-
+@app.route("/dashboards")
+def dashboards_new():
+    return render_template('dashboards.html')
 
 def the_big_one(book, df_number, df_origin, df_performance):
     df_performance = df_performance. \
@@ -55,8 +39,13 @@ def the_big_one(book, df_number, df_origin, df_performance):
         assign(date=pd.to_datetime(df_performance['date'])). \
         sort_values(['date', 'start_chapter', 'start_problem'])
 
+    df_performance['end_chapter'] = df_performance['end_chapter'].astype(str)
     df_performance_test = df_performance.loc[df_performance['end_chapter'].str.contains('test', na=False)]
     df_performance_ass = df_performance.loc[~df_performance['end_chapter'].str.contains('test', na=False)]
+
+    # these columns have different types across the various collections, which makes for a bit of a headache
+    df_performance_ass['start_chapter'] = df_performance_ass['start_chapter'].astype(float).astype(int)
+    df_performance_ass['end_chapter'] = df_performance_ass['end_chapter'].astype(float).astype(int)
 
     # assignments
     start_chapter_ass = df_performance_ass['start_chapter'].iloc[0]
@@ -65,14 +54,9 @@ def the_big_one(book, df_number, df_origin, df_performance):
     end_chapter_ass = df_performance_ass['end_chapter'].iloc[-1]
     end_problem_ass = df_performance_ass['end_problem'].iloc[-1]
 
-    # start_chapter_ass = 97
-    # start_problem_ass = 'b'
-    # end_chapter_ass = 97
-    # end_problem_ass = '10'
-
     alphabet = 'abcdefghijklmnopqrstuvwxyz'
     df_grande_ass = pd.DataFrame()
-    for chapter in range(start_chapter_ass, end_chapter_ass + 1):
+    for chapter in range(int(float(start_chapter_ass)), int(float(end_chapter_ass)) + 1):
         df_temp = pd.DataFrame()
         lesson_probs = df_number.query('chapter == {}'.format(chapter)).iloc[0]['num_lesson_probs']
         mixed_probs = int(df_number.query('chapter == {}'.format(chapter)).iloc[0]['num_mixed_probs'])
@@ -142,11 +126,13 @@ def the_big_one(book, df_number, df_origin, df_performance):
     row_p = next(df_p_g)[1]
     for ind, row in df_grande_ass.iterrows():
         df_grande_ass.set_value(ind, 'date', row_p['date'])  # FutureWarning: set_value is deprecated and will be removed in a future release. Please use .at[] or .iat[] accessors instead
-        if (row['chapter'] == row_p['end_chapter']) and (str(row['problem']) == row_p['end_problem']):
+        if (row['chapter'] == int(float(row_p['end_chapter']))) and (str(row['problem']) == row_p['end_problem']):
             try:
                 row_p = next(df_p_g)[1]
             except:
-                pass
+                print('boom!')
+
+    df_grande_ass['origin'] = df_grande_ass['origin'].str.strip()  # todo: this didn't work for some reason.
 
     # tests
     df_grande_test = pd.DataFrame()
@@ -173,8 +159,8 @@ def performance_over_time(df, book, kid):
             x_lst[1] = '0' + x_lst[1]
         return '-'.join(x_lst)
     df['date'] = df['date'].astype(str).apply(js_month)  # this zero indexes the month for js's benefit.
-    print(df.info())
-    print(df.head())
+
+
 
     return df['correct'].\
         groupby(df['date']).mean().\
@@ -205,7 +191,27 @@ def mixed_problems_correct(df):
         groupby([df['chapter'], df['origin']]).apply(counter).\
         sort_values(['chapter', 'problem', 'origin'])
 
+def _sorter(x):
+    x_i = x.loc[~x['origin'].str.strip().str.isdigit()]
+    x_d = x.loc[x['origin'].str.strip().str.isdigit()]
+
+    x_d['origin'] = x_d['origin'].astype(int)
+    x_d.sort_values('origin', inplace=True)
+    x_d['origin'] = x_d['origin'].astype(str)
+
+    return x_d.append(x_i)
+
+def _chapter_sort(df):
+    if np.all(df['origin'].str.strip().str.isdigit()):
+        df['origin'] = df['origin'].astype(int)
+        df.sort_values(['mean', 'origin'], inplace=True)
+    else:
+        df.sort_values('mean', inplace=True)
+        df = df.groupby(df['mean']).apply(_sorter)
+    return df
+
 def performance_by_chapter(df):
+    df['origin'] = df['origin'].str.strip()
     return pd.concat(
         [
             df['correct'].groupby(df['origin']).agg(['mean', 'count']),
@@ -213,14 +219,34 @@ def performance_by_chapter(df):
         ],
         axis=1
         ). \
-        reset_index(drop=False)
+        reset_index(drop=False). \
+        pipe(_chapter_sort)
 
-@app.route("/dashboards_new")
-def dashboards_new():
-    return render_template('dashboards_scratch.html')
 
-# todo: check and make sure the df_grande are correct.
+def performance_on_tests(df, kid):
+    if df.empty:
+        return df
 
+    df['kid'] = kid
+
+    df_miss = df.query('correct == 0')
+    df_miss_lst = df_miss.groupby(df_miss['chapter']).apply(lambda x: x['problem'].tolist())
+
+    df_test = pd.concat(
+        [
+            df['correct'].groupby(df['chapter']).mean(),
+            df_miss_lst,
+            df[['book', 'kid']].groupby(df['chapter']).agg(lambda x: x.value_counts().index[0])
+
+        ],
+        axis=1
+    ). \
+        reset_index(drop=False). \
+        rename(columns={'chapter': 'test', 0: 'miss_lst', 'correct': 'perc_correct'})
+    df_test['ind'] = df_test.index
+    df_test['chapters'] = df_test['test'].str.split().apply(lambda x: '{0}-{1}'.format(int(x[1]) * 4 - 3, int(x[1]) * 4))
+    var_lst = ['ind', 'book', 'kid', 'miss_lst', 'test', 'perc_correct', 'chapters']
+    return df_test[var_lst]
 
 @app.route("/query_performance", methods=['POST'])
 def query_performance():
@@ -232,8 +258,10 @@ def query_performance():
     df_origin = pd.DataFrame(list(db_origin[js['book']].find()))
 
     df_grande_ass, df_grande_test = the_big_one(js['book'], df_number, df_origin, df_performance)
+    print(df_grande_ass.query('origin == "17"'))
 
     df_time_data = performance_over_time(df_grande_ass.append(df_grande_test), js['book'], js['kid'])
+    df_test_data = performance_on_tests(df_grande_test, js['kid'])
 
     df_temp = df_grande_ass.pipe(origin_lst_expand, js['kid'])
     df_prob_data = mixed_problems_correct(df_temp)
@@ -243,12 +271,13 @@ def query_performance():
         [
             {'df_time_data': df_time_data.to_dict('records')},
             {'df_prob_data': df_prob_data.to_dict('records')},
-            {'df_score_data': df_score_data.to_dict('records')}
+            {'df_score_data': df_score_data.to_dict('records')},
+            {'df_test_data': df_test_data.to_dict('records')}
         ]
     )
 
 
-@app.route("/dashboards")
+@app.route("/dashboards_old")
 def dashboards():
     date_thresh = '2018-09-17'
     # date_thresh = str(datetime.date.today() - datetime.timedelta(days=14))
@@ -375,7 +404,7 @@ def dashboards():
     # print(df_score_data.head())
     # print(df_prob_data)
     return render_template(
-        "dashboards.html",
+        "dashboards_old.html",
         score_data_time=df_time_data.to_dict('records'),
         score_data_mixed=df_score_data.to_dict('records'),
         prob_data=df_prob_data.to_dict('records')
@@ -466,12 +495,6 @@ def query_periods_data():
     print(df_merged[['value1', 'position1', 'value2', 'position2', 'date1', 'date2']].to_dict('records'))
     return jsonify(df_merged[['value1', 'position1', 'value2', 'position2', 'date1', 'date2']].to_dict('records'))
 
-# todo: how should I deal with tests? Should I just throw them out for now? Count them as normal?
-# todo: break down into lesson problems and mixed problems
-# todo: break down into lessons and tests
-# todo: percent correct on (1) tests, (2) lessons, (3) lesson problems, (4) mixed problems
-# todo: maybe something by chapter and not just by day
-# todo: two panels: (1) last two weeks (make the window variable) and (2) everything from the beginning of time, the parts not featured in (1) more opaque
 
 
 @app.route("/enter_problem_number")
@@ -632,21 +655,3 @@ def quit():
 if __name__ == '__main__':
     # dashboards_new()
     app.run(host='0.0.0.0', port=8001, debug=True)
-
-
-# todo: in performance, think of a solution to test
-
-
-# todo: in performance page, maybe don't make submit button hidden after click, and make it so it refreshes if I push it again.
-# todo: standardize date field in form
-
-# todo: form styling for the three pages
-# todo: complete the .sh bash file
-    # -back up the database
-    # -send the backup to git
-    # -shutdown database and server
-
-
-# todo: page to delete an entry by chapter
-# todo: page to modify an entry by chapter
-
