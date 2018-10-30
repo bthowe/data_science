@@ -289,7 +289,10 @@ db.bofm.find({'book': '2-ne', 'chapter': '20'})
 db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
 db.bofm.stats().count
 db['dc-testament'].stats().count
+
 db.Math_7_6.update({_id: ObjectId("5ba1bc941036475a96128fc6")}, { $set: { date: "2018-09-17"}})
+
+db.Algebra_1_2.deleteOne({ _id: ObjectId("5bd7c1c11036473053367ded")})
 ```
 
 
