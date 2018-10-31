@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .unhidden {
+            display: inline-block;
+        }
+
+        .column {
+            float: left;
+            width: 45.00%;
+            padding: 5px;
+        }
+
+        .row::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .button {
+            background: whitesmoke;
+            padding: 5px;
+            width: 100%;
+            height: 50px;
+        }
+        .top_button {
+            background: whitesmoke;
+            padding: 5px;
+            width: 100%;
+            height: 50px;
+        }
+        #button_next{
+            width: 50%;
+            float: right;
+            height: 100%;
+            padding: 5px;
+            background: Gainsboro;
+        }
+        #button_flip{
+            width: 45%;
+            float: left;
+            height: 90%;
+            padding: 5px;
+            background: Gainsboro;
+        }
+        #button_back{
+            width: 45%;
+            /*float: right;*/
+            height: 90%;
+            padding: 5px;
+            background: Gainsboro;
+        }
+        #ind{
+            float: left;
+            width: 20%;
+        }
+        #b_ind{
+            float: right;
+            width: 20%;
+        }
+        .button_column {
+            float: left;
+            width: 23.00%;
+            padding: 5px;
+        }
+
+        #button_reshuffle_batch{
+            width: 100%;
+            float: left;
+            height: 100%;
+            padding: 5px;
+        }
+        #button_next_batch{
+            width: 100%;
+            float: left;
+            height: 100%;
+            padding: 5px;
+        }
+        #button_deck_again{
+            width: 100%;
+            float: left;
+            height: 100%;
+            padding: 5px;
+        }
+        #main_menu{
+            width: 100%;
+            float: left;
+            height: 100%;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <form name="batch_size" id="batch_size">
+            <LABEL for="batch_size">Batch Size: </LABEL> <br>
+            <input id="five" type="radio" name="batch_size" value="five"> 5 <br>
+            <input id="ten" type="radio" name="batch_size" value="ten"> 10 <br>
+            <input id="all" type="radio" name="batch_size" value="all" checked> Entire Deck <br> <br>
+        </form>
+    </div>
+
+    <div class="card_control">
+        <div class="top_button">
+            <p id="ind"></p>
+            <button id="button_back" label="OK" class="hidden"/>Previous Card</button>
+            <p id="b_ind"></p>
+        </div>
+        <div class="row">
+            <div class="column">
+                <img id="image" style="width:100%">
+            </div>
+            <div class="column">
+                <img id="image_hidden" class="hidden" style="width:100%">
+            </div>
+        </div>
+        <div class="button">
+            <button id="button_flip" label="OK"/>Flip</button>
+            <button id="button_next" label="OK" class="unhidden"/>Next Card</button>
+        </div>
+    </div>
+
+    <div>
+        <div class="button">
+            <div class="button_column">
+                <button id="button_reshuffle_batch" label="OK" class="hidden"/>Practice Batch Again</button>
+            </div>
+            <div class="button_column">
+                <button id="button_next_batch" label="OK" class="hidden"/>Next Batch</button>
+            </div>
+            <div class="button_column">
+                <button id="button_deck_again" class="hidden">Practice Deck Again</button>
+            </div>
+            <div class="button_column">
+                <button id="main_menu">Main Menu</button>
+                <!--<button id="main_menu" onclick="window.location.href='/'">Main Menu</button>-->
+            </div>
+        </div>
+    </div>
+
+<script>
+    cards_ordered = {{cards | tojson}}
+    var cards_shuffled
+    var cards
+    var index = 0
+    var batch_index = 0
+    var batch_size = cards_ordered.length
+    var num_batches = Math.ceil(cards_ordered.length / batch_size)
+
+    document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
+    document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards_ordered.length;
+
+    function shuffle(array) {
+        var currentIndex = array.length, temporaryValue, randomIndex;
+
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+        }
+        return array;
+    }
+    cards_shuffled = shuffle(cards_ordered)
+    cards = cards_shuffled
+
+    document.getElementById("image").src = cards[index][0];
+
+    document.addEventListener('DOMContentLoaded', init, false);
+    function init(){
+        function flip () {
+            document.getElementById("image_hidden").src = cards[index][1];
+            var image = document.getElementById('image_hidden');
+            image.className = "unhidden"
+
+            if (cards.length == index + 1) {
+                document.getElementById('button_reshuffle_batch').className = "unhidden"
+                if (((cards_ordered.length / batch_size | 0) == batch_index) | ((cards_ordered.length % batch_size == 0) & ((cards_ordered.length / batch_size | 0) == batch_index + 1))) {
+                    document.getElementById('button_deck_again').className = "unhidden"
+                }
+            }
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Flip",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+        }
+        var button_flip = document.getElementById('button_flip');
+        button_flip.addEventListener('click', flip, true);
+
+
+        function next () {
+            index++;
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards.length;
+
+            var image = document.getElementById('image_hidden');
+            if (image.className == "unhidden") {
+                image.className = "hidden"
+            }
+            document.getElementById("image").src = cards[index][0];
+
+            var button_back = document.getElementById('button_back');
+            if (index == 1) {
+                button_back.className = "unhidden"
+            }
+            if (index == (cards.length - 1)) {
+                button_next.className = "hidden"
+            }
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Next Card",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+        }
+        var button_next = document.getElementById('button_next');
+        button_next.addEventListener('click', next, true);
+
+
+        function back () {
+            index--;
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards.length;
+
+            var image = document.getElementById('image_hidden');
+            if (image.className == "unhidden") {
+                image.className = "hidden"
+            }
+            document.getElementById("image").src = cards[index][0];
+
+            var button_next = document.getElementById('button_next');
+            if (index == (cards.length - 2)) {
+                button_next.className = "unhidden"
+            }
+            if (index == 0) {
+                button_back.className = "hidden"
+            }
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Previous Card",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+        }
+        var button_back = document.getElementById('button_back');
+        button_back.addEventListener('click', back, true);
+
+
+        var radios = document.forms["batch_size"].elements["batch_size"];
+        for(var i = 0, max = radios.length; i < max; i++) {
+            radios[i].onclick = function() {
+                if (this.value == "five") {
+                    cards = shuffle(cards_ordered).slice(0, 5)
+                    document.getElementById('button_next_batch').className = "unhidden"
+                    batch_size = 5
+                    num_batches = Math.ceil(cards_ordered.length / batch_size)
+                }
+                else if (this.value == "ten") {
+                    cards = shuffle(cards_ordered).slice(0, 10)
+                    document.getElementById('button_next_batch').className = "unhidden"
+                    batch_size = 10
+                    num_batches = Math.ceil(cards_ordered.length / batch_size)
+                }
+                else {
+                    cards = shuffle(cards_ordered)
+                    batch_size = cards_ordered.length
+                    num_batches = Math.ceil(cards_ordered.length / batch_size)
+                }
+                index = 0
+                document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + batch_size;
+
+                batch_index = 0
+                document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
+                document.getElementById("image").src = cards[index][0];
+                document.getElementById('button_next').className = "unhidden"
+                document.getElementById('button_back').className = "hidden"
+            }
+        }
+
+
+        function reshuffle () {
+            cards = shuffle(cards)
+            index = 0
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + batch_size;
+
+            document.getElementById("image").src = cards[index][0];
+            document.getElementById('button_next').className = "unhidden"
+            document.getElementById('button_back').className = "hidden"
+            document.getElementById('button_reshuffle_batch').className = "hidden"
+            document.getElementById('image_hidden').className = "hidden"
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Practice Batch Again",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+        }
+        var button_reshuffle = document.getElementById('button_reshuffle_batch');
+        button_reshuffle.addEventListener('click', reshuffle, true);
+
+
+        function next_batch () {
+            batch_index++
+            cards = cards_shuffled.slice(batch_size * batch_index, batch_size * (batch_index + 1))
+            index = 0
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + cards.length;
+            document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
+
+            document.getElementById("image").src = cards[index][0];
+            document.getElementById('button_next').className = "unhidden"
+            document.getElementById('button_back').className = "hidden"
+            document.getElementById('image_hidden').className = "hidden"
+            document.getElementById('button_reshuffle_batch').className = "hidden"
+            if (((cards_ordered.length / batch_size | 0) == batch_index) | ((cards_ordered.length % batch_size == 0) & ((cards_ordered.length / batch_size | 0) == batch_index + 1))) {
+                document.getElementById('button_next_batch').className = "hidden"
+            }
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Next Batch",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+        }
+        var button_next_batch= document.getElementById('button_next_batch');
+        button_next_batch.addEventListener('click', next_batch, true);
+
+
+        function deck_again () {
+            index=0
+            document.getElementById('ind').innerHTML = "Card: " + (index + 1) + " / " + batch_size;
+
+            batch_index=0
+            document.getElementById('b_ind').innerHTML = "Batch: " + (batch_index + 1) + " / " + num_batches;
+            cards = cards_ordered
+
+            document.getElementById("all").checked = true
+            document.getElementById("image").src = cards[index][0];
+            document.getElementById('image_hidden').className = "hidden"
+            document.getElementById('button_next').className = "unhidden"
+            document.getElementById('button_back').className = "hidden"
+            document.getElementById('button_reshuffle_batch').className = "hidden"
+            document.getElementById('button_deck_again').className = "hidden"
+
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Practice Deck Again",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+        }
+        var button_deck_again = document.getElementById('button_deck_again');
+        button_deck_again.addEventListener('click', deck_again, true);
+
+
+        function main_menu() {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/mongo_call", true);
+            request.send(JSON.stringify(
+                {
+                    "page": "Practice",
+                    "button": "Main Menu",
+                    "index": index,
+                    "batch_index": batch_index,
+                    "batch_size": batch_size,
+                    "num_batches": num_batches,
+                    "card_front": cards[index][0],
+                    "card_back": cards[index][1],
+                    "timestamp": Math.floor(Date.now() / 1000)
+                }));
+            window.location.href = '/';
+        }
+        var button_main_menu = document.getElementById('main_menu');
+        button_main_menu.addEventListener('click', main_menu, true);
+
+    };
+</script>
+
+
+
+</body>
+</html>
