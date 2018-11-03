@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import joblib
 import datetime
 import webbrowser
 import numpy as np
@@ -23,10 +24,27 @@ client = MongoClient()
 db_number = client['math_book_info']
 db_origin = client['math_exercise_origins']
 db_performance = client['math_performance']
+db_vocab = client['vocab']
 
-@app.route("/")
+
+@app.route("/login")
+def login():
+    return render_template('login.html')
+
+
+@app.route("/user_name", methods=['POST'])
+def user_name():
+    name = json.loads(request.data.decode('utf-8'))['person']
+    print(name)
+    joblib.dump(name, 'user_name.pkl')
+    return ''
+
+
+@app.route("/main_menu")
 def main_menu():
-    return render_template('main_menu.html')
+    name = joblib.load('user_name.pkl')
+    return render_template('main_menu.html', user_name=name)
+
 
 @app.route("/dashboards")
 def dashboards_new():
@@ -503,11 +521,88 @@ def add_missed_problems():
     return ''
 
 
+@app.route('/vocab/practice', methods=['POST'])
+def practice():
+    lesson_num = str(request.form['user_input'])
+    prompt_type = str(request.form['prompt_type'])
+    num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
+    if prompt_type == 'word':
+        cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
+                  'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1)] for num in range(0, num_cards, 2)]
+    else:
+        cards = [['static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
+                  'static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)] for num in range(0, num_cards, 2)]
+
+    return render_template("vocab/display_card.html", cards=cards)
+
+
+@app.route('/vocab/quiz', methods=['POST'])
+def quiz():
+    practice_type = str(request.form['practice'])
+    prompt_type = str(request.form['word'])
+    lesson_num = str(request.form['lesson'])
+    num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
+
+    if prompt_type == 'word':
+        cards = [['../static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num),
+                  '../static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1)] for num in range(0, num_cards, 2)]
+
+        alternatives = []
+        for card_i in range(len(cards)):
+            alternatives_i = []
+            for j in range(3):
+                random_lesson = np.random.choice(lesson_lst)
+                num_cards_in_random_lesson = len(os.listdir('static/{0}'.format(random_lesson)))
+                random_card = np.random.choice(range(0, num_cards_in_random_lesson, 2))
+                alternatives_i.append('../static/{0}/rc_vocab_{0}_{1}.png'.format(random_lesson, random_card + 1))
+            alternatives.append(alternatives_i)
+
+    else:
+        cards = [['../static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num + 1),
+                  '../static/{0}/rc_vocab_{0}_{1}.png'.format(lesson_num, num)] for num in range(0, num_cards, 2)]
+
+        alternatives = []
+        for card_i in range(len(cards)):
+            alternatives_i = []
+            for j in range(3):
+                random_lesson = np.random.choice(lesson_lst)
+                num_cards_in_random_lesson = len(os.listdir('static/{0}'.format(random_lesson)))
+                random_card = np.random.choice(range(0, num_cards_in_random_lesson, 2))
+                alternatives_i.append('../static/{0}/rc_vocab_{0}_{1}.png'.format(random_lesson, random_card))
+            alternatives.append(alternatives_i)
+
+    if practice_type == 'practice':
+        return render_template('vocab/display_card.html', cards=cards)
+    else:
+        return render_template('vocab/quiz_card.html', cards=cards, alts=alternatives)
+
+
+@app.route('/mongo_call', methods=['POST'])
+def mongo_call():
+    name = joblib.load('user_name.pkl')
+    js = json.loads(request.data.decode('utf-8'))
+    js['name'] = name
+
+    print(js)
+    # todo: when I'm ready, uncomment this.
+    # tab = db_vocab[js['page']]
+    # tab.insert_one(js)
+    #
+    # print('data inserted: {}'.format(js))
+    return ''
+
+
+@app.route("/vocab")
+def vocab():
+    return render_template('vocabulary.html')
+
+
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
+
 
 @app.route('/quit')
 def quit():
@@ -515,5 +610,6 @@ def quit():
     return ''
 
 if __name__ == '__main__':
+    lesson_lst = list(range(4, 13)) + list(range(14, 75))
     # dashboards_new()
     app.run(host='0.0.0.0', port=8001, debug=True)

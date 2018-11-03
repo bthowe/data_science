@@ -28,9 +28,9 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav">
-      <!--<li class="nav-item active">-->
-        <!--<a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>-->
-      <!--</li>-->
+      <li class="nav-item active">
+        <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+      </li>
       <li class="nav-item">
         <a class="nav-link" href="/quit">Quit</a>
       </li>
@@ -55,7 +55,7 @@
                 <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
                     <a href=# onclick="goForm('Calvin')">
                         <div class="features-icons-icon d-flex">
-                            <img src="/static/if_vehicles-23_809718.png" class="m-auto text-primary">
+                            <img src="/static/if_vehicles-23_809718.png" class="m-auto text-primary" id="calvin">>
                         </div>
                     </a>
                     <h3>Calvin</h3>
@@ -78,68 +78,21 @@
 
 
 <script>
-
-
-//    function createButton() {
-//        var div = document.createElement("div");
-//        document.body.appendChild(div);
-//
-//        var btn = document.createElement("BUTTON");
-//        btn.id = 'button_record';
-//        btn.innerHTML = 'Record';
-//        div.appendChild(btn);
-//        btn.addEventListener('click', function (event) {
-//            var request = new XMLHttpRequest();
-//            request.responseType = 'json';
-//            request.open("POST", "/add_missed_problems", true);
-//            request.send(JSON.stringify(
-//                {
-//                    "kid": kid,
-//                    "book": book,
-//                    "start_chapter": start_chapter,
-//                    "start_problem": start_problem,
-//                    "end_chapter": end_chapter,
-//                    "end_problem": end_problem,
-//                    "date": date,
-//                    "start_time": start_time,
-//                    "end_time": end_time,
-//                    "add_miss_list": add_miss_list,
-//                    "rem_miss_list": rem_miss_list,
-//                    "test": test
-//                }
-//                )
-//            );
-//            window.location.href = '/enter_performance';
-//        });
-//    }
-//    ;
-//
-//    var form = document.createElement("form");
-//    form.method = "POST";
-//    form.action = "/main_menu";
-////    form.action = "/ayo";
+    var form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/main_menu";
+//    form.action = "/ayo";
 
         function goForm(kid) {
-            var request = new XMLHttpRequest();
-            request.responseType = 'json';
-            request.open("POST", "/user_name", true);
-            request.send(JSON.stringify(
-                {
-                    "person": kid
-                }
-                )
-            );
-            window.location.href = '/main_menu';
+            var name = document.createElement("input");
+            name.name = "person";
 
-//            var name = document.createElement("input");
-//            name.name = "person";
-//
-//            name.value = kid;
-//
-//            form.appendChild(name);
-//            document.body.appendChild(form);
-//
-//            form.submit()
+            name.value = kid;
+
+            form.appendChild(name);
+            document.body.appendChild(form);
+
+            form.submit()
         }
 
         function passCreate() {

@@ -27,69 +27,79 @@
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
             <li class="nav-item">
+                <a class="nav-link" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="/quit">Quit</a>
             </li>
         </ul>
     </div>
 </nav>
 
-  <!-- Icons Grid -->
-    <section class="features-icons bg-light text-center">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-4">
-            <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
-              <a href="/enter_problem_number">
-              <div class="features-icons-icon d-flex">
-                <!--<i class="icon-screen-desktop m-auto text-primary"></i>-->
-                  <img src="/static/if_LIBRARY_2_753918.png" class="m-auto text-primary">
-              </div>
-              </a>
-              <h3>Number of Problems</h3>
-              <p class="lead mb-0">Specify the number of lesson and mixed problems for a given book and lesson.</p>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
-              <a href="/enter_problem_origin">
-              <div class="features-icons-icon d-flex">
-                <!--<i class="icon-layers m-auto text-primary"></i>-->
-                  <img src="/static/if_93_171452.png" class="m-auto text-primary">
-              </div>
-              </a>
-              <h3>Origin of Problems</h3>
-              <p class="lead mb-0">For each problem, specify the lesson from which it originates.</p>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div class="features-icons-item mx-auto mb-0 mb-lg-3">
-              <a href="/enter_performance">
-              <div class="features-icons-icon d-flex">
-                <!--<i class="icon-check m-auto text-primary"></i>-->
-                  <img src="/static/if_performance-clock-speed_353431.png" class="m-auto text-primary">
-              </div>
-              </a>
-              <h3>Performance</h3>
-              <p class="lead mb-0">Record which problems were missed on a child's daily assignment.</p>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-4">
-            <div class="features-icons-item mx-auto mb-0 mb-lg-3">
-              <a href="/dashboards">
-              <div class="features-icons-icon d-flex">
-                <!--<i class="icon-check m-auto text-primary"></i>-->
-                  <img src="/static/if_bar-chart_1608569.png" class="m-auto text-primary">
-              </div>
-              </a>
-              <h3>Dashboards</h3>
-              <p class="lead mb-0">View performance over time and by concept.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<!-- Icons Grid -->
+<section class="features-icons bg-light text-center">
+  <div class="container">
+    <div class="row" id="data"></div>
+    <div class="row" id="practice"></div>
+    <div class="row" id="dashboard"></div>
+  </div>
+</section>
+
+<script>
+    userName = {{ user_name | tojson }}
+    var div_data = document.getElementById('data');
+    var div_prac = document.getElementById('practice');
+    var div_dash = document.getElementById('dashboard');
+
+    function iconCreate(href, file, title, description, div_thing){
+        var div1 = document.createElement("div")
+        div1.className = "col-lg-4"
+        var div2 = document.createElement("div")
+        div2.className = "features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3"
+        var div3 = document.createElement("div")
+        div3.className = "features-icons-icon d-flex"
+
+        var a = document.createElement("a");
+        a.href = href
+
+        var img = document.createElement("img")
+        img.className = "m-auto text-primary"
+        img.src = file
+
+        var h3 = document.createElement("h3")
+        h3.innerHTML = title
+
+        var p = document.createElement("p")
+        p.innerHTML = description
+        p.className = "lead mb-0"
+
+        div3.appendChild(img)
+        a.appendChild(div3)
+        div2.appendChild(a)
+        div2.appendChild(h3)
+        div2.appendChild(p)
+        div1.appendChild(div2)
+        div_thing.appendChild(div1)
+    }
+
+    if (userName != "Travis") {
+        iconCreate("/vocab", "/static/if_alphabet_3592685.png", "Vocabulary", "Practice vocabulary.", div_prac)
+        iconCreate("/dashboards", "/static/if_bar-chart_1608569.png", "Dashboards", "View performance over time and by concept.", div_dash)
+    }
+    else {
+        iconCreate("/enter_problem_number", "/static/if_LIBRARY_2_753918.png", "Number of Problems", "Specify the number of lesson and mixed problems for a given book and lesson.", div_data)
+        iconCreate("/enter_problem_origin", "/static/if_93_171452.png", "Origin of Problems", "For each problem, specify the lesson from which it originates.", div_data)
+        iconCreate("/enter_performance", "/static/if_performance-clock-speed_353431.png", "Performance", "Record which problems were missed on a child's daily assignment.", div_data)
+
+        iconCreate("/vocab", "/static/if_alphabet_3592685.png", "Vocabulary", "Practice vocabulary.", div_prac)
+        iconCreate("/dashboards", "/static/if_bar-chart_1608569.png", "Dashboards", "View performance over time and by concept.", div_dash)
+    }
+
+</script>
 
 </body>
 </html>
+
+
+<!--todo: center the icons-->
+<!--todo: add title for rows?-->

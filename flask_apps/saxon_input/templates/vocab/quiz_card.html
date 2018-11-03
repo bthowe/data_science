@@ -84,8 +84,31 @@
             padding: 5px;
         }
     </style>
+
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel=stylesheet>
+
 </head>
 <body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Vocabulary</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href=# onclick="main_menu_quit('Main Menu')">Home<span class="sr-only">(current)</span></a>
+        <!--<a class="nav-link" href="/main_menu">Home <span class="sr-only">(current)</span></a>-->
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href=# onclick="main_menu_quit('Quit')">Quit<span class="sr-only">(current)</span></a>
+        <!--<a class="nav-link" href="/quit">Quit</a>-->
+          <!--"Quit"-->
+      </li>
+    </ul>
+  </div>
+</nav>
 
     <div class="row">
         <div class="column">
@@ -139,9 +162,9 @@
             <div class="button_column">
                 <button id="button_start_over" class="hidden"/>Repeat Lesson</button>
             </div>
-            <div class="button_column">
-                <button id="button_main_menu"/>Main Menu</button>
-            </div>
+            <!--<div class="button_column">-->
+                <!--<button id="button_main_menu"/>Main Menu</button>-->
+            <!--</div>-->
         </div>
     </div>
 
@@ -204,6 +227,31 @@
                 return i
                 break;
             }
+        }
+    }
+
+    function main_menu_quit(button) {
+        var request = new XMLHttpRequest();
+        request.open("POST", "/mongo_call", true);
+        request.send(JSON.stringify(
+            {
+                "page": "Quiz",
+                "button": button,
+                "radio_button_chosen": "None",
+                "prompt": cards_shuffled[index][0],
+                "alternatives": alts,
+                "answer_card": cards_shuffled[index][1],
+                "chosen_card": "None",
+                "completed": completed,
+                "correct": correct,
+                "index": index,
+                "timestamp": Math.floor(Date.now() / 1000)
+            }));
+        if (button === "Quit") {
+            window.location.href = '/quit';
+        }
+        else {
+            window.location.href = '/main_menu';
         }
     }
 
@@ -393,27 +441,27 @@
         button_start_over.addEventListener('click', start_over, true);
 
 
-        function main_menu() {
-            var request = new XMLHttpRequest();
-            request.open("POST", "/mongo_call", true);
-            request.send(JSON.stringify(
-                {
-                    "page": "Quiz",
-                    "button": "Main Menu",
-                    "radio_button_chosen": "None",
-                    "prompt": cards_shuffled[index][0],
-                    "alternatives": alts,
-                    "answer_card": cards_shuffled[index][1],
-                    "chosen_card": "None",
-                    "completed": completed,
-                    "correct": correct,
-                    "index": index,
-                    "timestamp": Math.floor(Date.now() / 1000)
-                }));
-            window.location.href = '/';
-        }
-        var button_main_menu = document.getElementById('button_main_menu');
-        button_main_menu.addEventListener('click', main_menu, true);
+//        function main_menu() {
+//            var request = new XMLHttpRequest();
+//            request.open("POST", "/mongo_call", true);
+//            request.send(JSON.stringify(
+//                {
+//                    "page": "Quiz",
+//                    "button": "Main Menu",
+//                    "radio_button_chosen": "None",
+//                    "prompt": cards_shuffled[index][0],
+//                    "alternatives": alts,
+//                    "answer_card": cards_shuffled[index][1],
+//                    "chosen_card": "None",
+//                    "completed": completed,
+//                    "correct": correct,
+//                    "index": index,
+//                    "timestamp": Math.floor(Date.now() / 1000)
+//                }));
+//            window.location.href = '/';
+//        }
+//        var button_main_menu = document.getElementById('button_main_menu');
+//        button_main_menu.addEventListener('click', main_menu, true);
     }
 
 
