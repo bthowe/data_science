@@ -1,6 +1,12 @@
 source ~/PycharmProjects/venv/data_science/bin/activate
 
+git pull origin master
+
 cd ~/Projects/github/data_science/flask_apps/saxon_input
+mongorestore --db vocab --verbose dump/vocab
+mongorestore --db vocab --verbose dump/math_book_info
+mongorestore --db vocab --verbose dump/math_exercise_origins
+mongorestore --db vocab --verbose dump/math_performance
 
 mongod --fork --logpath ../../bash/vocab/mongo_log/mongod.log
 open -a "Google Chrome" http://0.0.0.0:8001/login
