@@ -583,12 +583,10 @@ def mongo_call():
     js = json.loads(request.data.decode('utf-8'))
     js['name'] = name
 
-    print(js)
-    # todo: when I'm ready, uncomment this.
-    # tab = db_vocab[js['page']]
-    # tab.insert_one(js)
-    #
-    # print('data inserted: {}'.format(js))
+    tab = db_vocab[js['page']]
+    tab.insert_one(js)
+
+    print('data inserted: {}'.format(js))
     return ''
 
 

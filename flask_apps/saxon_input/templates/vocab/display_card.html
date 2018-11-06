@@ -101,26 +101,30 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Vocabulary</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href=# onclick="main_menu_quit('Main Menu')">Home<span class="sr-only">(current)</span></a>
-        <!--<a class="nav-link" href="/main_menu">Home <span class="sr-only">(current)</span></a>-->
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href=# onclick="main_menu_quit('Quit')">Quit<span class="sr-only">(current)</span></a>
-        <!--<a class="nav-link" href="/quit">Quit</a>-->
-          <!--"Quit"-->
-      </li>
-    </ul>
-  </div>
+    <a class="navbar-brand" href="#">Vocabulary</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href=# onclick="main_menu_quit('Home')">Home<span
+                        class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href=# onclick="main_menu_quit('Main Menu')">Vocab Menu<span
+                        class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href=# onclick="main_menu_quit('Quit')">Quit<span
+                        class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+    </div>
 </nav>
 
-    <div class="col-xs-12 col-sm-12">
+<div class="col-xs-12 col-sm-12">
         <form name="batch_size" id="batch_size">
             <LABEL for="batch_size">Batch Size: </LABEL> <br>
             <input id="five" type="radio" name="batch_size" value="five"> 5 <br>
@@ -218,6 +222,9 @@
             }));
         if (button === "Quit") {
             window.location.href = '/quit';
+        }
+        else if (button == "Main Menu") {
+            window.location.href = '/vocab';
         }
         else {
             window.location.href = '/main_menu';

@@ -27,10 +27,15 @@
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav">
       <li class="nav-item active">
-        <a class="nav-link" href="/main_menu">Home <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href=# onclick="main_menu_quit('Main Menu')">Home<span class="sr-only">(current)</span></a>
+        <!--<a class="nav-link" href="/main_menu">Home <span class="sr-only">(current)</span></a>-->
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/quit">Quit</a>
+        <a class="nav-link" href=# onclick="main_menu_quit('Quit')">Quit<span class="sr-only">(current)</span></a>
+        <!--<a class="nav-link" href="/main_menu">Home <span class="sr-only">(current)</span></a>-->
+      <!--</li>-->
+      <!--<li class="nav-item">-->
+        <!--<a class="nav-link" href="/quit">Quit</a>-->
       </li>
     </ul>
   </div>
@@ -85,6 +90,28 @@
 
 <script>
     document.getElementById('lesson').focus();
+
+        function main_menu_quit(button) {
+        var request = new XMLHttpRequest();
+        request.open("POST", "/mongo_call", true);
+        request.send(JSON.stringify(
+            {
+                "page": "Main",
+                "button": button,
+                "practice": document.getElementById('practice').checked,
+                "quiz": document.getElementById('quiz').checked,
+                "word": document.getElementById('word').checked,
+                "def": document.getElementById('def').checked,
+                "lesson": document.getElementById('lesson').value,
+                "timestamp": Math.floor(Date.now() / 1000)
+            }));
+        if (button === "Quit") {
+            window.location.href = '/quit';
+        }
+        else {
+            window.location.href = '/main_menu';
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', init, false);
     function init() {
