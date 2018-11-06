@@ -175,12 +175,15 @@ $ pip3 install -r /path/to/requirements.txt
 ```
 
 to deactivate
-```bash
 $ deactivate
 ```
 
+to update a package
+```bash
+pip install pandas {[[[[--upgrade
+```
 
-list python libraries
+list python liKV5V     aries
 ```bash
 pip freeze
 pip freeze > requirements.txt
@@ -190,6 +193,7 @@ install library to certain installation of python
 ```bash
 pip2.7 install <package name>
 pip3.6 install <package name>
+```bash
 ```
 
 alias pip and python installations in bash
@@ -293,6 +297,22 @@ db['dc-testament'].stats().count
 db.Math_7_6.update({_id: ObjectId("5ba1bc941036475a96128fc6")}, { $set: { date: "2018-09-17"}})
 
 db.Algebra_1_2.deleteOne({ _id: ObjectId("5bd7c1c11036473053367ded")})
+
+//drop collection within a database in use
+db.Algebra_1_2_thingy.drop()
+
+// within a directory where the directory named dump is located
+mongodump -d vocab -o dump
+mongorestore --db vocab --verbose dump/vocab
+
+// update every document in a field: https://stackoverflow.com/questions/7714216/add-new-field-to-every-document-in-a-mongodb-collection
+db.your_collection.update(
+    {},
+    {$set : {"new_field":1}},
+    {upsert:false,
+    multi:true}
+  ) 
+
 ```
 
 
