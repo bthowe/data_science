@@ -7,9 +7,9 @@ git pull origin master
 mongod --fork --logpath ../../bash/vocab/mongo_log/mongod.log
 
 mongorestore --db vocab --verbose dump/vocab
-mongorestore --db vocab --verbose dump/math_book_info
-mongorestore --db vocab --verbose dump/math_exercise_origins
-mongorestore --db vocab --verbose dump/math_performance
+mongorestore --db math_book_info --verbose dump/math_book_info
+mongorestore --db math_exercise_origins --verbose dump/math_exercise_origins
+mongorestore --db math_performance --verbose dump/math_performance
 
 open -a "Google Chrome" http://0.0.0.0:8001/login
 python3 saxon_math_command.py
