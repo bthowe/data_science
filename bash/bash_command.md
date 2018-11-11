@@ -174,8 +174,10 @@ $ pip install -r /path/to/requirements.txt
 $ pip3 install -r /path/to/requirements.txt
 ```
 
-to deactivate
-$ deactivate
+remember to install pipreqs and create the requirements file in the current directory
+```bash
+pip install pipreqs
+pipreqs .
 ```
 
 to update a package
@@ -218,8 +220,9 @@ I had to follow the following in order to install xgboost: https://stackoverflow
 10. change export CXX = gcc to export CXX = g++-7
 11. make clean_all && make -j4
 12. cd python-package; python setup.py install
-
-
+or 
+12. cd python-package; python3 setup.py install
+I was having a problem where the library was being recognized but the class XGBCLassifier (or whatever it's called) wasn't. After looking at the interpreter's path I hit the refresh button and this fixed the problem, I think, by putting the xgboost-0.81....egg file in the path.
 ```bash
 curl -i http://localhost:5000/todo/api/v1.0/tasks/2
 curl --form addressFile=@/Users/travis.howe/Downloads/test.csv --form benchmark=9 --form vintage=Census2010_Census2010 https://geocoding.geo.census.gov/geocoder/geographies/addressbatch --output geocoderesult.csv
