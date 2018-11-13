@@ -31,12 +31,24 @@ def data_create():
         if x['treatment'] == 0:
             return sigmoid(b0 + x['one'] * b1 + x['two'] * b2 + x['three'] * b3)
         else:
-            return sigmoid(2 + b0 + x['one'] * b1 + x['two'] * b2 + x['three'] * b3)
+            return sigmoid(3 + b0 + x['one'] * b1 + x['two'] * b2 + x['three'] * b3)
     df['p'] = df.apply(treatment_effect, axis=1)
     df['y'] = binom.rvs(1, df['p'])
+
+    print('Estimate of treatment effect: {}'.format(df.query('treatment == 1')['p'].mean() - df.query('treatment == 0')['p'].mean()))
+
+    nt = df.query('treatment == 1').shape[0]
+    nc = df.query('treatment == 0').shape[0]
+    p = df['y'].mean()
+
+    print('Estimate of standard error: {}'.format(np.sqrt(p * (1-p) * ((1 / nt) + (1 / nc)))))
+    print('\n\n')
+    print('Difference in means: {}'.format(df.query('treatment == 1')['y'].mean() - df.query('treatment == 0')['y'].mean()))
+
     df['constant'] = 1
 
     joblib.dump(df, 'data.pkl')
+    sys.exit()
 
 
 def model_parameter_distribution_estimate(data):
@@ -102,7 +114,7 @@ def treatment_effect_calc(df):
     # return (df['y_treatment'] - df['y_control']).mean(), (df['y_treatment'] - df['y_control']).std()
 
 if __name__ == '__main__':
-    data_create()
+    # data_create()
 
     data = joblib.load('data.pkl')
 

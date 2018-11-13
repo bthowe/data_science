@@ -13,8 +13,6 @@ app = Flask(__name__)
 lesson_lst = list(range(4, 13)) + list(range(14, 75))
 
 client = MongoClient()
-# client.drop_database('vocab')
-# sys.exit()
 db = client['vocab']
 
 # @app.before_first_request

@@ -16,7 +16,7 @@
 
 <style>
     img {
-        width: 100px;
+        width: 70px;
     }
 </style>
 
@@ -53,7 +53,7 @@
 
     function iconCreate(href, file, title, description, div_thing){
         var div1 = document.createElement("div")
-        div1.className = "col-lg-4"
+        div1.className = "col-lg-3"
         var div2 = document.createElement("div")
         div2.className = "features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3"
         var div3 = document.createElement("div")
@@ -90,6 +90,7 @@
         iconCreate("/enter_problem_number", "/static/if_LIBRARY_2_753918.png", "Number of Problems", "Specify the number of lesson and mixed problems for a given book and lesson.", div_data)
         iconCreate("/enter_problem_origin", "/static/if_93_171452.png", "Origin of Problems", "For each problem, specify the lesson from which it originates.", div_data)
         iconCreate("/enter_performance", "/static/if_performance-clock-speed_353431.png", "Performance", "Record which problems were missed on a child's daily assignment.", div_data)
+        iconCreate("/scripture_commentary", "/static/GospelLibrary.png", "Scripture Commentary", "Record questions, principles, and evidences from a child's daily scripture searching.", div_data)
 
         iconCreate("/vocab", "/static/if_alphabet_3592685.png", "Vocabulary", "Practice vocabulary.", div_prac)
         iconCreate("/dashboards", "/static/if_bar-chart_1608569.png", "Dashboards", "View performance over time and by concept.", div_dash)

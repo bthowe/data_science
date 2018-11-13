@@ -316,6 +316,15 @@ db.your_collection.update(
     multi:true}
   ) 
 
+to delete a db
+use database_name
+db.dropDatabase()
+
+
+// to create a new database. You need at least one document
+use scripture_commentary
+db.createCollection("Calvin")
+db.Calvin.insert({"name": "Calvin", "date": "2018-11-05", "ref": "", "comment": "Why was there famine?"})
 ```
 
 

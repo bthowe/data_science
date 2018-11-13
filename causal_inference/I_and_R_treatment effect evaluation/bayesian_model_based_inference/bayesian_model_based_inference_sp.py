@@ -1,3 +1,5 @@
+"""Super-population average treatment effects"""
+
 import sys
 import joblib
 import pymc3 as pm

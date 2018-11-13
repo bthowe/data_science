@@ -3,6 +3,7 @@ In some ways it is similar to the dice problem in that the value of the card is 
 # Likelihood 
 * the likelihood says, conditional on that hand, what is the probability of that outcome? Hmmm, this might not be useful.
 * If a hand has all three cards, or just one, the likelihood of "yes" is no different. Thus, the likelihood function is binary.
+* But what is the probably of a card given they've included one or more of those cards in a query before?
 
 
 # TODO

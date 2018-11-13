@@ -116,11 +116,13 @@ def inexact_matching_without_replacement(X, covars, propensity):
     return X_matched
 
 if __name__ == '__main__':
-    df = data_create()
+    # df = data_create()
+    # df.to_csv('/Users/travis.howe/Projects/github/data_science/causal_inference/I_and_R_treatment effect evaluation/matching_estimators/estimation_approaches.csv', index=False)
+
+    df = pd.read_csv('/Users/travis.howe/Projects/github/data_science/causal_inference/I_and_R_treatment effect evaluation/matching_estimators/estimation_approaches.csv')
     covars = ['one', 'two', 'three']
     print(inexact_matching_without_replacement(df[['treatment'] + covars], covars, df['propensity_score']))
 
 
-# todo: come up with fake data for which I know the treatment effect
 # todo: implement everything in python
 # todo: implement everything in R
