@@ -23,6 +23,11 @@ spark/dataframe/rough_example.py
 
 .DS_Store
 
+sample_data_files/
+
+.pdf
+
+chromedriver
 
 data_files/
 tensor_flow_models/
