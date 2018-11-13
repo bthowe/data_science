@@ -25,6 +25,7 @@ db_number = client['math_book_info']
 db_origin = client['math_exercise_origins']
 db_performance = client['math_performance']
 db_vocab = client['vocab']
+db_script = client['scripture_commentary']
 
 
 @app.route("/login")
@@ -595,6 +596,26 @@ def vocab():
     return render_template('vocabulary.html')
 
 
+
+@app.route('/mongo_call_script', methods=['POST'])
+def mongo_call_script():
+    js = json.loads(request.data.decode('utf-8'))
+    print(js)
+
+    tab = db_script[js['name']]
+    tab.insert_one(js)
+
+    print('data inserted: {}'.format(js))
+    return ''
+
+@app.route("/scripture_commentary")
+def scripture_commentary():
+    return render_template('scripture_commentary.html')
+
+
+
+
+
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
@@ -607,7 +628,7 @@ def quit():
     shutdown_server()
     return ''
 
+
 if __name__ == '__main__':
     lesson_lst = list(range(4, 13)) + list(range(14, 75))
-    # dashboards_new()
     app.run(host='0.0.0.0', port=8001, debug=True)

@@ -4,6 +4,8 @@ cd ~/Projects/github/data_science/flask_apps/saxon_input
 
 mongod --fork --logpath ../../bash/vocab/mongo_log/mongod.log
 open -a "Google Chrome" http://0.0.0.0:8001/login
+
+# gunicorn --bind 0.0.0.0:8001 saxon_math_command:app
 python3 saxon_math_command.py
 
 mongodump -d math_book_info -o dump
