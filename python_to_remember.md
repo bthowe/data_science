@@ -136,6 +136,12 @@ clf.set_params(alpha=alpha / 2)
 
 
 ## numpy
+find substring in string in numpy array
+```python
+np.char.find(df['origin'].values, 'abc')
+```
+
+
 ```python
 upper = []
 upper = np.concatenate((upper, rfqr.predict(X_test, quantile=98.5)))
@@ -177,6 +183,11 @@ Reshape a one dimensional array into a two dimensional array
 
 
 ## pandas
+mask whether values are digits in series
+```python
+Series.str.isdigit()
+```
+
 read the data from the clipboard into a dataframe
 ```python
 df = pd.read_clipboard()

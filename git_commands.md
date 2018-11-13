@@ -15,6 +15,11 @@ git add file_name
 * adds a file to staging
 
 ```git
+git reset
+```
+* removes files from the about to be commited area (use after a git add .)
+
+```git
 git diff -r HEAD path/to/file
 ```
 * -r means compare to a particular version

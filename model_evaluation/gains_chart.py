@@ -43,7 +43,7 @@ def model_lift_chart(y_test, y_prob, interval_width):
     df_gc['% of Total Contact Population (cumulative)'] = df_gc['% of Total Contact Population (bin)'].cumsum()
     df_gc['Lift'] = df_gc['% of Total Population (cumulative)'] / df_gc['% of Total Contact Population (cumulative)']
     df_gc = df_gc.fillna(0).replace(np.inf, np.nan).fillna(1).round(2)
-    print df_gc
+    print(df_gc)
 
 def _perfect_model_curve(y_test, y_prob):
     frac_of_successes = y_test.mean()

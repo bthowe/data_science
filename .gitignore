@@ -20,6 +20,10 @@ temp.py
 spark/dataframe/download_s3.py
 spark/dataframe/rough_example.py
 
+
+.DS_Store
+
+
 data_files/
 tensor_flow_models/
 .Python

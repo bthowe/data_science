@@ -10,7 +10,6 @@ end_of_book_list = ['Moroni 10', 'Doctrine and Covenants 138', 'Articles of Fait
 go = True
 
 client = MongoClient()
-client.drop_database('scrip_footnotes')
 db = client['scrip_footnotes']
 # print(db.collection_names())
 
