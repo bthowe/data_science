@@ -1,0 +1,38 @@
+2018-09-19T09:35:53.955-0500 I CONTROL  [initandlisten] MongoDB starting : pid=26566 port=27017 dbpath=/data/db 64-bit host=installadmins-MacBook-Pro-5.local
+2018-09-19T09:35:53.955-0500 I CONTROL  [initandlisten] db version v4.0.0
+2018-09-19T09:35:53.955-0500 I CONTROL  [initandlisten] git version: 3b07af3d4f471ae89e8186d33bbb1d5259597d51
+2018-09-19T09:35:53.955-0500 I CONTROL  [initandlisten] allocator: system
+2018-09-19T09:35:53.955-0500 I CONTROL  [initandlisten] modules: none
+2018-09-19T09:35:53.956-0500 I CONTROL  [initandlisten] build environment:
+2018-09-19T09:35:53.956-0500 I CONTROL  [initandlisten]     distarch: x86_64
+2018-09-19T09:35:53.956-0500 I CONTROL  [initandlisten]     target_arch: x86_64
+2018-09-19T09:35:53.956-0500 I CONTROL  [initandlisten] options: { processManagement: { fork: true }, systemLog: { destination: "file", path: "../../bash/vocab/mongo_log/mongod.log" } }
+2018-09-19T09:35:53.957-0500 I STORAGE  [initandlisten] Detected data files in /data/db created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2018-09-19T09:35:53.957-0500 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2018-09-19T09:35:54.785-0500 I STORAGE  [initandlisten] WiredTiger message [1537367754:785550][26566:0x7fffb08083c0], txn-recover: Main recovery loop: starting at 35/9728
+2018-09-19T09:35:54.879-0500 I STORAGE  [initandlisten] WiredTiger message [1537367754:879962][26566:0x7fffb08083c0], txn-recover: Recovering log 35 through 36
+2018-09-19T09:35:54.948-0500 I STORAGE  [initandlisten] WiredTiger message [1537367754:948267][26566:0x7fffb08083c0], txn-recover: Recovering log 36 through 36
+2018-09-19T09:35:55.001-0500 I STORAGE  [initandlisten] WiredTiger message [1537367755:1090][26566:0x7fffb08083c0], txn-recover: Set global recovery timestamp: 0
+2018-09-19T09:35:55.123-0500 I RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
+2018-09-19T09:35:55.440-0500 I CONTROL  [initandlisten] 
+2018-09-19T09:35:55.441-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-09-19T09:35:55.441-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-09-19T09:35:55.442-0500 I CONTROL  [initandlisten] 
+2018-09-19T09:35:55.442-0500 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-09-19T09:35:55.442-0500 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2018-09-19T09:35:55.442-0500 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2018-09-19T09:35:55.443-0500 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-09-19T09:35:55.443-0500 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-09-19T09:35:55.443-0500 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-09-19T09:35:55.444-0500 I CONTROL  [initandlisten] 
+2018-09-19T09:35:55.612-0500 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/data/db/diagnostic.data'
+2018-09-19T09:35:55.613-0500 I NETWORK  [initandlisten] waiting for connections on port 27017
+2018-09-19T09:35:55.699-0500 I CONTROL  [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2018-09-19T09:35:55.699-0500 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2018-09-19T09:35:55.700-0500 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+2018-09-19T09:35:55.701-0500 I CONTROL  [signalProcessingThread] Shutting down free monitoring
+2018-09-19T09:35:55.701-0500 I FTDC     [signalProcessingThread] Shutting down full-time diagnostic data capture
+2018-09-19T09:35:55.702-0500 I STORAGE  [signalProcessingThread] WiredTigerKVEngine shutting down
+2018-09-19T09:35:55.929-0500 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2018-09-19T09:35:55.930-0500 I CONTROL  [signalProcessingThread] now exiting
+2018-09-19T09:35:55.931-0500 I CONTROL  [signalProcessingThread] shutting down with code:0

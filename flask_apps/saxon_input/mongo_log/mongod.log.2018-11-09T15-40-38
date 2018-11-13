@@ -1,0 +1,155 @@
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten] MongoDB starting : pid=99213 port=27017 dbpath=/data/db 64-bit host=installadmins-MacBook-Pro-5.local
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten] db version v4.0.0
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten] git version: 3b07af3d4f471ae89e8186d33bbb1d5259597d51
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten] allocator: system
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten] modules: none
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten] build environment:
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten]     distarch: x86_64
+2018-11-09T09:37:02.628-0600 I CONTROL  [initandlisten]     target_arch: x86_64
+2018-11-09T09:37:02.629-0600 I CONTROL  [initandlisten] options: { processManagement: { fork: true }, systemLog: { destination: "file", path: "../../bash/vocab/mongo_log/mongod.log" } }
+2018-11-09T09:37:02.630-0600 I STORAGE  [initandlisten] Detected data files in /data/db created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2018-11-09T09:37:02.630-0600 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2018-11-09T09:37:03.602-0600 I STORAGE  [initandlisten] WiredTiger message [1541777823:601988][99213:0x7fffc357d3c0], txn-recover: Main recovery loop: starting at 123/9088
+2018-11-09T09:37:03.702-0600 I STORAGE  [initandlisten] WiredTiger message [1541777823:702289][99213:0x7fffc357d3c0], txn-recover: Recovering log 123 through 124
+2018-11-09T09:37:03.774-0600 I STORAGE  [initandlisten] WiredTiger message [1541777823:774620][99213:0x7fffc357d3c0], txn-recover: Recovering log 124 through 124
+2018-11-09T09:37:03.830-0600 I STORAGE  [initandlisten] WiredTiger message [1541777823:830317][99213:0x7fffc357d3c0], txn-recover: Set global recovery timestamp: 0
+2018-11-09T09:37:03.957-0600 I RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
+2018-11-09T09:37:04.325-0600 I CONTROL  [initandlisten] 
+2018-11-09T09:37:04.326-0600 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-11-09T09:37:04.326-0600 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-11-09T09:37:04.326-0600 I CONTROL  [initandlisten] 
+2018-11-09T09:37:04.327-0600 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-11-09T09:37:04.327-0600 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2018-11-09T09:37:04.327-0600 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2018-11-09T09:37:04.327-0600 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-11-09T09:37:04.328-0600 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-11-09T09:37:04.328-0600 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-11-09T09:37:04.328-0600 I CONTROL  [initandlisten] 
+2018-11-09T09:37:04.529-0600 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/data/db/diagnostic.data'
+2018-11-09T09:37:04.530-0600 I NETWORK  [initandlisten] waiting for connections on port 27017
+2018-11-09T09:37:05.454-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63736 #1 (1 connection now open)
+2018-11-09T09:37:05.455-0600 I NETWORK  [conn1] received client metadata from 127.0.0.1:63736 conn1: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:37:24.114-0600 I NETWORK  [conn1] end connection 127.0.0.1:63736 (0 connections now open)
+2018-11-09T09:37:24.616-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63742 #2 (1 connection now open)
+2018-11-09T09:37:24.617-0600 I NETWORK  [conn2] received client metadata from 127.0.0.1:63742 conn2: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:37:25.167-0600 I NETWORK  [conn2] end connection 127.0.0.1:63742 (0 connections now open)
+2018-11-09T09:37:25.686-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63744 #3 (1 connection now open)
+2018-11-09T09:37:25.686-0600 I NETWORK  [conn3] received client metadata from 127.0.0.1:63744 conn3: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:37:26.241-0600 I NETWORK  [conn3] end connection 127.0.0.1:63744 (0 connections now open)
+2018-11-09T09:37:26.758-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63747 #4 (1 connection now open)
+2018-11-09T09:37:26.760-0600 I NETWORK  [conn4] received client metadata from 127.0.0.1:63747 conn4: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:37:27.306-0600 I NETWORK  [conn4] end connection 127.0.0.1:63747 (0 connections now open)
+2018-11-09T09:37:27.776-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63748 #5 (1 connection now open)
+2018-11-09T09:37:27.776-0600 I NETWORK  [conn5] received client metadata from 127.0.0.1:63748 conn5: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:37:31.863-0600 I NETWORK  [conn5] end connection 127.0.0.1:63748 (0 connections now open)
+2018-11-09T09:37:32.399-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63751 #6 (1 connection now open)
+2018-11-09T09:37:32.400-0600 I NETWORK  [conn6] received client metadata from 127.0.0.1:63751 conn6: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:37:32.964-0600 I NETWORK  [conn6] end connection 127.0.0.1:63751 (0 connections now open)
+2018-11-09T09:37:33.509-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63752 #7 (1 connection now open)
+2018-11-09T09:37:33.509-0600 I NETWORK  [conn7] received client metadata from 127.0.0.1:63752 conn7: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:37:35.920-0600 I NETWORK  [conn7] end connection 127.0.0.1:63752 (0 connections now open)
+2018-11-09T09:37:35.983-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63756 #8 (1 connection now open)
+2018-11-09T09:37:35.985-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63758 #9 (2 connections now open)
+2018-11-09T09:37:35.987-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63760 #10 (3 connections now open)
+2018-11-09T09:37:35.989-0600 I NETWORK  [conn8] end connection 127.0.0.1:63756 (2 connections now open)
+2018-11-09T09:37:35.989-0600 I NETWORK  [conn9] end connection 127.0.0.1:63758 (1 connection now open)
+2018-11-09T09:37:35.989-0600 I NETWORK  [conn10] end connection 127.0.0.1:63760 (0 connections now open)
+2018-11-09T09:37:36.006-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63764 #11 (1 connection now open)
+2018-11-09T09:37:36.008-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63766 #12 (2 connections now open)
+2018-11-09T09:37:36.010-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63768 #13 (3 connections now open)
+2018-11-09T09:37:36.011-0600 I NETWORK  [conn11] end connection 127.0.0.1:63764 (2 connections now open)
+2018-11-09T09:37:36.011-0600 I NETWORK  [conn12] end connection 127.0.0.1:63766 (1 connection now open)
+2018-11-09T09:37:36.011-0600 I NETWORK  [conn13] end connection 127.0.0.1:63768 (0 connections now open)
+2018-11-09T09:37:36.028-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63772 #14 (1 connection now open)
+2018-11-09T09:37:36.031-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63774 #15 (2 connections now open)
+2018-11-09T09:37:36.034-0600 I NETWORK  [conn14] end connection 127.0.0.1:63772 (1 connection now open)
+2018-11-09T09:37:36.034-0600 I NETWORK  [conn15] end connection 127.0.0.1:63774 (0 connections now open)
+2018-11-09T09:40:39.520-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63826 #16 (1 connection now open)
+2018-11-09T09:40:39.521-0600 I NETWORK  [conn16] received client metadata from 127.0.0.1:63826 conn16: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:40:46.130-0600 I NETWORK  [conn16] end connection 127.0.0.1:63826 (0 connections now open)
+2018-11-09T09:40:46.657-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63829 #17 (1 connection now open)
+2018-11-09T09:40:46.659-0600 I NETWORK  [conn17] received client metadata from 127.0.0.1:63829 conn17: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:40:47.246-0600 I NETWORK  [conn17] end connection 127.0.0.1:63829 (0 connections now open)
+2018-11-09T09:40:47.766-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63831 #18 (1 connection now open)
+2018-11-09T09:40:47.769-0600 I NETWORK  [conn18] received client metadata from 127.0.0.1:63831 conn18: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:40:48.347-0600 I NETWORK  [conn18] end connection 127.0.0.1:63831 (0 connections now open)
+2018-11-09T09:40:48.861-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63834 #19 (1 connection now open)
+2018-11-09T09:40:48.862-0600 I NETWORK  [conn19] received client metadata from 127.0.0.1:63834 conn19: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:40:49.437-0600 I NETWORK  [conn19] end connection 127.0.0.1:63834 (0 connections now open)
+2018-11-09T09:40:49.953-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63835 #20 (1 connection now open)
+2018-11-09T09:40:49.954-0600 I NETWORK  [conn20] received client metadata from 127.0.0.1:63835 conn20: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:40:54.050-0600 I NETWORK  [conn20] end connection 127.0.0.1:63835 (0 connections now open)
+2018-11-09T09:40:54.586-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63837 #21 (1 connection now open)
+2018-11-09T09:40:54.587-0600 I NETWORK  [conn21] received client metadata from 127.0.0.1:63837 conn21: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:40:55.156-0600 I NETWORK  [conn21] end connection 127.0.0.1:63837 (0 connections now open)
+2018-11-09T09:40:55.661-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63839 #22 (1 connection now open)
+2018-11-09T09:40:55.667-0600 I NETWORK  [conn22] received client metadata from 127.0.0.1:63839 conn22: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:40:56.242-0600 I NETWORK  [conn22] end connection 127.0.0.1:63839 (0 connections now open)
+2018-11-09T09:40:56.729-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63840 #23 (1 connection now open)
+2018-11-09T09:40:56.729-0600 I NETWORK  [conn23] received client metadata from 127.0.0.1:63840 conn23: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:41:25.965-0600 I NETWORK  [conn23] end connection 127.0.0.1:63840 (0 connections now open)
+2018-11-09T09:41:26.438-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63843 #24 (1 connection now open)
+2018-11-09T09:41:26.438-0600 I NETWORK  [conn24] received client metadata from 127.0.0.1:63843 conn24: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:41:56.668-0600 I NETWORK  [conn24] end connection 127.0.0.1:63843 (0 connections now open)
+2018-11-09T09:41:57.135-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63844 #25 (1 connection now open)
+2018-11-09T09:41:57.136-0600 I NETWORK  [conn25] received client metadata from 127.0.0.1:63844 conn25: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:45:25.228-0600 I NETWORK  [conn25] end connection 127.0.0.1:63844 (0 connections now open)
+2018-11-09T09:45:25.299-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63884 #26 (1 connection now open)
+2018-11-09T09:45:25.301-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63886 #27 (2 connections now open)
+2018-11-09T09:45:25.304-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63888 #28 (3 connections now open)
+2018-11-09T09:45:25.305-0600 I NETWORK  [conn26] end connection 127.0.0.1:63884 (2 connections now open)
+2018-11-09T09:45:25.305-0600 I NETWORK  [conn27] end connection 127.0.0.1:63886 (1 connection now open)
+2018-11-09T09:45:25.305-0600 I NETWORK  [conn28] end connection 127.0.0.1:63888 (0 connections now open)
+2018-11-09T09:45:25.323-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63892 #29 (1 connection now open)
+2018-11-09T09:45:25.325-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63894 #30 (2 connections now open)
+2018-11-09T09:45:25.327-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63896 #31 (3 connections now open)
+2018-11-09T09:45:25.328-0600 I NETWORK  [conn29] end connection 127.0.0.1:63892 (2 connections now open)
+2018-11-09T09:45:25.328-0600 I NETWORK  [conn30] end connection 127.0.0.1:63894 (1 connection now open)
+2018-11-09T09:45:25.328-0600 I NETWORK  [conn31] end connection 127.0.0.1:63896 (0 connections now open)
+2018-11-09T09:45:25.345-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63900 #32 (1 connection now open)
+2018-11-09T09:45:25.347-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63902 #33 (2 connections now open)
+2018-11-09T09:45:25.350-0600 I NETWORK  [conn32] end connection 127.0.0.1:63900 (1 connection now open)
+2018-11-09T09:45:25.350-0600 I NETWORK  [conn33] end connection 127.0.0.1:63902 (0 connections now open)
+2018-11-09T09:45:25.371-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63906 #34 (1 connection now open)
+2018-11-09T09:45:25.373-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63908 #35 (2 connections now open)
+2018-11-09T09:45:25.375-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63910 #36 (3 connections now open)
+2018-11-09T09:45:25.412-0600 I NETWORK  [conn34] end connection 127.0.0.1:63906 (2 connections now open)
+2018-11-09T09:45:25.412-0600 I NETWORK  [conn36] end connection 127.0.0.1:63910 (0 connections now open)
+2018-11-09T09:45:25.412-0600 I NETWORK  [conn35] end connection 127.0.0.1:63908 (1 connection now open)
+2018-11-09T09:45:31.838-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63920 #37 (1 connection now open)
+2018-11-09T09:45:31.838-0600 I NETWORK  [conn37] received client metadata from 127.0.0.1:63920 conn37: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:45:32.437-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63921 #38 (2 connections now open)
+2018-11-09T09:45:32.438-0600 I NETWORK  [conn38] received client metadata from 127.0.0.1:63921 conn38: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-09T09:45:40.530-0600 I NETWORK  [conn38] end connection 127.0.0.1:63921 (1 connection now open)
+2018-11-09T09:45:40.933-0600 I NETWORK  [conn37] end connection 127.0.0.1:63920 (0 connections now open)
+2018-11-09T09:45:40.990-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63929 #39 (1 connection now open)
+2018-11-09T09:45:40.992-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63931 #40 (2 connections now open)
+2018-11-09T09:45:40.995-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63933 #41 (3 connections now open)
+2018-11-09T09:45:40.996-0600 I NETWORK  [conn40] end connection 127.0.0.1:63931 (2 connections now open)
+2018-11-09T09:45:40.996-0600 I NETWORK  [conn41] end connection 127.0.0.1:63933 (1 connection now open)
+2018-11-09T09:45:40.996-0600 I NETWORK  [conn39] end connection 127.0.0.1:63929 (0 connections now open)
+2018-11-09T09:45:41.017-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63937 #42 (1 connection now open)
+2018-11-09T09:45:41.019-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63939 #43 (2 connections now open)
+2018-11-09T09:45:41.022-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63941 #44 (3 connections now open)
+2018-11-09T09:45:41.022-0600 I NETWORK  [conn42] end connection 127.0.0.1:63937 (2 connections now open)
+2018-11-09T09:45:41.022-0600 I NETWORK  [conn43] end connection 127.0.0.1:63939 (1 connection now open)
+2018-11-09T09:45:41.022-0600 I NETWORK  [conn44] end connection 127.0.0.1:63941 (0 connections now open)
+2018-11-09T09:45:41.041-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63945 #45 (1 connection now open)
+2018-11-09T09:45:41.042-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63947 #46 (2 connections now open)
+2018-11-09T09:45:41.045-0600 I NETWORK  [conn45] end connection 127.0.0.1:63945 (1 connection now open)
+2018-11-09T09:45:41.045-0600 I NETWORK  [conn46] end connection 127.0.0.1:63947 (0 connections now open)
+2018-11-09T09:45:41.062-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63951 #47 (1 connection now open)
+2018-11-09T09:45:41.064-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63953 #48 (2 connections now open)
+2018-11-09T09:45:41.068-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:63955 #49 (3 connections now open)
+2018-11-09T09:45:41.115-0600 I NETWORK  [conn47] end connection 127.0.0.1:63951 (2 connections now open)
+2018-11-09T09:45:41.115-0600 I NETWORK  [conn48] end connection 127.0.0.1:63953 (1 connection now open)
+2018-11-09T09:45:41.115-0600 I NETWORK  [conn49] end connection 127.0.0.1:63955 (0 connections now open)
+2018-11-09T09:45:42.197-0600 I CONTROL  [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2018-11-09T09:45:42.197-0600 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2018-11-09T09:45:42.197-0600 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+2018-11-09T09:45:42.198-0600 I CONTROL  [signalProcessingThread] Shutting down free monitoring
+2018-11-09T09:45:42.198-0600 I FTDC     [signalProcessingThread] Shutting down full-time diagnostic data capture
+2018-11-09T09:45:42.200-0600 I STORAGE  [signalProcessingThread] WiredTigerKVEngine shutting down
+2018-11-09T09:45:42.396-0600 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2018-11-09T09:45:42.397-0600 I CONTROL  [signalProcessingThread] now exiting
+2018-11-09T09:45:42.398-0600 I CONTROL  [signalProcessingThread] shutting down with code:0

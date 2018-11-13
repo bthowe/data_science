@@ -1,0 +1,63 @@
+2018-10-18T21:11:35.430-0500 I CONTROL  [initandlisten] MongoDB starting : pid=88154 port=27017 dbpath=/data/db 64-bit host=installminsMBP5
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten] db version v4.0.0
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten] git version: 3b07af3d4f471ae89e8186d33bbb1d5259597d51
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten] allocator: system
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten] modules: none
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten] build environment:
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten]     distarch: x86_64
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten]     target_arch: x86_64
+2018-10-18T21:11:35.431-0500 I CONTROL  [initandlisten] options: { processManagement: { fork: true }, systemLog: { destination: "file", path: "../../bash/vocab/mongo_log/mongod.log" } }
+2018-10-18T21:11:35.433-0500 I STORAGE  [initandlisten] Detected data files in /data/db created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2018-10-18T21:11:35.434-0500 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2018-10-18T21:11:36.288-0500 I STORAGE  [initandlisten] WiredTiger message [1539915096:288357][88154:0x7fffc4d0c3c0], txn-recover: Main recovery loop: starting at 79/197248
+2018-10-18T21:11:36.381-0500 I STORAGE  [initandlisten] WiredTiger message [1539915096:381778][88154:0x7fffc4d0c3c0], txn-recover: Recovering log 79 through 80
+2018-10-18T21:11:36.455-0500 I STORAGE  [initandlisten] WiredTiger message [1539915096:455246][88154:0x7fffc4d0c3c0], txn-recover: Recovering log 80 through 80
+2018-10-18T21:11:36.505-0500 I STORAGE  [initandlisten] WiredTiger message [1539915096:505922][88154:0x7fffc4d0c3c0], txn-recover: Set global recovery timestamp: 0
+2018-10-18T21:11:36.612-0500 I RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
+2018-10-18T21:11:36.912-0500 I CONTROL  [initandlisten] 
+2018-10-18T21:11:36.913-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-10-18T21:11:36.914-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-10-18T21:11:36.914-0500 I CONTROL  [initandlisten] 
+2018-10-18T21:11:36.915-0500 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-10-18T21:11:36.915-0500 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2018-10-18T21:11:36.916-0500 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2018-10-18T21:11:36.916-0500 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-10-18T21:11:36.916-0500 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-10-18T21:11:36.917-0500 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-10-18T21:11:36.917-0500 I CONTROL  [initandlisten] 
+2018-10-18T21:11:37.102-0500 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/data/db/diagnostic.data'
+2018-10-18T21:11:37.105-0500 I NETWORK  [initandlisten] waiting for connections on port 27017
+2018-10-18T21:11:37.992-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:50296 #1 (1 connection now open)
+2018-10-18T21:11:37.992-0500 I NETWORK  [conn1] received client metadata from 127.0.0.1:50296 conn1: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-10-18T21:11:38.543-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:50301 #2 (2 connections now open)
+2018-10-18T21:11:38.544-0500 I NETWORK  [conn2] received client metadata from 127.0.0.1:50301 conn2: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-10-18T21:12:23.026-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:50494 #3 (3 connections now open)
+2018-10-18T21:12:23.026-0500 I NETWORK  [conn3] received client metadata from 127.0.0.1:50494 conn3: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-10-18T21:20:02.193-0500 I NETWORK  [conn2] end connection 127.0.0.1:50301 (2 connections now open)
+2018-10-18T21:20:02.193-0500 I NETWORK  [conn3] end connection 127.0.0.1:50494 (1 connection now open)
+2018-10-18T21:20:02.579-0500 I NETWORK  [conn1] end connection 127.0.0.1:50296 (0 connections now open)
+2018-10-18T21:20:02.667-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52352 #4 (1 connection now open)
+2018-10-18T21:20:02.669-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52354 #5 (2 connections now open)
+2018-10-18T21:20:02.672-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52356 #6 (3 connections now open)
+2018-10-18T21:20:02.675-0500 I NETWORK  [conn4] end connection 127.0.0.1:52352 (2 connections now open)
+2018-10-18T21:20:02.675-0500 I NETWORK  [conn6] end connection 127.0.0.1:52356 (1 connection now open)
+2018-10-18T21:20:02.675-0500 I NETWORK  [conn5] end connection 127.0.0.1:52354 (0 connections now open)
+2018-10-18T21:20:02.695-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52360 #7 (1 connection now open)
+2018-10-18T21:20:02.697-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52362 #8 (2 connections now open)
+2018-10-18T21:20:02.700-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52364 #9 (3 connections now open)
+2018-10-18T21:20:02.702-0500 I NETWORK  [conn7] end connection 127.0.0.1:52360 (2 connections now open)
+2018-10-18T21:20:02.702-0500 I NETWORK  [conn9] end connection 127.0.0.1:52364 (0 connections now open)
+2018-10-18T21:20:02.702-0500 I NETWORK  [conn8] end connection 127.0.0.1:52362 (1 connection now open)
+2018-10-18T21:20:02.720-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52368 #10 (1 connection now open)
+2018-10-18T21:20:02.722-0500 I NETWORK  [listener] connection accepted from 127.0.0.1:52370 #11 (2 connections now open)
+2018-10-18T21:20:02.724-0500 I NETWORK  [conn11] end connection 127.0.0.1:52370 (0 connections now open)
+2018-10-18T21:20:02.724-0500 I NETWORK  [conn10] end connection 127.0.0.1:52368 (1 connection now open)
+2018-10-18T21:20:09.877-0500 I CONTROL  [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2018-10-18T21:20:09.877-0500 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2018-10-18T21:20:09.878-0500 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+2018-10-18T21:20:09.878-0500 I CONTROL  [signalProcessingThread] Shutting down free monitoring
+2018-10-18T21:20:09.878-0500 I FTDC     [signalProcessingThread] Shutting down full-time diagnostic data capture
+2018-10-18T21:20:09.880-0500 I STORAGE  [signalProcessingThread] WiredTigerKVEngine shutting down
+2018-10-18T21:20:10.040-0500 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2018-10-18T21:20:10.042-0500 I CONTROL  [signalProcessingThread] now exiting
+2018-10-18T21:20:10.043-0500 I CONTROL  [signalProcessingThread] shutting down with code:0

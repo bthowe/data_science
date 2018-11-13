@@ -1,0 +1,12 @@
+2018-10-22T21:53:02.026-0500 I CONTROL  [initandlisten] MongoDB starting : pid=15487 port=27017 dbpath=/data/db 64-bit host=installminsMBP5
+2018-10-22T21:53:02.027-0500 I CONTROL  [initandlisten] db version v4.0.0
+2018-10-22T21:53:02.027-0500 I CONTROL  [initandlisten] git version: 3b07af3d4f471ae89e8186d33bbb1d5259597d51
+2018-10-22T21:53:02.027-0500 I CONTROL  [initandlisten] allocator: system
+2018-10-22T21:53:02.027-0500 I CONTROL  [initandlisten] modules: none
+2018-10-22T21:53:02.027-0500 I CONTROL  [initandlisten] build environment:
+2018-10-22T21:53:02.027-0500 I CONTROL  [initandlisten]     distarch: x86_64
+2018-10-22T21:53:02.028-0500 I CONTROL  [initandlisten]     target_arch: x86_64
+2018-10-22T21:53:02.028-0500 I CONTROL  [initandlisten] options: { processManagement: { fork: true }, systemLog: { destination: "file", path: "../../bash/vocab/mongo_log/mongod.log" } }
+2018-10-22T21:53:02.030-0500 I STORAGE  [initandlisten] exception in initAndListen: DBPathInUse: Unable to lock the lock file: /data/db/mongod.lock (Resource temporarily unavailable). Another mongod instance is already running on the /data/db directory, terminating
+2018-10-22T21:53:02.030-0500 I CONTROL  [initandlisten] now exiting
+2018-10-22T21:53:02.030-0500 I CONTROL  [initandlisten] shutting down with code:100
