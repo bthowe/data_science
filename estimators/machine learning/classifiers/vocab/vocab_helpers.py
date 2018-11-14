@@ -1,9 +1,57 @@
 import sys
+import datetime
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.base import BaseEstimator, TransformerMixin
+import matplotlib.pyplot as plt
+from pymongo import MongoClient
+from collections import defaultdict
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import FunctionTransformer
+from xgboost import XGBClassifier
+from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
+from scipy.stats import uniform
 
-def target_create(df):
+def data_pull():
+    client = MongoClient()
+    db_vocab = client['vocab']
+
+    cols = ['_id', 'button', 'name', 'page', 'timestamp']
+
+    df_main = pd.DataFrame(list(db_vocab['Main'].find({'name': 'Calvin'})))
+    df_main['timestamp'] = df_main['timestamp'].apply(datetime.datetime.fromtimestamp)
+
+    df_practice = pd.DataFrame(list(db_vocab['Practice'].find({'name': 'Calvin'})))
+    df_practice['timestamp'] = df_practice['timestamp'].apply(datetime.datetime.fromtimestamp)
+
+    df_quiz = pd.DataFrame(list(db_vocab['Quiz'].find({'name': 'Calvin'})))
+    df_quiz['timestamp'] = df_quiz['timestamp'].apply(datetime.datetime.fromtimestamp)
+
+    return df_main[cols]. \
+        append(df_practice[cols]). \
+        append(df_quiz[cols]). \
+        sort_values('timestamp')   #. \
+
+
+
+def observation_filter_train(df, start_date, end_date):
+    return df.\
+        query('timestamp > "{}"'.format(start_date)). \
+        query('timestamp < "{}"'.format(end_date)). \
+        reset_index(drop=True)
+
+def observation_filter(df, end_date):
+    return df.\
+        query('timestamp >= "{}"'.format(end_date)). \
+        reset_index(drop=True)
+
+# def objects_create(df):
+#     return target_create(df)
+#     todo: do I need a test and train set?
+
+def target_create_train(df):
     df['active'] = 1
 
     df.at[list(range(217, 224)), 'active'] = 0
@@ -21,35 +69,33 @@ def target_create(df):
     df.at[10106, 'active'] = 0
     df.at[list(range(11296, 11302)), 'active'] = 0
     df.at[11862, 'active'] = 0
-    return df.reset_index(drop=False)
+    return df.reset_index(drop=True)
+
+def target_create(df):
+    df['active'] = 1
+    return df.reset_index(drop=True)
 
 
 def feature_create(df):
-    df['date'] = df['timestamp'].dt.date  #.astype(str)
-    df['hour_of_day'] = df['timestamp'].dt.hour.astype(str)
-    df['day_of_week'] = df['timestamp'].dt.dayofweek.astype(str)
+    df.loc[:, 'date'] = df['timestamp'].dt.date  #.astype(str)
+    df.loc[:, 'hour_of_day'] = df['timestamp'].dt.hour.astype(str)
+    df.loc[:, 'day_of_week'] = df['timestamp'].dt.dayofweek.astype(str)
 
-    df['Ltimestamp'] = df['timestamp'].shift(1)
-    df['time_since_last_button'] = (df['timestamp'] - df['Ltimestamp']).dt.seconds
-    df.at[0, 'time_since_last_button'] = 0
+    df.loc[:, 'Ltimestamp'] = df['timestamp'].shift(1)
+    df.loc[:, 'Lpage'] = df['page'].shift(1)
+    df.loc[:, 'Lbutton'] = df['button'].shift(1)
+    df.loc[:, 'Lhour_of_day'] = df['hour_of_day'].shift(1)
+    df.loc[:, 'Lday_of_week'] = df['day_of_week'].shift(1)
 
+    df.loc[:, 'time_since_last_button'] = (df['timestamp'] - df['Ltimestamp']).dt.seconds
+
+    df = df.assign(new_day=0)
     def day_features(x):
-        x['new_day'] = 0
         x['new_day'].iloc[0] = 1
-
-        x['Lpage'] = x['page'].shift(1)
-        x.at[x['Lpage'] != x['Lpage'], 'Lpage'] = 'None'
-
-        x['Lbutton'] = x['button'].shift(1)
-        x.at[x['Lbutton'] != x['Lbutton'], 'Lbutton'] = 'None'
-
-        x['Lhour_of_day'] = x['hour_of_day'].shift(1)
-        x.at[x['Lhour_of_day'] != x['Lhour_of_day'], 'Lhour_of_day'] = 'None'
-
-        x['Lday_of_week'] = x['day_of_week'].shift(1)
-        x.at[x['Lday_of_week'] != x['Lday_of_week'], 'Lday_of_week'] = 'None'
         return x
-    return df.groupby(df['date']).apply(day_features).reset_index(drop=True)
+
+    df = df.groupby(df['date']).apply(day_features).iloc[1:]
+    return df
 
 
 def feature_none(df):
