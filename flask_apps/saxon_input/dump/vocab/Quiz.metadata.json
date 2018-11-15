@@ -1,1 +1,1 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"vocab.Quiz"}],"uuid":"f093ff4e3da54efcb2ecbad1947f3dc8"}
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"vocab.Quiz"}]}
