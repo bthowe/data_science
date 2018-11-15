@@ -4,7 +4,7 @@ cd ~/Projects/github/data_science/flask_apps/saxon_input
 
 git pull origin master
 
-mongod --fork --logpath ../../bash/vocab/mongo_log/mongod.log
+mongod --fork --logpath mongo_log/mongod.log
 
 mongorestore --db vocab --verbose dump/vocab
 mongorestore --db math_book_info --verbose dump/math_book_info

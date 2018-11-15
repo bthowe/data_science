@@ -33,10 +33,17 @@ TESTS
 
 VOCAB
 * vocab dashboards
+    * how many minutes per day
+    * how many cards per day and of which type?
+    * time per card
+    * which cards in a chapter did he spend the most time on?
+    * total time per chapter
+    * total time per card in chapter
 
 SCRIPTURE THOUGHTS
 
-
+MAIN_MENU
+* rows with headings
 
 
 
@@ -44,11 +51,5 @@ MAKE THE CHAPTER COME UP AUTOMATICALLY AND CHECK IF ALREADY BEEN ENTERED.
 
 
 
-* how many minutes per day
-* how cards per day
-* time per card
-* which cards in a chapter did he spend the most time on?
-* total time per chapter
-* total time per card in chapter
 
 todo: make it so calvin can't go directory to the data entry pages
