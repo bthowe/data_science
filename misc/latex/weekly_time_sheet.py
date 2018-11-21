@@ -8,6 +8,7 @@ import subprocess
 
 today = datetime.date.today()
 date_shift = 7 - today.weekday()  # Monday is 0
+date_shift = 0
 dates = [str(today + datetime.timedelta(date_shift + days)) for days in range(0, 6)]
 
 discussion_questions = [
