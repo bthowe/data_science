@@ -53,9 +53,33 @@
                 <label for="date">Date</label>
                 <input class="form-control" id="date" placeholder="yyyy-mm-dd">
             </div>
-            <div class="form-group col-md-2">
-                <label for="ref">Reference</label>
-                <input class="form-control" id="ref" placeholder="1 Nephi 1:1-2:4">
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-1">
+                <label for="start_book">Start Book</label>
+                <input class="form-control" id="start_book" placeholder="">
+            </div>
+            <div class="form-group col-md-1">
+                <label for="start_chapter">Start Chapter</label>
+                <input class="form-control" id="start_chapter" placeholder="">
+            </div>
+            <div class="form-group col-md-1">
+                <label for="start_verse">Start Verse</label>
+                <input class="form-control" id="start_verse" placeholder="">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-1">
+                <label for="end_book">End Book</label>
+                <input class="form-control" id="end_book" placeholder="">
+            </div>
+            <div class="form-group col-md-1">
+                <label for="end_chapter">End Chapter</label>
+                <input class="form-control" id="end_chapter" placeholder="">
+            </div>
+            <div class="form-group col-md-1">
+                <label for="end_verse">End Verse</label>
+                <input class="form-control" id="end_verse" placeholder="">
             </div>
         </div>
         <div class="form-group">
@@ -95,7 +119,12 @@
                 {
                     "name": kid,
                     "date": document.getElementById('date').value,
-                    "ref": document.getElementById('ref').value,
+                    "start_book": document.getElementById('start_book').value,
+                    "start_chapter": document.getElementById('start_chapter').value,
+                    "start_verse": document.getElementById('start_verse').value,
+                    "end_book": document.getElementById('end_book').value,
+                    "end_chapter": document.getElementById('end_chapter').value,
+                    "end_verse": document.getElementById('end_verse').value,
                     "comment": document.getElementById('comment').value
                 }));
 //        window.location.href = '/scripture_commentary';
