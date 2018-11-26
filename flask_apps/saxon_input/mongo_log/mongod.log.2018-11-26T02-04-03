@@ -1,0 +1,103 @@
+2018-11-23T10:23:39.500-0600 I CONTROL  [initandlisten] MongoDB starting : pid=97885 port=27017 dbpath=/data/db 64-bit host=installminsMBP5
+2018-11-23T10:23:39.500-0600 I CONTROL  [initandlisten] db version v4.0.0
+2018-11-23T10:23:39.500-0600 I CONTROL  [initandlisten] git version: 3b07af3d4f471ae89e8186d33bbb1d5259597d51
+2018-11-23T10:23:39.500-0600 I CONTROL  [initandlisten] allocator: system
+2018-11-23T10:23:39.501-0600 I CONTROL  [initandlisten] modules: none
+2018-11-23T10:23:39.501-0600 I CONTROL  [initandlisten] build environment:
+2018-11-23T10:23:39.501-0600 I CONTROL  [initandlisten]     distarch: x86_64
+2018-11-23T10:23:39.501-0600 I CONTROL  [initandlisten]     target_arch: x86_64
+2018-11-23T10:23:39.501-0600 I CONTROL  [initandlisten] options: { processManagement: { fork: true }, systemLog: { destination: "file", path: "mongo_log/mongod.log" } }
+2018-11-23T10:23:39.503-0600 I STORAGE  [initandlisten] Detected data files in /data/db created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2018-11-23T10:23:39.504-0600 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=7680M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),statistics_log=(wait=0),verbose=(recovery_progress),
+2018-11-23T10:23:40.418-0600 I STORAGE  [initandlisten] WiredTiger message [1542990220:418451][97885:0x7fffc357d3c0], txn-recover: Main recovery loop: starting at 143/48384
+2018-11-23T10:23:40.512-0600 I STORAGE  [initandlisten] WiredTiger message [1542990220:512213][97885:0x7fffc357d3c0], txn-recover: Recovering log 143 through 144
+2018-11-23T10:23:40.582-0600 I STORAGE  [initandlisten] WiredTiger message [1542990220:582136][97885:0x7fffc357d3c0], txn-recover: Recovering log 144 through 144
+2018-11-23T10:23:40.630-0600 I STORAGE  [initandlisten] WiredTiger message [1542990220:630705][97885:0x7fffc357d3c0], txn-recover: Set global recovery timestamp: 0
+2018-11-23T10:23:40.742-0600 I RECOVERY [initandlisten] WiredTiger recoveryTimestamp. Ts: Timestamp(0, 0)
+2018-11-23T10:23:41.185-0600 I CONTROL  [initandlisten] 
+2018-11-23T10:23:41.185-0600 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-11-23T10:23:41.185-0600 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-11-23T10:23:41.185-0600 I CONTROL  [initandlisten] 
+2018-11-23T10:23:41.186-0600 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-11-23T10:23:41.186-0600 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server. 
+2018-11-23T10:23:41.186-0600 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP 
+2018-11-23T10:23:41.186-0600 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-11-23T10:23:41.187-0600 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-11-23T10:23:41.187-0600 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-11-23T10:23:41.187-0600 I CONTROL  [initandlisten] 
+2018-11-23T10:23:41.428-0600 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/data/db/diagnostic.data'
+2018-11-23T10:23:41.430-0600 I NETWORK  [initandlisten] waiting for connections on port 27017
+2018-11-23T10:23:41.493-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51322 #1 (1 connection now open)
+2018-11-23T10:23:41.502-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51325 #2 (2 connections now open)
+2018-11-23T10:23:41.503-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51326 #3 (3 connections now open)
+2018-11-23T10:23:42.024-0600 I NETWORK  [conn1] end connection 127.0.0.1:51322 (2 connections now open)
+2018-11-23T10:23:42.024-0600 I NETWORK  [conn2] end connection 127.0.0.1:51325 (1 connection now open)
+2018-11-23T10:23:42.024-0600 I NETWORK  [conn3] end connection 127.0.0.1:51326 (0 connections now open)
+2018-11-23T10:23:42.045-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51330 #4 (1 connection now open)
+2018-11-23T10:23:42.066-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51333 #5 (2 connections now open)
+2018-11-23T10:23:42.067-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51334 #6 (3 connections now open)
+2018-11-23T10:23:42.073-0600 I NETWORK  [conn4] end connection 127.0.0.1:51330 (2 connections now open)
+2018-11-23T10:23:42.073-0600 I NETWORK  [conn5] end connection 127.0.0.1:51333 (1 connection now open)
+2018-11-23T10:23:42.073-0600 I NETWORK  [conn6] end connection 127.0.0.1:51334 (0 connections now open)
+2018-11-23T10:23:42.095-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51338 #7 (1 connection now open)
+2018-11-23T10:23:42.099-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51341 #8 (2 connections now open)
+2018-11-23T10:23:42.100-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51342 #9 (3 connections now open)
+2018-11-23T10:23:42.116-0600 I NETWORK  [conn7] end connection 127.0.0.1:51338 (2 connections now open)
+2018-11-23T10:23:42.116-0600 I NETWORK  [conn9] end connection 127.0.0.1:51342 (1 connection now open)
+2018-11-23T10:23:42.116-0600 I NETWORK  [conn8] end connection 127.0.0.1:51341 (0 connections now open)
+2018-11-23T10:23:42.136-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51346 #10 (1 connection now open)
+2018-11-23T10:23:42.140-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51348 #11 (2 connections now open)
+2018-11-23T10:23:42.144-0600 I NETWORK  [conn10] end connection 127.0.0.1:51346 (1 connection now open)
+2018-11-23T10:23:42.144-0600 I NETWORK  [conn11] end connection 127.0.0.1:51348 (0 connections now open)
+2018-11-23T10:23:42.162-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51352 #12 (1 connection now open)
+2018-11-23T10:23:42.166-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51355 #13 (2 connections now open)
+2018-11-23T10:23:42.167-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51356 #14 (3 connections now open)
+2018-11-23T10:23:42.180-0600 I NETWORK  [conn12] end connection 127.0.0.1:51352 (2 connections now open)
+2018-11-23T10:23:42.180-0600 I NETWORK  [conn14] end connection 127.0.0.1:51356 (1 connection now open)
+2018-11-23T10:23:42.180-0600 I NETWORK  [conn13] end connection 127.0.0.1:51355 (0 connections now open)
+2018-11-23T10:23:43.295-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51364 #15 (1 connection now open)
+2018-11-23T10:23:43.296-0600 I NETWORK  [conn15] received client metadata from 127.0.0.1:51364 conn15: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-23T10:23:43.854-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51365 #16 (2 connections now open)
+2018-11-23T10:23:43.855-0600 I NETWORK  [conn16] received client metadata from 127.0.0.1:51365 conn16: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-23T10:24:20.898-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51388 #17 (3 connections now open)
+2018-11-23T10:24:20.899-0600 I NETWORK  [conn17] received client metadata from 127.0.0.1:51388 conn17: { driver: { name: "PyMongo", version: "3.7.1" }, os: { type: "Darwin", name: "Darwin", architecture: "x86_64", version: "10.12.5" }, platform: "CPython 3.6.3.final.0" }
+2018-11-23T10:39:58.206-0600 I NETWORK  [conn17] end connection 127.0.0.1:51388 (2 connections now open)
+2018-11-23T10:39:58.206-0600 I NETWORK  [conn16] end connection 127.0.0.1:51365 (1 connection now open)
+2018-11-23T10:39:58.450-0600 I NETWORK  [conn15] end connection 127.0.0.1:51364 (0 connections now open)
+2018-11-23T10:39:58.541-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51500 #18 (1 connection now open)
+2018-11-23T10:39:58.543-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51502 #19 (2 connections now open)
+2018-11-23T10:39:58.546-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51504 #20 (3 connections now open)
+2018-11-23T10:39:58.548-0600 I NETWORK  [conn18] end connection 127.0.0.1:51500 (2 connections now open)
+2018-11-23T10:39:58.548-0600 I NETWORK  [conn19] end connection 127.0.0.1:51502 (1 connection now open)
+2018-11-23T10:39:58.548-0600 I NETWORK  [conn20] end connection 127.0.0.1:51504 (0 connections now open)
+2018-11-23T10:39:58.567-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51508 #21 (1 connection now open)
+2018-11-23T10:39:58.569-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51510 #22 (2 connections now open)
+2018-11-23T10:39:58.571-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51512 #23 (3 connections now open)
+2018-11-23T10:39:58.573-0600 I NETWORK  [conn23] end connection 127.0.0.1:51512 (0 connections now open)
+2018-11-23T10:39:58.573-0600 I NETWORK  [conn22] end connection 127.0.0.1:51510 (1 connection now open)
+2018-11-23T10:39:58.573-0600 I NETWORK  [conn21] end connection 127.0.0.1:51508 (2 connections now open)
+2018-11-23T10:39:58.591-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51516 #24 (1 connection now open)
+2018-11-23T10:39:58.593-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51518 #25 (2 connections now open)
+2018-11-23T10:39:58.596-0600 I NETWORK  [conn24] end connection 127.0.0.1:51516 (1 connection now open)
+2018-11-23T10:39:58.596-0600 I NETWORK  [conn25] end connection 127.0.0.1:51518 (0 connections now open)
+2018-11-23T10:39:58.614-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51522 #26 (1 connection now open)
+2018-11-23T10:39:58.616-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51524 #27 (2 connections now open)
+2018-11-23T10:39:58.618-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51526 #28 (3 connections now open)
+2018-11-23T10:39:58.688-0600 I NETWORK  [conn26] end connection 127.0.0.1:51522 (2 connections now open)
+2018-11-23T10:39:58.689-0600 I NETWORK  [conn27] end connection 127.0.0.1:51524 (1 connection now open)
+2018-11-23T10:39:58.689-0600 I NETWORK  [conn28] end connection 127.0.0.1:51526 (0 connections now open)
+2018-11-23T10:39:58.712-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51530 #29 (1 connection now open)
+2018-11-23T10:39:58.715-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51532 #30 (2 connections now open)
+2018-11-23T10:39:58.719-0600 I NETWORK  [listener] connection accepted from 127.0.0.1:51534 #31 (3 connections now open)
+2018-11-23T10:39:58.720-0600 I NETWORK  [conn29] end connection 127.0.0.1:51530 (2 connections now open)
+2018-11-23T10:39:58.720-0600 I NETWORK  [conn31] end connection 127.0.0.1:51534 (1 connection now open)
+2018-11-23T10:39:58.720-0600 I NETWORK  [conn30] end connection 127.0.0.1:51532 (0 connections now open)
+2018-11-23T10:40:02.551-0600 I CONTROL  [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2018-11-23T10:40:02.551-0600 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2018-11-23T10:40:02.552-0600 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+2018-11-23T10:40:02.552-0600 I CONTROL  [signalProcessingThread] Shutting down free monitoring
+2018-11-23T10:40:02.553-0600 I FTDC     [signalProcessingThread] Shutting down full-time diagnostic data capture
+2018-11-23T10:40:02.554-0600 I STORAGE  [signalProcessingThread] WiredTigerKVEngine shutting down
+2018-11-23T10:40:02.746-0600 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2018-11-23T10:40:02.747-0600 I CONTROL  [signalProcessingThread] now exiting
+2018-11-23T10:40:02.747-0600 I CONTROL  [signalProcessingThread] shutting down with code:0

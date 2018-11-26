@@ -1,6 +1,9 @@
 
 
 TODO
+
+main menu needs some work if not admin.
+
 need to put the Child's name into the upper right hand corner of the nav bar.
 implement a login for Kay
 

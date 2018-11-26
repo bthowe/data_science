@@ -6,6 +6,7 @@ import datetime
 import webbrowser
 import numpy as np
 import pandas as pd
+import saxon_math_helpers
 from pymongo import MongoClient
 from collections import defaultdict
 from flask import Flask, request, render_template, jsonify, redirect
@@ -26,6 +27,7 @@ db_origin = client['math_exercise_origins']
 db_performance = client['math_performance']
 db_vocab = client['vocab']
 db_script = client['scripture_commentary']
+db_forms = client['forms']
 
 
 @app.route("/login")
@@ -516,7 +518,6 @@ def add_missed_problems():
 
     collection = db_performance[js['book']]
     y = collection.insert_one(js)
-    print(y)
 
     print('data inserted: {}'.format(js))
     return ''
@@ -600,7 +601,6 @@ def vocab():
 @app.route('/mongo_call_script', methods=['POST'])
 def mongo_call_script():
     js = json.loads(request.data.decode('utf-8'))
-    print(js)
 
     tab = db_script[js['name']]
     tab.insert_one(js)
@@ -613,7 +613,36 @@ def scripture_commentary():
     return render_template('scripture_commentary.html')
 
 
+@app.route('/mongo_call_forms', methods=['POST'])
+def mongo_call_forms():
+    js = json.loads(request.data.decode('utf-8'))
 
+    tab = db_forms['Weekly']
+    tab.insert_one(js)
+    print('data inserted: {}'.format(js))
+
+    saxon_math_helpers.latex_create(
+        ['Calvin', 'Samuel', 'Kay'],
+        [js['calvin_book'], js['samuel_book'], js['kay_book']],
+        [datetime.datetime.strftime(datetime.datetime.strptime(js['week_start_date'], '%Y-%m-%d') + datetime.timedelta(days), '%Y-%m-%d') for days in range(0, 6)],
+        [js['mon_question'], js['tue_question'], js['wed_question'], js['thu_question'], js['fri_question'], js['sat_question']],
+        [js['mon_job'], js['tue_job'], js['wed_job'], js['thu_job'], js['fri_job'], js['sat_job']]
+    )
+
+    chrome = webbrowser.get('chrome')
+    chrome.open_new_tab('file:///Users/travis.howe/Projects/github/data_science/flask_apps/saxon_input/weekly_time_sheet.pdf')
+
+    return ''
+
+@app.route("/weekly_forms_create")
+def weekly_forms_create():
+    today = datetime.date.today()
+    date_shift = 7 - today.weekday()  # Monday is 0
+    date = str(today + datetime.timedelta(date_shift))
+
+    output = {k: v for k, v in list(db_forms['Weekly'].find())[-1].items() if k != '_id'}
+
+    return render_template('weekly_forms_create.html', date=date, form_data=output)
 
 
 def shutdown_server():

@@ -38,16 +38,30 @@
 
 <!-- Icons Grid -->
 <section class="features-icons bg-light text-center">
-  <div class="container">
-    <div class="row" id="data"></div>
-    <div class="row" id="practice"></div>
-    <div class="row" id="dashboard"></div>
-  </div>
+    <div class="container">
+        <div class="container" style="padding: 20px">
+            <div class="row"><h5>Enter Book Information into Database</h5></div>
+            <div class="row text-center" id="math_book_info" style="border:1px solid black"></div>
+        </div>
+        <div class="container" style="padding: 20px">
+            <div class="row"><h5>Enter Daily Activity into Database</h5></div>
+            <div class="row" id="daily_info" style="border:1px solid black"></div>
+        </div>
+        <div class="container" style="padding: 20px">
+            <div class="row"><h5>Learn</h5></div>
+            <div class="row" id="practice" style="border:1px solid black"></div>
+        </div>
+        <div class="container" style="padding: 20px">
+            <div class="row"><h5>Monitor Performance</h5></div>
+            <div class="row" id="dashboard" style="border:1px solid black"></div>
+        </div>
+    </div>
 </section>
 
 <script>
     userName = {{ user_name | tojson }}
-    var div_data = document.getElementById('data');
+    var div_math_book_info = document.getElementById('math_book_info');
+    var div_daily_info = document.getElementById('daily_info');
     var div_prac = document.getElementById('practice');
     var div_dash = document.getElementById('dashboard');
 
@@ -79,6 +93,7 @@
         div2.appendChild(h3)
         div2.appendChild(p)
         div1.appendChild(div2)
+
         div_thing.appendChild(div1)
     }
 
@@ -87,12 +102,15 @@
         iconCreate("/dashboards", "/static/if_bar-chart_1608569.png", "Dashboards", "View performance over time and by concept.", div_dash)
     }
     else {
-        iconCreate("/enter_problem_number", "/static/if_LIBRARY_2_753918.png", "Number of Problems", "Specify the number of lesson and mixed problems for a given book and lesson.", div_data)
-        iconCreate("/enter_problem_origin", "/static/if_93_171452.png", "Origin of Problems", "For each problem, specify the lesson from which it originates.", div_data)
-        iconCreate("/enter_performance", "/static/if_performance-clock-speed_353431.png", "Performance", "Record which problems were missed on a child's daily assignment.", div_data)
-        iconCreate("/scripture_commentary", "/static/GospelLibrary.png", "Scripture Commentary", "Record questions, principles, and evidences from a child's daily scripture searching.", div_data)
+        iconCreate("/enter_problem_number", "/static/if_LIBRARY_2_753918.png", "Number of Problems", "Specify the number of lesson and mixed problems for a given book and lesson.", div_math_book_info)
+        iconCreate("/enter_problem_origin", "/static/if_93_171452.png", "Origin of Problems", "For each problem, specify the lesson from which it originates.", div_math_book_info)
+
+        iconCreate("/enter_performance", "/static/if_performance-clock-speed_353431.png", "Performance", "Record which problems were missed on a child's daily assignment.", div_daily_info)
+        iconCreate("/scripture_commentary", "/static/GospelLibrary.png", "Scripture Commentary", "Record questions, principles, and evidences from a child's daily scripture searching.", div_daily_info)
+        iconCreate("/weekly_forms_create", "/static/iconfinder_content-form-contract-article-paper_3209382.png", "Weekly Forms", "Generate the forms for the week.", div_daily_info)
 
         iconCreate("/vocab", "/static/if_alphabet_3592685.png", "Vocabulary", "Practice vocabulary.", div_prac)
+
         iconCreate("/dashboards", "/static/if_bar-chart_1608569.png", "Dashboards", "View performance over time and by concept.", div_dash)
     }
 
