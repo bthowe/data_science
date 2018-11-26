@@ -8,11 +8,11 @@ import subprocess
 
 today = datetime.date.today()
 date_shift = 7 - today.weekday()  # Monday is 0
-date_shift = 0
+# date_shift = 0
 dates = [str(today + datetime.timedelta(date_shift + days)) for days in range(0, 6)]
 
 discussion_questions = [
-    "Brainstorming research questions.",
+    "Brainstorming questions.",
     "Moving from a question to a testable hypothesis.",
     "Developing a test of hypothesis.",
     "Making inference and drawing conclusions.",
@@ -22,7 +22,7 @@ discussion_questions = [
 
 kids = ['Calvin', 'Samuel', 'Kay']
 
-books = ['Algebra 1 / 2', 'Math 7 / 6', 'Math 5 / 4']
+books = ['Algebra 1', 'Math 7 / 6', 'Math 5 / 4']
 
 jobs = [
     'Garbage, toothbrush paper towel',
@@ -32,6 +32,26 @@ jobs = [
     'Sweep',
     'Scrub shower, no cleanser'
 ]
+
+# db.Weekly.insert({
+#     "week_start_date": "2018-11-26",
+#     "mon_question": "Brainstorming questions.",
+#     "tue_question": "Moving from a question to a testable hypothesis.",
+#     "wed_question": "Developing a test of hypothesis.",
+#     "thu_question": "Making inference and drawing conclusions.",
+#     "fri_question": "Question based on current event.",
+#     "sat_question": "Principles from scripture passage or general conference talk.",
+#     "mon_job": "Garbage, toothbrush paper towel",
+#     "tue_job": "Toilet",
+#     "wed_job": "Sink",
+#     "thu_job": "Mirror, light switch, door knob",
+#     "fri_job": "Sweep",
+#     "sat_job": "Scrub shower, no cleanser",
+#     "calvin_book": "Algebra 1",
+#     "samuel_book": "Math 7/6",
+#     "kay_book": "Math 5/4"
+# })
+
 
 
 header = r'''
