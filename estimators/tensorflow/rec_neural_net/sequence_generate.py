@@ -33,8 +33,12 @@ class SequenceGenerate(object):
         self.x_enc = tf.one_hot(x, depth=self.num_chars)
         self.y_enc = tf.one_hot(self.y, depth=self.num_chars)
 
+        # self.state = None
+        # self.out = None
+
         self.prediction
-        # self.error
+        self.probs
+        self.cost
         self.optimize
 
     @lazy_property
@@ -43,10 +47,16 @@ class SequenceGenerate(object):
             return tf.contrib.rnn.BasicLSTMCell(self.lstm_size, forget_bias=1.0, state_is_tuple=False)
 
         network = tf.contrib.rnn.MultiRNNCell([make_cell() for _ in range(self.num_layers)], state_is_tuple=False)
-        outputs, states = tf.nn.dynamic_rnn(network, self.x_enc, initial_state=self.lstm_init_value, dtype=tf.float32)
+        output, state = tf.nn.dynamic_rnn(network, self.x_enc, initial_state=self.lstm_init_value, dtype=tf.float32)
+        self.out = tf.shape(output)
+        self.state = state
 
-        outputs_reshaped = tf.reshape(outputs, [-1, self.lstm_size])
+        outputs_reshaped = tf.reshape(output, [-1, self.lstm_size])
         return tf.layers.dense(outputs_reshaped, self.num_chars, activation=None)
+
+    @lazy_property
+    def probs(self):
+        return tf.reshape(tf.nn.softmax(self.prediction), (self.out[0], self.out[1], self.num_chars))
 
     @lazy_property
     def cost(self):
@@ -58,13 +68,6 @@ class SequenceGenerate(object):
         learning_rate = 0.003
         optimizer = tf.train.RMSPropOptimizer(learning_rate, 0.9)
         return optimizer.minimize(self.cost)
-
-    @lazy_property
-    def error(self):
-        correct = tf.nn.in_top_k(self.prediction, self.y_enc, 1)
-        accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
-        return accuracy
-
 
 def data_create():
     txt = open('../data_files/strata_abstracts.txt', 'r').read().lower()
@@ -85,6 +88,30 @@ def _get_next_batch(batch_size, time_steps, data):
         y_batch[:, t] = [data[i + t + 1] for i in batch_id]
 
     return x_batch, y_batch
+
+
+def run_step(sess, model, x, lstm_init_value, seed, chars, init_value):
+    test_data = [[chars.index(c) for c in seed]]
+
+    out, next_lstm_state = sess.run([model.probs, model.state], {x: test_data, lstm_init_value: [init_value]})
+
+    return out[0][0], next_lstm_state[0]
+
+
+def generate_text(sess, model, x, lstm_init_value, seed, n_layers, lstm_size, chars, len_test_txt=500):
+    seed = seed.lower()
+
+    lstm_last_state = np.zeros((n_layers * 2 * lstm_size,))
+    for c in seed:
+        out, lstm_last_state = run_step(sess, model, x, lstm_init_value, c, chars, lstm_last_state)
+
+    gen_str = seed
+    for i in range(len_test_txt):
+        ele = np.random.choice(range(len(chars)), p=out)
+        gen_str += chars[ele]
+        out, lstm_last_state = run_step(sess, model, x, lstm_init_value, chars[ele], chars, lstm_last_state)
+
+    return gen_str
 
 
 def main():
@@ -110,19 +137,40 @@ def main():
     sess.run(tf.global_variables_initializer())
     for i in range(num_iterations):
         x_batch, y_true_batch = _get_next_batch(batch_size, time_steps, data)
-        # print(x_batch)
-        # print(y_true_batch)
 
         init_value = np.zeros((x_batch.shape[0], num_layers * 2 * lstm_size))
         sess.run(model.optimize, feed_dict={x: x_batch, y_true: y_true_batch, lstm_init_value: init_value})
 
-        # if (i % display_step == 0) or (i == num_iterations - 1):
-        #     msg = "Optimization Iteration: {0:>6}, Training Loss: {1:>6}"
-        #     loss = sess.run(model.error, feed_dict={x: x_batch, y_true: y_true_batch, lstm_init_value: init_value})
-        #     print(msg.format(i, ))
-        #     print("  " + generate_text(sess, {'x': x, 'lstm_init_value': lstm_init_value}, {'prob': prob, 'state': state}, 'We', 60))
+        if (i % display_step == 0) or (i == num_iterations - 1):
+            l = sess.run(model.cost, feed_dict={x: x_batch, y_true: y_true_batch, lstm_init_value: init_value})
 
-# todo: need to get the error thing working.
+            gen_str = generate_text(sess, model, x, lstm_init_value, 'We', num_layers, lstm_size, data_idx, 50)
+
+            # # todo: go through generate text code, clean things up.
+            # len_test_txt = 50
+            # seed = 'we'
+            # lstm_last_state = np.zeros((num_layers * 2 * lstm_size,))
+            # for c in seed:
+            #     test_data = [[data_idx.index(see) for see in c]]
+            #     out, next_lstm_state = sess.run([model.probs, model.state], {x: test_data, lstm_init_value: [lstm_last_state]})
+            #     out = out[0][0]
+            #     lstm_last_state = next_lstm_state[0]
+            #
+            # gen_str = seed
+            # for i in range(len_test_txt):
+            #     ele = np.random.choice(range(len(data_idx)), p=out)
+            #     gen_str += data_idx[ele]
+            #
+            #     test_data = [[data_idx.index(c) for c in data_idx[ele]]]
+            #
+            #     out, next_lstm_state = sess.run([model.probs, model.state], {x: test_data, lstm_init_value: [lstm_last_state]})
+            #     out = out[0][0]
+            #     lstm_last_state = next_lstm_state[0]
+
+            msg = "Optimization Iteration: {0:>6}, Training Loss: {1:>6}"
+            print(msg.format(i, l))
+            print("  " + gen_str)
+
 
 
 if __name__ == '__main__':
