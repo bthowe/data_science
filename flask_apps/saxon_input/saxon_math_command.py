@@ -54,9 +54,14 @@ def dashboards_new():
     return render_template('dashboards.html')
 
 def the_big_one(book, df_number, df_origin, df_performance):
+    # todo: maybe just remove the offending documents from the database
+    if 'chapter' in df_performance.columns.tolist():
+        df_performance.drop('chapter', 1, inplace=True)
+    if 'miss_list' in df_performance.columns.tolist():
+        df_performance.drop('miss_list', 1, inplace=True)
+
     df_performance = df_performance. \
         query('date == date'). \
-        drop(['chapter', 'miss_list'], 1). \
         assign(date=pd.to_datetime(df_performance['date'])). \
         sort_values(['date', 'start_chapter', 'start_problem'])
 
@@ -271,18 +276,33 @@ def query_performance():
     js = json.loads(request.data.decode('utf-8'))
     print(js)  # kid, book
 
-    df_performance = pd.DataFrame(list(db_performance[js['book']].find({'kid': js['kid']})))
-    df_number = pd.DataFrame(list(db_number[js['book']].find()))
-    df_origin = pd.DataFrame(list(db_origin[js['book']].find()))
 
-    df_grande_ass, df_grande_test = the_big_one(js['book'], df_number, df_origin, df_performance)
+    # I need to loop over the books and not take just the one.
+    df_time_data = pd.DataFrame()
+    df_test_data = pd.DataFrame()
+    df_prob_data = pd.DataFrame()
+    df_score_data = pd.DataFrame()
+    for book in ['Math_5_4', 'Math_6_5', 'Math_7_6', 'Math_8_7', 'Algebra_1_2', 'Algebra_1', 'Algebra_2']:
+        perf_temp = pd.DataFrame(list(db_performance[book].find({'kid': js['kid']})))
+        numb_temp = pd.DataFrame(list(db_number[book].find()))
+        orig_temp = pd.DataFrame(list(db_origin[book].find()))
+        print(perf_temp.shape[0])
+        if perf_temp.shape[0] > 0:
+            df_grande_ass, df_grande_test = the_big_one(
+                book,
+                numb_temp,
+                orig_temp,
+                perf_temp
+            )
+            # df_grande_ass = df_grande_ass.append(ass_temp).reset_index(drop=True)
+            # df_grande_test = df_grande_test.append(test_temp).reset_index(drop=True)
 
-    df_time_data = performance_over_time(df_grande_ass.append(df_grande_test), js['book'], js['kid'])
-    df_test_data = performance_on_tests(df_grande_test, js['kid'])
+            df_time_data = df_time_data.append(performance_over_time(df_grande_ass.append(df_grande_test), book, js['kid'])).reset_index(drop=True)
+            df_test_data = performance_on_tests(df_grande_test, js['kid']).reset_index(drop=True)
 
-    df_temp = df_grande_ass.pipe(origin_lst_expand, js['kid'])
-    df_prob_data = mixed_problems_correct(df_temp)
-    df_score_data = performance_by_chapter(df_temp)
+            df_temp = df_grande_ass.pipe(origin_lst_expand, js['kid'])
+            df_prob_data = mixed_problems_correct(df_temp).reset_index(drop=True)
+            df_score_data = performance_by_chapter(df_temp).reset_index(drop=True)
 
     return jsonify(
         [

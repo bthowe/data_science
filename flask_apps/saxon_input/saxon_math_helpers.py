@@ -62,7 +62,29 @@ def latex_create(kids, books, dates, discussion_questions, jobs):
         '''.format(
             i[0][0], i[0][1], i[1]
         )
-
+        if i[1] == dates[-1]:
+            sunday_date = datetime.datetime.strftime(datetime.datetime.strptime(dates[-1], '%Y-%m-%d') + datetime.timedelta(days=1), '%Y-%m-%d')
+            math_scripture += '''
+            \\clearpage
+            \\newpage
+            \\makeatletter
+            \\setlength{{\@fptop}}{{35pt}}
+            \\makeatother
+            \\begin{{table}}
+            \\caption*{{Scripture Questions and Principles}}
+            \\begin{{tabular}}{{| l | l | l | l | l | l |}}
+            \\hline
+            \\multicolumn{{3}}{{|p{{9.5cm}}|}}{{Name: {0}}} & \\multicolumn{{3}}{{|p{{9.5cm}}|}}{{Date: {1}}} \\\\[20pt]
+            \\hline
+            \\multicolumn{{2}}{{|p{{6.33cm}}|}}{{Start Book: }} & \\multicolumn{{2}}{{|p{{6.33cm}}|}}{{Start Chapter: }} & \\multicolumn{{2}}{{|p{{6.33cm}}|}}{{Start Verse: }} \\\\[20pt]
+            \\hline
+            \\multicolumn{{2}}{{|p{{6.33cm}}|}}{{End Book: }} & \\multicolumn{{2}}{{|p{{6.33cm}}|}}{{End Chapter: }} & \\multicolumn{{2}}{{|p{{6.33cm}}|}}{{End Verse: }} \\\\[20pt]
+            \\hline
+            \\multicolumn{{6}}{{l}}{{}} \\\\[20pt]
+            \\multicolumn{{6}}{{l}}{{Comment:}} \\\\[20pt]
+            \\end{{tabular}}
+            \\end{{table}}
+            '''.format(i[0][0], sunday_date)
 
     time_sheets = ''''''
     for name in kids:

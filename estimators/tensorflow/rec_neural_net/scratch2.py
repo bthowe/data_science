@@ -23,10 +23,9 @@ def lazy_property(function):
 
 class WtteRnn(object):
     # def __init__(self, data, target, dropout, num_hidden=200, num_layers=3):
-    def __init__(self, data, target, mask, dropout, num_hidden=10, num_layers=1):
+    def __init__(self, data, target, dropout, num_hidden=100, num_layers=1):
         self.data = data
         self.target = target
-        self.mask = mask
         self.dropout = dropout
         self._num_hidden = num_hidden
         self._num_layers = num_layers
@@ -35,46 +34,66 @@ class WtteRnn(object):
         self.error
         self.optimize
 
+
+    @lazy_property
+    def length(self):
+        used = tf.sign(tf.reduce_max(tf.abs(self.data), reduction_indices=2))
+        length = tf.reduce_sum(used, reduction_indices=1)
+        length = tf.cast(length, tf.int32)
+        return length
+
+
     @lazy_property
     def prediction(self):
-        print(self.data)
-        print(self.target)
-        print(self.mask)
-        # sys.exit()
-
-        masked_data = tf.boolean_mask(self.data, self.mask, axis=0)
-        print(masked_data)
-        print(self.data)
-
-
         network = tf.contrib.rnn.BasicLSTMCell(num_units=self._num_hidden)
 
-        outputs, states = tf.nn.dynamic_rnn(network, self.data, dtype=tf.float32)  # tanh activation on hidenn layers?
+        outputs, _ = tf.nn.dynamic_rnn(
+            network,
+            self.data,
+            dtype=tf.float32,
+            sequence_length=self.length
+        )
 
-        outputs_reshaped = tf.reshape(outputs, [-1, self._num_hidden * self.data.shape[1]])  # nodes in hidden layer times the number of features which is the size of the second dimension
+        # outputs = tf.transpose(outputs, [1, 0, 2])
+        # last = tf.gather(outputs, int(outputs.get_shape()[0]) - 1)
+        last = self._last_relevant(outputs, self.length)
+        # print(last)
 
-        outputs_dense = tf.layers.dense(outputs_reshaped, 2)  #, activation=tf.nn.softplus)  # alpha, beta
+        out1 = tf.contrib.layers.fully_connected(last, 10, activation_fn=None)
+
+        out = tf.contrib.layers.fully_connected(out1, 2, activation_fn=None)
+
+        # return tf.nn.softplus(out)
 
         return tf.concat(
             [
-                tf.clip_by_value(tf.exp(tf.slice(outputs_dense, [0, 0], [-1, 1])), 0, 100),
-                tf.clip_by_value(tf.nn.softplus(tf.slice(outputs_dense, [0, 1], [-1, 1])), 0, 100)
+                tf.exp(tf.slice(out, [0, 0], [-1, 1])),
+                tf.nn.softplus(tf.slice(out, [0, 1], [-1, 1]), name='out')
             ],
             axis=1
         )
 
-
-    # todo: understand the architecture of the network...what is a masking layer?
+        # return tf.concat(
+        #     [
+        #         tf.clip_by_value(tf.exp(tf.slice(out, [0, 0], [-1, 1])), 0, 100),
+        #         tf.clip_by_value(tf.nn.softplus(tf.slice(out, [0, 1], [-1, 1])), 0, 100)
+        #     ],
+        #     axis=1
+        # )
 
 
     def _loglikelihood(self, a_b, tte):
         location = 10.0
         growth = 20.0
 
-        a_b = tf.Print(a_b, [a_b])
+        # a_b = tf.Print(a_b, [a_b])
 
         a = tf.slice(a_b, [0, 0], [-1, 1])
+        # a = tf.Print(a, [a])
+
         b = tf.slice(a_b, [0, 1], [-1, 1])
+        # b = tf.Print(b, [b])
+
         tte = tf.cast(tf.reshape(tte, [-1, 1]), tf.float32)
 
         hazard0 = tf.pow(tf.div(tte + 1e-9, a), b)
@@ -104,6 +123,22 @@ class WtteRnn(object):
     def error(self):
         return self.cost
 
+    @staticmethod
+    def _weight_and_bias(in_size, out_size):
+        weight = tf.truncated_normal([in_size, out_size], stddev=0.01)
+        bias = tf.constant(0.1, shape=[out_size])
+        return tf.Variable(weight), tf.Variable(bias)
+
+    @staticmethod
+    def _last_relevant(output, length):
+        batch_size = tf.shape(output)[0]
+        max_length = int(output.get_shape()[1])
+        output_size = int(output.get_shape()[2])
+        index = tf.range(0, batch_size) * max_length + (length - 1)
+        flat = tf.reshape(output, [-1, output_size])
+        relevant = tf.gather(flat, index)
+        return relevant
+
 
 def _load_file(name):
     with open(name, 'r') as file:
@@ -116,9 +151,6 @@ def _build_data(engine, time, x, max_time, is_test):
     # A full history of sensor readings to date for each x
     out_x = np.empty((0, max_time, 24), dtype=np.float32)
 
-    # A full history of sensor readings to date for each x
-    mask = np.empty((0, max_time), dtype=np.float32)
-
     for i in np.sort(np.unique(engine)):
         print("Engine: " + str(int(i)))
         # When did the engine fail? (Last day + 1 for train data, irrelevant for test.)
@@ -130,7 +162,6 @@ def _build_data(engine, time, x, max_time, is_test):
             start = 0
 
         this_x = np.empty((0, max_time, 24), dtype=np.float32)
-        this_mask = np.empty((0, max_time), dtype=np.int32)
 
         for j in range(start, max_engine_time):
             engine_x = x[engine == i]
@@ -138,59 +169,17 @@ def _build_data(engine, time, x, max_time, is_test):
             out_y = np.append(out_y, np.array((max_engine_time - j, 1), ndmin=2), axis=0)
 
             xtemp = np.zeros((1, max_time, 24))
-            xtemp[:, max_time - min(j, 99) - 1:max_time, :] = engine_x[max(0, j - max_time + 1):j + 1, :]
+
+            # todo: let's try padding after
+            xtemp[:, 0:min(j, 99) + 1, :] = engine_x[max(0, j - max_time + 1):j + 1, :]
+            # xtemp[:, max_time - min(j, 99) - 1:max_time, :] = engine_x[max(0, j - max_time + 1):j + 1, :]
+
             this_x = np.concatenate((this_x, xtemp))
 
-            masktemp = np.zeros((1, max_time))
-            masktemp[:, max_time - min(j, 99) - 1:max_time] = 1
-            this_mask = np.concatenate((this_mask, masktemp))
-
         out_x = np.concatenate((out_x, this_x))
-        mask = np.concatenate((mask, this_mask))
 
-    return out_x, out_y, mask
+    return out_x, out_y
 
-# def _build_data(engine, time, x, max_time, is_test):
-#     # y[0] will be days remaining, y[1] will be event indicator, always 1 for this data
-#     out_y = np.empty((0, 2), dtype=np.float32)
-#
-#     # A full history of sensor readings to date for each x
-#     out_x = np.empty((0, max_time, 24), dtype=np.float32)
-#
-#     # A full history of sensor readings to date for each x
-#     mask = np.empty((0, max_time), dtype=np.float32)
-#
-#     for i in np.sort(np.unique(engine)):
-#         print("Engine: " + str(int(i)))
-#         # When did the engine fail? (Last day + 1 for train data, irrelevant for test.)
-#         max_engine_time = int(np.max(time[engine == i])) + 1
-#
-#         if is_test:
-#             start = max_engine_time - 1
-#         else:
-#             start = 0
-#
-#         this_x = np.empty((0, max_time, 24), dtype=np.float32)
-#         this_mask = np.empty((0, max_time), dtype=np.int32)
-#
-#         for j in range(start, max_engine_time):
-#             engine_x = x[engine == i]
-#
-#             out_y = np.append(out_y, np.array((max_engine_time - j, 1), ndmin=2), axis=0)
-#
-#             xtemp = np.zeros((1, max_time, 24))
-#             xtemp[:, max_time - min(j, 99) - 1:max_time, :] = engine_x[max(0, j - max_time + 1):j + 1, :]
-#             this_x = np.concatenate((this_x, xtemp))
-#
-#             masktemp = np.zeros((1, max_time))
-#             masktemp[:, max_time - min(j, 99) - 1:max_time] = 1
-#             this_mask = np.concatenate((this_mask, masktemp))
-#
-#         out_x = np.concatenate((out_x, this_x))
-#         mask = np.concatenate((mask, this_mask))
-#
-#     return out_x, out_y, mask
-#
 def data_create(train_test_split_frac=.1):
     data = _load_file('../data_files/train.csv')
     # Make engine numbers and days zero-indexed
@@ -208,14 +197,12 @@ def data_create(train_test_split_frac=.1):
     # Configurable observation look-back period for each engine/day
     max_time = 100
 
-    X_train, y_train, mask_train = _build_data(train[:, 0], train[:, 1], train[:, 2:26], max_time, False)
-    X_test, y_test, mask_test = _build_data(test[:, 0], test[:, 1], test[:, 2:26], max_time, False)
+    X_train, y_train = _build_data(train[:, 0], train[:, 1], train[:, 2:26], max_time, False)
+    X_test, y_test = _build_data(test[:, 0], test[:, 1], test[:, 2:26], max_time, False)
     joblib.dump(X_train, '../data_files/X_train.pkl')
     joblib.dump(y_train[:, 0], '../data_files/y_train.pkl')  # I don't know why he includes the column of 1s. I believe all we need is the tte.
-    joblib.dump(mask_train, '../data_files/mask_train.pkl')  # I don't know why he includes the column of 1s. I believe all we need is the tte.
     joblib.dump(X_test, '../data_files/X_test.pkl')
     joblib.dump(y_test[:, 0], '../data_files/y_test.pkl')  # I don't know why he includes the column of 1s. I believe all we need is the tte.
-    joblib.dump(mask_test, '../data_files/mask_test.pkl')  # I don't know why he includes the column of 1s. I believe all we need is the tte.
 
 
 def train_test_split(X, y, test_frac, normalize=True):
@@ -256,40 +243,39 @@ def _get_next_batch(batch_size, data, target):
     return data[idx], target[idx]
 
 def main():
-    # data_create()  # X: (20631, 100, 24), y: (20631,); X_train: (18679, 100, 24), X_test: (1952, 100, 24)
+    data_create()  # X: (20631, 100, 24), y: (20631,); X_train: (18679, 100, 24), X_test: (1952, 100, 24)
     # X_train, y_train, X_test, y_test = train_test_split(joblib.load('../data_files/X.pkl'), joblib.load('../data_files/y.pkl'), .1)
     X_train = joblib.load('../data_files/X_train.pkl')
     y_train = joblib.load('../data_files/y_train.pkl')
-    mask_train = joblib.load('../data_files/mask_train.pkl')
     X_test = joblib.load('../data_files/X_test.pkl')
     y_test = joblib.load('../data_files/y_test.pkl')
-    mask_test = joblib.load('../data_files/mask_test.pkl')
-
-    # todo: when making the data do I need to pad? How would I mask in tensorflow?
-
-
-
 
     X_train = X_train / np.linalg.norm(X_train)
     X_test = X_test / np.linalg.norm(X_test)
 
-    X_train = X_train[90:91, :, :]
-    y_train = y_train[90:91]
-    mask_train = mask_train[90:91, :]
+    # X_train = X_train[90:91, :, :]
+    # y_train = y_train[90:91]  # 102; a = 102.5 and b = 55.2 and climbing
+    X_train = np.concatenate((X_train[90:91, :, :], X_train[190:191, :, :]))
+    y_train = np.concatenate((y_train[90:91], y_train[190:191]))
+    print(y_train)  # [102. 2.]
+
+
+    # todo: there must be a problem because I'm not seeing the bifurcation I'd expect in the alpha and betas across the two observations. They are essentially predicting the same death date.
+    # todo: How do I deal with the craziness that happens when things get kind of close?
+
 
     sequence_length = 100
     feature_size = 24
 
     data = tf.placeholder(tf.float32, [None, sequence_length, feature_size])
     target = tf.placeholder(tf.int32, [None])
-    mask = tf.placeholder(tf.float32, [None, sequence_length])
     dropout = tf.placeholder(tf.float32)
 
-    model = WtteRnn(data, target, mask, dropout)
+    model = WtteRnn(data, target, dropout)
 
 
     batch_size = 50
-    num_epochs = 1000
+    num_epochs = 100000
 
     sess = tf.Session()
 
@@ -306,11 +292,12 @@ def main():
         #     y_batch = y_train[idx]
         #
         #     sess.run(model.optimize, feed_dict={data: X_batch, target: y_batch, dropout: .5})
-        sess.run(model.optimize, feed_dict={data: X_train, target: y_train, mask: mask_train, dropout: 1})
+        sess.run(model.optimize, feed_dict={data: X_train, target: y_train, dropout: 1})
+        print(sess.run(model.prediction, feed_dict={data: X_train, target: y_train, dropout: 1}))
 
         # train_acc = sess.run(model.error, {data: X_batch, target: y_batch, dropout: 1})
-        train_acc = sess.run(model.error, {data: X_train, target: y_train, mask: mask_train, dropout: 1})
-        test_acc = sess.run(model.error, {data: X_test, target: y_test, mask: mask_test, dropout: 1})
+        train_acc = sess.run(model.error, {data: X_train, target: y_train, dropout: 1})
+        test_acc = sess.run(model.error, {data: X_test, target: y_test, dropout: 1})
         print('Epoch {:2d} train accuracy {:3.5f}, test accuracy {:3.5f}'.format(epoch + 1, train_acc, test_acc))
 
 
@@ -325,10 +312,20 @@ if __name__ == '__main__':
 
 
 # really good: https://stats.stackexchange.com/questions/352036/what-should-i-do-when-my-neural-network-doesnt-learn
+
+
 # gives good guidance regarding some of the implementation nuances: https://github.com/gm-spacagna/deep-ttf/
+
 
 # on masking: https://www.quora.com/What-is-masking-in-a-recurrent-neural-network-RNN
 
 
-
+# https: // danijar.com / structuring - your - tensorflow - models /
+# https://danijar.com/introduction-to-recurrent-networks-in-tensorflow/
 # todo: start here: https://danijar.com/variable-sequence-lengths-in-tensorflow/
+
+
+# You can use neural nets to...
+# sequence classification (generating a prediction for the entire sequence)
+# sequence labeling (generating a prediction for each time step)
+# sequence generation (

@@ -2,6 +2,12 @@
 
 TODO
 
+math performance come up with book after choosing child
+scripture commentary make it so can add other questions/principles
+
+
+dashboards...I think I need to split the dashboards up afterall. I need to be able to specify the book for the problems missed one.
+
 main menu needs some work if not admin.
 
 need to put the Child's name into the upper right hand corner of the nav bar.

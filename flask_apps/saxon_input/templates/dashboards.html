@@ -183,7 +183,7 @@
             }
             return df
         }
-        function getData(kid, book) {
+        function getData(kid) {
             var request = new XMLHttpRequest();
             request.responseType = 'json';
             request.open("POST", "/query_performance", true);
@@ -196,7 +196,6 @@
             };
             request.send(JSON.stringify(
                 {
-                    "book": book,
                     "kid": kid
                 }
                 )
@@ -214,10 +213,10 @@
                 svg.selectAll("*").remove();
 
                 if (choose_kid_val == "samuel") {
-                    getData("Samuel", "Math_7_6")
+                    getData("Samuel")
                 }
                 else if (choose_kid_val == "calvin") {
-                    getData("Calvin", "Algebra_1_2")
+                    getData("Calvin")
                 }
                 document.getElementById('choose_dash').focus();
             }
