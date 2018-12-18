@@ -29,6 +29,9 @@ db_vocab = client['vocab']
 db_script = client['scripture_commentary']
 db_forms = client['forms']
 
+lesson_lst = list(range(4, 13)) + list(range(14, 75))
+book_lst = ['Math_5_4', 'Math_6_5', 'Math_7_6', 'Math_8_7', 'Algebra_1_2', 'Algebra_1', 'Algebra_2']
+
 
 @app.route("/login")
 def login():
@@ -665,19 +668,55 @@ def weekly_forms_create():
     return render_template('weekly_forms_create.html', date=date, form_data=output)
 
 
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
+@app.route('/query_book', methods=['POST'])
+def query_book():
+    js = json.loads(request.data.decode('utf-8'))
+    print(js)
+
+    if js['name'] == 'Choose...':
+        return jsonify({})
+    for book in reversed(book_lst):
+        l = list(db_performance[book].find({'kid': js['name']}))
+        if l:
+            return jsonify(l[0]['book'])
+            # break
+    return ''
+
+
+
+@app.route('/killer', methods=['POST'])
+def killer():
+    sys.exit(4)
+    # js = json.loads(request.data.decode('utf-8'))
+    # print(js)
+    #
+    # if js['name'] == 'Choose...':
+    #     return jsonify({})
+    # for book in reversed(book_lst):
+    #     l = list(db_performance[book].find({'kid': js['name']}))
+    #     if l:
+    #         return jsonify(l[0]['book'])
+    #         # break
+    return ''
+
+
 
 
 @app.route('/quit')
 def quit():
-    shutdown_server()
-    return ''
+    # sys.exit(4)
+    return render_template('quit.html')
+    # return ''
 
 
-if __name__ == '__main__':
-    lesson_lst = list(range(4, 13)) + list(range(14, 75))
-    app.run(host='0.0.0.0', port=8001, debug=True)
+    # if __name__ == '__main__':
+#     lesson_lst = list(range(4, 13)) + list(range(14, 75))
+#     book_lst = ['Math_5_4', 'Math_6_5', 'Math_7_6', 'Math_8_7', 'Algebra_1_2', 'Algebra_1', 'Algebra_2']
+
+    # chrome = webbrowser.get('chrome')
+    # chrome.open('http://0.0.0.0:8001/login')
+
+    # app.run(host='0.0.0.0', port=8001, debug=True)
+
+
+# gunicorn --bind 0.0.0.0:8001 saxon_math_command:app

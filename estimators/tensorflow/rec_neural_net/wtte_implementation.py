@@ -202,8 +202,8 @@ def main():
 
     # execution
     sess = tf.Session()
-    # tf.set_random_seed(1)
-    # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+    tf.set_random_seed(1)
+    sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 
     sess.run(tf.global_variables_initializer())
     for epoch in range(n_epochs):
@@ -235,3 +235,5 @@ if __name__ == '__main__':
 
 # todo next: variable input length
 # todo next: try my hand at the engine data
+
+

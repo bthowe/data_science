@@ -1,7 +1,3 @@
-source ~/PycharmProjects/venv/data_science/bin/activate
-
-cd ~/Projects/github/data_science/flask_apps/saxon_input
-
 git pull origin master
 
 mongod --fork --logpath mongo_log/mongod.log
@@ -14,6 +10,7 @@ mongorestore --db scripture_commentary --verbose dump/scripture_commentary
 mongorestore --db forms --verbose dump/forms
 
 open -a "Google Chrome" http://0.0.0.0:8001/login
+gunicorn --bind 0.0.0.0:8001 saxon_math_command:app
 python3 saxon_math_command.py
 
 mongodump -d math_book_info -o dump
@@ -28,5 +25,3 @@ git commit -m "standard mongo dump"
 git push origin master
 
 killall mongod
-
-deactivate

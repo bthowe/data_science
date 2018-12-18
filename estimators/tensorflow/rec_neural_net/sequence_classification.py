@@ -64,7 +64,7 @@ class SequenceClassification(object):
 
 
 def main():
-    # # We treat images as sequences of pixel rows.
+    # # We treat images as sequences of pixel rows. The pixels in a row are the features.
     rows = 28
     row_size = 28
     num_classes = 10

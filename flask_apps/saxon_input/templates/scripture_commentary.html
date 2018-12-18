@@ -38,12 +38,13 @@
 
 
 <div class="col-xs-12 col-sm-12">
-    <form>
+    <form onsubmit="return false;">
+    <!--<form>-->
         <div class="form-row">
             <div class="form-group col-md-2">
                 <label for="choose_kid">Name</label>
                 <select id="choose_kid" class="form-control">
-                    <option selected>Choose...</option>
+                    <option value="choose" selected>Choose...</option>
                     <option>Calvin</option>
                     <option>Samuel</option>
                     <option>Kay</option>
@@ -86,12 +87,23 @@
             <label for="comment">Comment</label>
             <textarea class="form-control" id="comment" rows="3"></textarea>
         </div>
-        <input class="btn btn-primary" id="submit" type="submit"/>
+        <!--<div class="form-group" id="add_another1">-->
+            <!--<button class="btn btn-primary" type="button">Add another comment</button>-->
+        <!--</div>-->
+        <div class="form-row">
+            <div class="col-md-auto">
+                <input class="btn btn-primary" id="submit" type="submit"/>
+            </div>
+            <div class="col-md-auto" id="add_another">
+                <button id="btn" class="hidden">Change boilerplate information</button>
+            </div>
+        </div>
     </form>
 </div>
 
 <script>
     document.getElementById('choose_kid').focus();
+    var payload;
 
     var today = new Date();
     var dd = today.getDate();
@@ -113,27 +125,49 @@
             var kid_e = document.getElementById("choose_kid")
             kid = kid_e.options[kid_e.selectedIndex].text;
 
+            payload = {
+                "name": kid,
+                "date": document.getElementById('date').value,
+                "start_book": document.getElementById('start_book').value,
+                "start_chapter": document.getElementById('start_chapter').value,
+                "start_verse": document.getElementById('start_verse').value,
+                "end_book": document.getElementById('end_book').value,
+                "end_chapter": document.getElementById('end_chapter').value,
+                "end_verse": document.getElementById('end_verse').value,
+                "comment": document.getElementById('comment').value
+            }
             var request = new XMLHttpRequest();
             request.open("POST", "/mongo_call_script", true);
             request.send(JSON.stringify(
-                {
-                    "name": kid,
-                    "date": document.getElementById('date').value,
-                    "start_book": document.getElementById('start_book').value,
-                    "start_chapter": document.getElementById('start_chapter').value,
-                    "start_verse": document.getElementById('start_verse').value,
-                    "end_book": document.getElementById('end_book').value,
-                    "end_chapter": document.getElementById('end_chapter').value,
-                    "end_verse": document.getElementById('end_verse').value,
-                    "comment": document.getElementById('comment').value
-                }));
-//        window.location.href = '/scripture_commentary';
-//            document.getElementById(ref).value = '';
-//            document.getElementById(comment).value = '';
-        }
+                payload
+                ));
 
+            document.getElementById('comment').value = ""
+
+            btn = document.getElementById("btn")
+            btn.className = "btn btn-primary"
+        }
         var button_submit = document.getElementById('submit');
         button_submit.addEventListener('click', submit, true);
+
+
+        function anotherComment() {
+            var kid_e = document.getElementById("choose_kid")
+            kid_e.value = "choose";
+
+            document.getElementById('start_book').value = "";
+            document.getElementById('start_chapter').value = "";
+            document.getElementById('start_verse').value = "";
+            document.getElementById('end_book').value = "";
+            document.getElementById('end_chapter').value = "";
+            document.getElementById('end_verse').value = "";
+
+            btn = document.getElementById("btn")
+            btn.className = "hidden"
+            document.getElementById('choose_kid').focus();
+        }
+        var button_another = document.getElementById('btn');
+        button_another.addEventListener('click', anotherComment, true);
     }
 
 

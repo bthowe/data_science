@@ -1,4 +1,3 @@
-# Adapted from https://gist.github.com/danijar/c7ec9a30052127c7a1ad169eeb83f159
 import sys
 import sets
 import random
@@ -32,9 +31,6 @@ class SequenceGenerate(object):
 
         self.x_enc = tf.one_hot(x, depth=self.num_chars)
         self.y_enc = tf.one_hot(self.y, depth=self.num_chars)
-
-        # self.state = None
-        # self.out = None
 
         self.prediction
         self.probs
@@ -76,7 +72,7 @@ def data_create():
     return data_index, data
 
 def _get_next_batch(batch_size, time_steps, data):
-    '''Returns batch of covariates and corresponding outcomes of size "batch_size" and length "time_steps"'''
+    '''Returns batch x and y, where the y represents the same substring as x leaded by one character.'''
     x_batch = np.zeros((batch_size, time_steps))
     y_batch = np.zeros((batch_size, time_steps))
 
@@ -144,40 +140,12 @@ def main():
         if (i % display_step == 0) or (i == num_iterations - 1):
             l = sess.run(model.cost, feed_dict={x: x_batch, y_true: y_true_batch, lstm_init_value: init_value})
 
-            gen_str = generate_text(sess, model, x, lstm_init_value, 'We', num_layers, lstm_size, data_idx, 50)
-
-            # # todo: go through generate text code, clean things up.
-            # len_test_txt = 50
-            # seed = 'we'
-            # lstm_last_state = np.zeros((num_layers * 2 * lstm_size,))
-            # for c in seed:
-            #     test_data = [[data_idx.index(see) for see in c]]
-            #     out, next_lstm_state = sess.run([model.probs, model.state], {x: test_data, lstm_init_value: [lstm_last_state]})
-            #     out = out[0][0]
-            #     lstm_last_state = next_lstm_state[0]
-            #
-            # gen_str = seed
-            # for i in range(len_test_txt):
-            #     ele = np.random.choice(range(len(data_idx)), p=out)
-            #     gen_str += data_idx[ele]
-            #
-            #     test_data = [[data_idx.index(c) for c in data_idx[ele]]]
-            #
-            #     out, next_lstm_state = sess.run([model.probs, model.state], {x: test_data, lstm_init_value: [lstm_last_state]})
-            #     out = out[0][0]
-            #     lstm_last_state = next_lstm_state[0]
-
             msg = "Optimization Iteration: {0:>6}, Training Loss: {1:>6}"
             print(msg.format(i, l))
-            print("  " + gen_str)
-
-
+            print("  " + generate_text(sess, model, x, lstm_init_value, 'We', num_layers, lstm_size, data_idx, 50))
 
 if __name__ == '__main__':
     main()
 
-
-
-# todo: get this working in this format
 # todo: get the engine one working
-# todo: get the math exercise prediction one working
+# todo: get the homeschool math exercise prediction one working

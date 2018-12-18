@@ -15,8 +15,8 @@ df = pd.concat(
 
 data = df.to_json(orient='records')
 
-resp = requests.post("http://0.0.0.0:8000/predict", headers=header)
-# resp = requests.post("http://0.0.0.0:8000/predict", data=json.dumps(data), headers=header)
+# resp = requests.post("http://0.0.0.0:8000/predict", headers=header)
+resp = requests.post("http://0.0.0.0:8000/predict", data=json.dumps(data), headers=header)
 
 print(resp.status_code)
 print(resp.json())

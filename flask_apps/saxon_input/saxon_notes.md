@@ -2,8 +2,9 @@
 
 TODO
 
-math performance come up with book after choosing child
-scripture commentary make it so can add other questions/principles
+
+1. get things setup on the white computer to run without me having to upload a new executable.
+2. generating a pdf with the questions and thoughts from the kids and their scripture study.
 
 
 dashboards...I think I need to split the dashboards up afterall. I need to be able to specify the book for the problems missed one.

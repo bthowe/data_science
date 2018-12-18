@@ -13,7 +13,7 @@ from collections import OrderedDict
 
 
 def data_create():
-    txt = open('data_files/strata_abstracts.txt', 'r').read().lower()
+    txt = open('../data_files/strata_abstracts.txt', 'r').read().lower()
     data_index = list(''.join(OrderedDict.fromkeys(txt).keys()))
     data = [data_index.index(c) for c in txt]
     return data_index, data
@@ -177,7 +177,8 @@ def generate(seed, len_test_txt=500):
 
 
 if __name__ == '__main__':
-    data_idx, data = data_create()
+    data_idx, data = data_create()  # data is 1525206 long
+
     time_steps = 100
     batch_size = 50
     num_iterations = 10000
@@ -196,3 +197,6 @@ if __name__ == '__main__':
 
 
 # todo: what going on here: https://stackoverflow.com/questions/42440565/how-to-feed-back-rnn-output-to-input-in-tensorflow
+
+# what is happening here: the first column is being fed in? then the second column and the state of the first? etc. Is this correct?
+

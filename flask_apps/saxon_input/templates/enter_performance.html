@@ -20,7 +20,7 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Performance</a>
+  <a class="navbar-brand" href="#">Math Performance</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -55,7 +55,7 @@
         <div class="form-row">
             <div class="form-group col-md-2">
                 <label for="choose_kid">Name</label>
-                <select id="choose_kid" class="form-control">
+                <select id="choose_kid" class="form-control" onchange=bookAutoFill()>
                     <option selected>Choose...</option>
                     <option>Calvin</option>
                     <option>Samuel</option>
@@ -248,6 +248,39 @@
             window.location.href = '/enter_performance';
         });
     };
+
+
+    function bookAutoFill() {
+        var kid_e = document.getElementById("choose_kid");
+        if (kid_e.value != "0") {
+            kid = kid_e.options[kid_e.selectedIndex].text;
+            console.log(kid)
+            var request = new XMLHttpRequest();
+            request.responseType = 'json';
+            request.open("POST", "/query_book", true);
+            request.onload = function () {
+                var name = request.response;
+
+                if (name != null) {
+                    document.getElementById("choose_book").value = name;
+                    document.getElementById('start_chapter').focus();
+                }
+                else {
+                    document.getElementById('choose_book').focus();
+                }
+            };
+            request.send(JSON.stringify(
+                {
+                    "name": kid,
+                }
+                )
+            );
+        }
+    }
+//    document.getElementById("choose_kid").onchange = bookAutoFill();
+
+
+
 
     document.addEventListener('DOMContentLoaded', init, false);
     function init() {

@@ -174,3 +174,4 @@ def latex_create(kids, books, dates, discussion_questions, jobs):
     os.unlink('weekly_time_sheet.aux')
     os.unlink('weekly_time_sheet.log')
     os.unlink('weekly_time_sheet.tex')
+
