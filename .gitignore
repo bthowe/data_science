@@ -21,6 +21,11 @@ spark/dataframe/download_s3.py
 spark/dataframe/rough_example.py
 
 
+*.index
+*.meta
+*.data-*
+
+
 mongod.log.*
 
 .DS_Store
