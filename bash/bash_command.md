@@ -340,3 +340,29 @@ chmod 755 name_of_script
 ```
 Now I can double click and it will execute.
 Alternatively, simply give it a .command suffix (i.e., name_of_script.command)
+
+
+
+
+
+
+
+
+CRON Jobs
+```bash
+
+```
+* creating/editing contab file
+```bash
+env EDITOR=nano crontab -e
+```
+Control+0, enter, Control+X to write and then exit nano.
+
+Every two minutes
+```git
+*/2 * * * * bash ~/Projects/github/howeschool_app/test.sh
+```
+Every day at midnight
+```git
+0 0 * * * bash ~/Projects/github/howeschool_app/test.sh
+```
