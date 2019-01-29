@@ -185,7 +185,7 @@ to update a package
 pip install pandas {[[[[--upgrade
 ```
 
-list python liKV5V     aries
+list python libraries (active ve first)
 ```bash
 pip freeze
 pip freeze > requirements.txt
@@ -366,3 +366,49 @@ Every day at midnight
 ```git
 0 0 * * * bash ~/Projects/github/howeschool_app/test.sh
 ```
+
+
+
+
+
+
+```bash
+python -c "import os"
+echo $?
+```
+if the result is 0 then it is installed
+
+```bash
+sudo apt-get install python3-numpy
+```
+```bash
+sudo apt-get install --only-upgrade python3-numpy
+```
+```bash
+pip3 install numpy --upgrade
+```
+Show location
+```bash
+pip3 show numpy
+```
+
+```bash
+pip --no-cache-dir install pandas
+```
+
+was having problems getting pandas to load. It was saying numpy was not found.
+This solved the problem...
+```bash
+sudo apt-get install libatlas-base-dev
+```
+
+
+
+from command.py, I was able to install everything through pip. The libatlas-base-dev was needed to get pandas working.
+Everything else was either already installed or installable through pip. 
+I have tried installing using apt-get first and pip second.
+
+
+/home/pi/.local/bin/gunicorn --bind 0.0.0.0:8001 command:app
+
+

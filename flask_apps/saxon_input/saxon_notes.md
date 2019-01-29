@@ -9,16 +9,6 @@ TODO
 
 dashboards...I think I need to split the dashboards up afterall. I need to be able to specify the book for the problems missed one.
 
-main menu needs some work if not admin.
-
-need to put the Child's name into the upper right hand corner of the nav bar.
-implement a login for Kay
-
-the login feature is bad. If i'm the last to login the kids could access my portal by simply going to the main_menu using the url and not the UI
-
-use the production server
-something I think I'll do is run the data when the script runs and keep it in memory
-* use the login name and load the data and keep in memory at login.
 
 todo: predict whether a child is going to miss the next problem from this chapter: condition on history with those types of problems, recent history, etc.
 todo: click to zoom into seven or so days before and after that point.
@@ -26,9 +16,6 @@ todo: click to zoom into seven or so days before and after that point.
 todo: make sure everything is correct
 
 BACKEND
-* move the functions to different scripts...saxon_math_command.py is getting very long...I can probably delete the other dashboards as well...don't need them now.
-* use a gunicorn server. See server.py in flask_apps > model_app. I couldn't get this to work because I couldn't kill the gunicorn server. 
-    * maybe this is helpful: https://gist.github.com/TheWaWaR/10955091?
 
 TIME
 * click on book and shows the datapoints, stats, and lines for that book
