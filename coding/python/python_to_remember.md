@@ -624,3 +624,14 @@ for record in cursor:
     print(record)
 ```
 
+
+#### requests
+```python
+import requests
+url = 'https://api.census.gov/data/timeseries/bds/firms?get=metro,sic1,fage4,fsize,ifsize&for=us:*&year2=2012&key=your key'
+r = requests.get(url)
+data = r.json()
+r.content
+r.text
+
+```

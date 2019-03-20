@@ -160,7 +160,7 @@ $ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framewor
 $ virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve
 
 virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 retention --system-site-packages
-virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve --system-site-packages
+virtualenv --python=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/bin/python3.7 test_ve --system-site-packages
 ```
 
 to activate a virtual environment named "test_ve":
@@ -460,3 +460,9 @@ https://stackoverflow.com/questions/21784641/installation-issue-with-matplotlib-
 
 
 
+
+
+
+
+brew and installing mongodb
+https://treehouse.github.io/installation-guides/mac/mongo-mac.html
