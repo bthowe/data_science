@@ -160,7 +160,7 @@ $ virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framewor
 $ virtualenv --python=/usr/local/Cellar/python3/3.6.3/Frameworks/Python.framework/Versions/3.6/bin/python3.6 test_ve
 
 virtualenv --python=/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/bin/python2.7 retention --system-site-packages
-virtualenv --python=/usr/local/Cellar/python/3.7.2_2/Frameworks/Python.framework/Versions/3.7/bin/python3.7 test_ve --system-site-packages
+virtualenv --python=/usr/local/Cellar/python/3.7.3/Frameworks/Python.framework/Versions/3.7/bin/python3.7 test_ve --system-site-packages
 ```
 
 to activate a virtual environment named "test_ve":
@@ -297,7 +297,8 @@ db.bofm.deleteMany({'book': '2-ne', 'chapter': '21'})
 db.bofm.stats().count
 db['dc-testament'].stats().count
 
-db.Math_7_6.update({_id: ObjectId("5ba1bc941036475a96128fc6")}, { $set: { date: "2018-09-17"}})
+db.Math_7_6.update({_id: ObjectId("5ba1bc941036475a96128fc6")}, { 
+: { date: "2018-09-17"}})
 
 db.Algebra_1_2.deleteOne({ _id: ObjectId("5bd7c1c11036473053367ded")})
 
@@ -466,3 +467,79 @@ https://stackoverflow.com/questions/21784641/installation-issue-with-matplotlib-
 
 brew and installing mongodb
 https://treehouse.github.io/installation-guides/mac/mongo-mac.html
+
+
+###SSH into another computer
+```bash
+ssh pi@xxx.xxx.x.xx
+```
+
+###Copy directory from remote computer to local
+```bash
+scp -r pi@xxx.xxx.x.xx:/media/pi/HOWESCHOOL/database_files .
+```
+
+###Export mongo db
+```bash
+mongoexport --host localhost --db forms --collection Scriptures --csv --out forms_Scriptures.csv --fields scripture,week_start_date,scripture_ref
+```
+###Import mongo db
+```bash
+mongoimport -d mydb -c things --type csv --file locations.csv --headerline
+```
+Here, mydb is the database name, things is the collections, locations.csv is the file path.
+
+
+
+
+
+###MySQL
+####updating the path for mysql
+```bash
+export PATH=${PATH}:/usr/local/mysql/bin
+```
+Put that in .bash_profile
+
+Login in shell
+```bash 
+mysql -u root -p
+```
+
+###In MySQL
+Quit in shell
+```bash 
+quit
+```
+
+create database
+```bash
+CREATE DATABASE nets_2015;
+```
+
+```sql
+CREATE TABLE emp (table column stuff);
+```
+```sql
+DROP TABLE emp;
+```
+```sql
+describe emp;
+```
+```sql
+use NETS_2015;
+```
+```sql
+show tables;
+```
+```sql
+SET GLOBAL local_infile = true;
+```sql
+SHOW GLOBAL VARIABLES LIKE 'local_infile';
+```
+
+https://stackoverflow.com/questions/18437689/error-1148-the-used-command-is-not-allowed-with-this-mysql-version
+so in /etc I created a file called my.cnf and added to it
+```bash
+[client]
+loose-local-infile = 1
+```
