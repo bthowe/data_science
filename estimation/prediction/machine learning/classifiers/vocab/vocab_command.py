@@ -110,7 +110,7 @@ def day_stats(end_date):
     print(X_new.info())
     print(X_new)
 
-# todo: (1) total time, (2) number of practice cards and quiz cards, (3) average time per practice card and quiz card
+# todo: (1) total time, (2) number of python_crash_course cards and quiz cards, (3) average time per python_crash_course card and quiz card
 # todo: plot: total time and split into colors by Practice and Quiz
 # todo: plot: right on top put the number of cards of each Practice and Quiz
 

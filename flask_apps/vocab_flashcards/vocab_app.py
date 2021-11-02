@@ -23,7 +23,7 @@ db = client['vocab']
 def submission_page():
     return render_template('main_menu.html')
 
-@app.route('/practice', methods=['POST'])
+@app.route('/python_crash_course', methods=['POST'])
 def practice():
     lesson_num = str(request.form['user_input'])
     prompt_type = str(request.form['prompt_type'])
@@ -72,7 +72,7 @@ def quiz():
                 alternatives_i.append('static/{0}/rc_vocab_{0}_{1}.png'.format(random_lesson, random_card))
             alternatives.append(alternatives_i)
 
-    if practice_type == 'practice':
+    if practice_type == 'python_crash_course':
         return render_template('display_card.html', cards=cards)
     else:
         return render_template('quiz_card.html', cards=cards, alts=alternatives)

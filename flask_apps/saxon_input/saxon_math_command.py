@@ -546,7 +546,7 @@ def add_missed_problems():
     return ''
 
 
-@app.route('/vocab/practice', methods=['POST'])
+@app.route('/vocab/python_crash_course', methods=['POST'])
 def practice():
     lesson_num = str(request.form['user_input'])
     prompt_type = str(request.form['prompt_type'])
@@ -563,7 +563,7 @@ def practice():
 
 @app.route('/vocab/quiz', methods=['POST'])
 def quiz():
-    practice_type = str(request.form['practice'])
+    practice_type = str(request.form['python_crash_course'])
     prompt_type = str(request.form['word'])
     lesson_num = str(request.form['lesson'])
     num_cards = len(os.listdir('static/{0}'.format(lesson_num)))
@@ -596,7 +596,7 @@ def quiz():
                 alternatives_i.append('../static/{0}/rc_vocab_{0}_{1}.png'.format(random_lesson, random_card))
             alternatives.append(alternatives_i)
 
-    if practice_type == 'practice':
+    if practice_type == 'python_crash_course':
         return render_template('vocab/display_card.html', cards=cards)
     else:
         return render_template('vocab/quiz_card.html', cards=cards, alts=alternatives)
