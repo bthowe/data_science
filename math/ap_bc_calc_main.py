@@ -1,7 +1,5 @@
 import sys
-
 import numpy as np
-
 
 
 def integral(f, a, b, precision=10_000):
@@ -11,6 +9,10 @@ def integral(f, a, b, precision=10_000):
     height = f(x)[1:]
 
     return np.sum(height * width)
+
+
+def derivative(f, x, h):
+    return (f(x + h) - f(x)) / h
 
 
 def prob_4():
@@ -36,10 +38,19 @@ def prob_6():
     print(a, b, c, d)
 
 
+def prob_7():
+    # at x = 1, f is given by the function y = (5/3) * x - 1
+    f = lambda x: (5/3) * x - 1
+    g = lambda x: x**2 + x - 1
+
+    d = derivative(lambda x: f(g(x)), 1, 0.00000001)
+    print(d)
+
 
 def main():
     # prob_4()
-    prob_6()
+    # prob_6()
+    prob_7()
 
 
 if __name__ == '__main__':
