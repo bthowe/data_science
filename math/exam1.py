@@ -53,6 +53,7 @@ def prob_13():
     f = lambda x: integral(g, 3, x)
     # derivative(f, )
 #      todo: will have to find the zero.
+#   todo: and take the derivative again.
 
 
 def _prob_18_function_wrapper(option, a):
