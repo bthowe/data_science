@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from functools import partial
+from scipy.optimize import fsolve
 
 
 def integral(f, a, b, precision=10_000):
@@ -48,17 +49,36 @@ def prob_7():
     print(d)
 
 
-def prob_13():
+def f_prime(x):
     g = lambda t: 54 * t**2 - 18 * t - 8
-    f = lambda x: integral(g, 3, x)
-    # derivative(f, )
-#      todo: will have to find the zero.
-<<<<<<< HEAD
-#   todo: and take another derivative
-=======
-#   todo: and take the derivative again.
-#  todo: ugg
->>>>>>> refs/remotes/origin/master
+    return derivative(g, x, 0.0001)
+
+
+def _integral(x):
+    g = lambda t: 54 * t**2 - 18 * t - 8
+    return integral(g, 3, x)
+
+
+def f_prime_solution2(x):
+    return derivative(_integral, x, 0.0001)
+
+
+def f_double_prime_solution2(x):
+    return derivative(f_prime_solution2, x, 0.0001)
+
+
+def prob_13():
+    """
+    Solution 1: Recognize that the derivative of the integral is just the function; then the second derivate of the
+    integral is just the derivate of the function. Set equal to 0 and solve.
+
+    Solution 2: Take the derivative of the original definite integral.
+    """
+    print(fsolve(f_prime, 0.5))
+    print(fsolve(f_double_prime_solution2, 0.25))
+
+
+
 
 
 def _prob_18_function_wrapper(option, a):
@@ -96,8 +116,8 @@ def main():
     # prob_4()
     # prob_6()
     # prob_7()
-    # prob_13()  #todo
-    prob_18()
+    prob_13()  #todo
+    # prob_18()
 
 
 if __name__ == '__main__':
