@@ -54,6 +54,7 @@ def prob_13():
     # derivative(f, )
 #      todo: will have to find the zero.
 #   todo: and take the derivative again.
+#  todo: ugg
 
 
 def _prob_18_function_wrapper(option, a):
