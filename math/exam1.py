@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+from functools import partial
 
 
 def integral(f, a, b, precision=10_000):
@@ -47,10 +48,50 @@ def prob_7():
     print(d)
 
 
+def prob_13():
+    g = lambda t: 54 * t**2 - 18 * t - 8
+    f = lambda x: integral(g, 3, x)
+    # derivative(f, )
+#      todo: will have to find the zero.
+
+
+def _prob_18_function_wrapper(option, a):
+    if option == 'A':
+        f_a = partial(lambda x, n: (x ** (3 * n + 3)) / (2 ** n), a)
+        return (1 / 2) * np.sum(f_a(np.arange(0, 25)))
+    elif option == 'B':
+        f_b = partial(lambda x, n: (x ** (3 * n + 3)) / (2 ** n), a)
+        return np.sum(f_b(np.arange(0, 25)))
+    elif option == 'C':
+        f_c = partial(lambda x, n: (x ** (3 * n)) / (2 ** n), a)
+        return 0.5 * np.sum(f_c(np.arange(0, 25)))
+    else:
+        f_d = partial(lambda x, n: (x ** (3 * n)) / (4 ** n), a)
+        return 0.5 * np.sum(f_d(np.arange(0, 25)))
+
+
+def prob_18():
+    """
+    The answer is A.
+    """
+    # a = 1
+    # a = 0.5
+    a = 0.25
+    for option in ['A', 'B', 'C', 'D']:
+        same = np.isclose(
+            _prob_18_function_wrapper(option, a),
+            (a ** 3) / (2 - a ** 3),
+            atol=1e-6
+        )
+        print(option, same)
+
+
 def main():
     # prob_4()
     # prob_6()
-    prob_7()
+    # prob_7()
+    # prob_13()  #todo
+    prob_18()
 
 
 if __name__ == '__main__':
