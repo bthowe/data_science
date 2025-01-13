@@ -73,12 +73,16 @@ def prob_13():
     integral is just the derivate of the function. Set equal to 0 and solve.
 
     Solution 2: Take the derivative of the original definite integral.
+
+    Solution 3: Refactored form of 2
     """
     print(fsolve(f_prime, 0.5))
     print(fsolve(f_double_prime_solution2, 0.25))
 
-
-
+    f = lambda x: integral(lambda t: 54 * t**2 - 18 * t - 8, 3, x)
+    df_dx = lambda x: derivative(f, x, 0.0001)
+    d2f_dxdx = lambda x: derivative(df_dx, x, 0.0001)
+    print(fsolve(d2f_dxdx, 0.25))
 
 
 def _prob_18_function_wrapper(option, a):
