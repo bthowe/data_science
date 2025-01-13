@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import sympy as sp
 from functools import partial
 from scipy.optimize import fsolve
 
@@ -74,7 +75,7 @@ def prob_13():
 
     Solution 2: Take the derivative of the original definite integral.
 
-    Solution 3: Refactored form of 2
+    Solution 3: Refactored form of 2, just using lambda functions and the integral and derivative functions from above.
     """
     print(fsolve(f_prime, 0.5))
     print(fsolve(f_double_prime_solution2, 0.25))
@@ -116,12 +117,22 @@ def prob_18():
         print(option, same)
 
 
+def prob_23():
+    x = sp.symbols('x')
+    f = (sp.exp(-3 * x) + sp.exp(3 * x)) / (6 * x)
+
+    # Expand f(x) around x=0 up to the 5th order
+    series_expansion = f.series(x, 0, 5)
+    print(series_expansion)
+
+
 def main():
     # prob_4()
     # prob_6()
     # prob_7()
-    prob_13()  #todo
+    # prob_13()
     # prob_18()
+    prob_23()
 
 
 if __name__ == '__main__':
