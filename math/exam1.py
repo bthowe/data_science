@@ -125,6 +125,12 @@ def prob_23():
     series_expansion = f.series(x, 0, 5)
     print(series_expansion)
 
+    from sympy import lambdify
+    g_func = lambdify(series_expansion, x, modules='numpy')
+    print(g_func(1))
+#     todo: how does it do this?
+#   todo: estimation of power series
+
 
 def main():
     # prob_4()
