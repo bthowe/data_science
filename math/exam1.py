@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import sympy as sp
+# from sympy import lambdify
+# from sympy import sin, cos, symbols, lambdify
 from functools import partial
 from scipy.optimize import fsolve
 
@@ -119,18 +121,17 @@ def prob_18():
 
 def prob_23():
     x = sp.symbols('x')
+
     f = (sp.exp(-3 * x) + sp.exp(3 * x)) / (6 * x)
+    expr = f.series(x, 0, 5).removeO()  # removing the big O was the key and took a while to figure out that this was the issue in lambdifying
+    print(expr)
 
-    # Expand f(x) around x=0 up to the 5th order
-    series_expansion = f.series(x, 0, 5)
-    print(series_expansion)
+    f = sp.lambdify(x, expr, modules=['sympy'])
+    a = np.array(1)
+    print(f(1))
 
-    from sympy import lambdify
-    g_func = lambdify(series_expansion, x, modules='numpy')
-    print(g_func(1))
 #     todo: how does it do this?
-#   todo: estimation of power series
-
+#   todo: do the above using sympy and lambdify
 
 def main():
     # prob_4()
