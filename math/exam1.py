@@ -1,10 +1,9 @@
 import sys
 import numpy as np
 import sympy as sp
-# from sympy import lambdify
-# from sympy import sin, cos, symbols, lambdify
 from functools import partial
 from scipy.optimize import fsolve
+from scipy.special import factorial
 
 
 def integral(f, a, b, precision=10_000):
@@ -133,13 +132,32 @@ def prob_23():
 #     todo: how does it do this?
 #   todo: do the above using sympy and lambdify
 
+
+def prob_31():
+    """
+    For n>15, numbers are too small, or big, for the computer to handle. It seems, though that e diverges, but 1 converges.
+    """
+    n = np.arange(0, 16)
+    f = lambda x: (-1)**n * factorial(n) * x**n / (n**n)
+    # r = 1 / np.exp(1)
+    # r = 1
+    r = np.exp(1)
+    print(f(r))
+    print(np.sum(f(r)))
+
+    ## this was a good idea, but since there was overflow for n > 15, I needed to look at the values of the sequence to get of sense of whether it was converging or otherwise.
+    # for x in np.linspace(-5, 5, 1000):
+    #     print(f'{x}: {f(x)}')
+
+
 def main():
     # prob_4()
     # prob_6()
     # prob_7()
     # prob_13()
     # prob_18()
-    prob_23()
+    # prob_23()
+    prob_31()
 
 
 if __name__ == '__main__':
